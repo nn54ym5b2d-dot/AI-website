@@ -19,6 +19,7 @@
 - 已设置远程仓库地址：`https://github.com/nn54ym5b2d-dot/AI-website.git`。
 - 已合并远程仓库初始 `README.md`。
 - GitHub 远程仓库已连接：`nn54ym5b2d-dot/AI-website`。
+- 本地 `main` 分支已推送到 GitHub，并跟踪 `origin/main`。
 
 当前未完成：
 
