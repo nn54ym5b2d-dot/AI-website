@@ -12,9 +12,10 @@
 
 1. `PROJECT_START.md`
 2. `docs/README.md`
-3. 与任务相关的 `docs/` 文件
-4. `docs/决策记录.md`
-5. 如果任务来自 GitHub Issue，读取对应 Issue 内容
+3. `docs/项目总控.md`
+4. 与任务相关的 `docs/` 文件
+5. `docs/决策记录.md`
+6. 如果任务来自 GitHub Issue，读取对应 Issue 内容
 
 如果文档之间出现冲突，以 `docs/决策记录.md` 的最新记录和 Robert 的最新明确指令为准；仍不清楚时先问 Robert。
 
@@ -35,6 +36,7 @@
 4. 修改文档或代码。
 5. 运行必要检查；如果没有代码或无法运行，说明原因。
 6. 汇报修改内容、验收方式、风险和建议下一步。
+7. 如果任务状态、计划或重要决策发生变化，同步更新 `docs/项目总控.md`、`docs/任务清单.md`、相关 docs，以及已接入的 Notion 总控页或 GitHub Issue。
 
 ## 5. 完成后汇报格式
 
@@ -52,8 +54,11 @@
 建议下一步：
 ```
 
-## 6. 当前限制
+## 6. 当前限制和外部系统状态
 
-- 当前本地文件夹尚未确认 Git 仓库连接。
-- GitHub Issues、Pull Request、GitHub Actions、部署预览只有在仓库和外部服务接通后才能正式使用。
+- 当前本地文件夹已连接 GitHub 仓库：`nn54ym5b2d-dot/AI-website`。
+- GitHub Actions 已接入并通过基础 CI 检查。
+- Notion 总控页已创建，本地同步源为 `docs/项目总控.md`。
+- GitHub Issues 和 GitHub Projects 尚未正式建立或确认，任务仍以 `docs/任务清单.md` 和 `docs/项目总控.md` 为主。
+- Pull Request、GitHub Projects、腾讯云部署预览只有在对应外部服务接通后才能正式使用。
 - 产品文档来自 `虚拟素材网站产品文档_v1.docx`，已拆分进 `docs/` 作为后续开发依据；如原 Word 文档后续更新，需要同步更新 `docs/`。

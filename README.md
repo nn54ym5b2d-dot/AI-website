@@ -24,4 +24,5 @@ npm run build
 
 - `PROJECT_START.md`：项目启动入口
 - `AGENTS.md`：Codex 工作规则
+- `docs/项目总控.md`：项目总控、当前进度、路线图和同步规则
 - `docs/`：产品、业务、权限、数据库、API 和验收资料
