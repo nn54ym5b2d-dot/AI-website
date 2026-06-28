@@ -1,7 +1,7 @@
 # 源素库项目启动入口
 
-版本：v1.6
-日期：2026-06-18
+版本：v1.7
+日期：2026-06-29
 适用项目：源素库 / 虚拟素材网站 / AI 数字素材交易平台
 
 ## 1. 当前项目状态
@@ -26,11 +26,13 @@
 - 已完成轻量代码 review，并修正后台权限 helper 与依赖版本固定问题。
 - 已验证 GitHub Actions CI 通过。
 - 已建立 `docs/项目总控.md`，作为 Notion 总控页的本地同步源。
+- 已完成一次协作状态审计：GitHub 仓库、GitHub Actions 和 Notion 总控页已连接；GitHub Issues/PR 当前为空；GitHub Projects 仍需授权后接入。
 
 当前未完成：
 
 - 业务功能尚未正式开发。
-- GitHub Issues 和 GitHub Projects 尚未正式建立。
+- GitHub Issues 尚未正式建立，当前为空。
+- GitHub Projects 尚未正式建立；当前 GitHub CLI 缺少 `read:project` 权限，需 Robert 确认后授权。
 - Notion 总控页已创建，需要与 `docs/项目总控.md` 保持同步。
 - 尚未接入微信支付、支付宝、认证、腾讯云 COS、腾讯云生产部署等外部服务。
 

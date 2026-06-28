@@ -59,6 +59,7 @@
 - 当前本地文件夹已连接 GitHub 仓库：`nn54ym5b2d-dot/AI-website`。
 - GitHub Actions 已接入并通过基础 CI 检查。
 - Notion 总控页已创建，本地同步源为 `docs/项目总控.md`。
-- GitHub Issues 和 GitHub Projects 尚未正式建立或确认，任务仍以 `docs/任务清单.md` 和 `docs/项目总控.md` 为主。
+- GitHub Issues 当前为空，尚未正式建立任务卡。
+- GitHub Projects 尚未正式建立；当前 GitHub CLI 缺少 `read:project` 权限，需 Robert 确认后授权。
 - Pull Request、GitHub Projects、腾讯云部署预览只有在对应外部服务接通后才能正式使用。
 - 产品文档来自 `虚拟素材网站产品文档_v1.docx`，已拆分进 `docs/` 作为后续开发依据；如原 Word 文档后续更新，需要同步更新 `docs/`。
