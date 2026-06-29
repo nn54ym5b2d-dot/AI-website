@@ -24,7 +24,7 @@
 - 已添加前台首页、上传者入口、管理后台入口和健康检查 API。
 - 已添加数据库、腾讯云 COS、权限、环境变量模板和 GitHub Actions CI 骨架。
 - 已完成轻量代码 review，并修正后台权限 helper 与依赖版本固定问题。
-- 已验证 GitHub Actions CI 通过。
+- 已验证 GitHub Actions CI 曾通过；最新推送后的远程运行状态以 GitHub Actions 页面为准。
 - 已建立 `docs/项目总控.md`，作为 Notion 总控页的本地同步源。
 - 已完成一次协作状态审计：GitHub 仓库、GitHub Actions 和 Notion 总控页已连接；当时 GitHub Issues/PR 为空，现已创建 T006-T016 Issues #1-#11；GitHub Projects 仍需授权后接入。
 - Robert 已确认 T005 网站代码框架通过，状态改为 Done。
