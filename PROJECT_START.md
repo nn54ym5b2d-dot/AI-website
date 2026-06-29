@@ -1,6 +1,6 @@
 # 源素库项目启动入口
 
-版本：v1.8
+版本：v2.0
 日期：2026-06-30
 适用项目：源素库 / 虚拟素材网站 / AI 数字素材交易平台
 
@@ -26,15 +26,15 @@
 - 已完成轻量代码 review，并修正后台权限 helper 与依赖版本固定问题。
 - 已验证 GitHub Actions CI 通过。
 - 已建立 `docs/项目总控.md`，作为 Notion 总控页的本地同步源。
-- 已完成一次协作状态审计：GitHub 仓库、GitHub Actions 和 Notion 总控页已连接；GitHub Issues/PR 当前为空；GitHub Projects 仍需授权后接入。
+- 已完成一次协作状态审计：GitHub 仓库、GitHub Actions 和 Notion 总控页已连接；当时 GitHub Issues/PR 为空，现已创建 T006-T016 Issues #1-#11；GitHub Projects 仍需授权后接入。
 - Robert 已确认 T005 网站代码框架通过，状态改为 Done。
 - 已生成 T006-T016 GitHub Issue 草稿：`docs/GitHub Issue 草稿.md`。
+- 已按 Robert 审核确认，将 T006-T016 创建为 GitHub Issues #1-#11。
 
 当前未完成：
 
 - 业务功能尚未正式开发。
-- GitHub Issues 尚未正式建立，当前为空；Issue 草稿已生成，待 Robert 审核。
-- GitHub Projects 尚未正式建立；当前 GitHub CLI 缺少 `read:project` 权限，需 Robert 确认后授权。
+- GitHub Projects 尚未正式建立；当前 GitHub CLI 需要重新登录并补充 `read:project` 权限，需 Robert 完成 GitHub 设备授权后继续。
 - Notion 总控页已创建，需要与 `docs/项目总控.md` 保持同步。
 - 尚未接入微信支付、支付宝、认证、腾讯云 COS、腾讯云生产部署等外部服务。
 
@@ -58,11 +58,10 @@
 
 ## 4. 当前推荐推进顺序
 
-1. Robert 审核 `docs/GitHub Issue 草稿.md`。
-2. 审核通过后，创建 GitHub Issues。
-3. 授权并建立或接入 GitHub Projects 看板。
-4. 执行 T006，细化第一版页面结构和导航。
-5. 同步准备腾讯云账号、腾讯云 COS、腾讯云备案资料和部署环境。
+1. Robert 完成 GitHub CLI 重新登录，并补充 `read:project` 权限。
+2. 授权并建立或接入 GitHub Projects 看板。
+3. 执行 GitHub Issue #1 / T006，细化第一版页面结构和导航。
+4. 同步准备腾讯云账号、腾讯云 COS、腾讯云备案资料和部署环境。
 
 ## 5. 当前最高优先级
 
@@ -72,7 +71,7 @@
 - 第一版到底哪些页面必须做。
 - 管理后台权限边界是否正确。
 - 腾讯云账号、COS Bucket、备案资料和部署环境如何实际开通。
-- T006-T016 的 GitHub Issue 草稿是否符合 Robert 管理习惯。
+- GitHub Projects 如何授权和建立看板。
 - 第一版页面结构和导航如何细化。
 
 确认后再进入核心功能开发会更稳。

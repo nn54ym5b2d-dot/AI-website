@@ -1,12 +1,28 @@
 # GitHub Issue 草稿
 
-版本：v1.0
+版本：v1.1
 日期：2026-06-30
-状态：草稿，待 Robert 审核；尚未创建到 GitHub Issues
+状态：已由 Robert 审核确认，并已创建到 GitHub Issues
 
 ## 使用说明
 
-本文件用于先集中审核 T006-T016 的 GitHub Issue 内容。Robert 确认后，再按本文逐条创建到 GitHub Issues，并接入 GitHub Projects 看板。
+本文件保留 T006-T016 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
+
+## GitHub Issue 映射
+
+| 任务 | GitHub Issue | 链接 |
+|---|---|---|
+| T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
+| T007 | #2 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
+| T008 | #3 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T009 | #4 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
+| T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
+| T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
+| T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
+| T013 | #8 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T014 | #9 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
+| T015 | #10 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
+| T016 | #11 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 
 每个任务默认规则：
 
