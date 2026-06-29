@@ -1,12 +1,14 @@
 # GitHub Issue 草稿
 
-版本：v1.1
+版本：v1.2
 日期：2026-06-30
-状态：已由 Robert 审核确认，并已创建到 GitHub Issues
+状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
 
 本文件保留 T006-T016 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
+
+GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 
 ## GitHub Issue 映射
 

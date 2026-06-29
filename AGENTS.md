@@ -60,6 +60,6 @@
 - GitHub Actions 已接入并通过基础 CI 检查。
 - Notion 总控页已创建，本地同步源为 `docs/项目总控.md`。
 - GitHub Issues 已创建 T006-T016，对应 #1-#11。
-- GitHub Projects 尚未正式建立；当前 GitHub CLI 需要重新登录并补充 `read:project` 权限，需 Robert 完成 GitHub 设备授权后继续。
-- Pull Request、GitHub Projects、腾讯云部署预览只有在对应外部服务接通后才能正式使用。
+- GitHub Project #1 已创建：`源素库 MVP 开发`，已加入 Issues #1-#11。
+- Pull Request、腾讯云部署预览只有在对应外部服务接通后才能正式使用。
 - 产品文档来自 `虚拟素材网站产品文档_v1.docx`，已拆分进 `docs/` 作为后续开发依据；如原 Word 文档后续更新，需要同步更新 `docs/`。
