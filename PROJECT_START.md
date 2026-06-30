@@ -1,6 +1,6 @@
 # 源素库项目启动入口
 
-版本：v2.2
+版本：v2.3
 日期：2026-06-30
 适用项目：源素库 / 虚拟素材网站 / AI 数字素材交易平台
 
@@ -31,11 +31,11 @@
 - 已生成 T006-T016 GitHub Issue 草稿：`docs/GitHub Issue 草稿.md`。
 - 已按 Robert 审核确认，将 T006-T016 创建为 GitHub Issues #1-#11。
 - 已创建 GitHub Project #1：`源素库 MVP 开发`，并加入 Issues #1-#11。
+- 已启用 GitHub `main` 主分支保护 ruleset：`Protect main branch`，状态为 Active，应用到 `main`，要求 Pull Request、`verify` 状态检查，禁止删除和强推。
 
 当前未完成：
 
 - 业务功能尚未正式开发。
-- 主分支保护尚未真正启用；GitHub API 显示 `main` 的 `protected=false`，classic branch protection 返回 `Branch not protected`，Rulesets 为空。
 - Notion 总控页已创建，需要与 `docs/项目总控.md` 保持同步。
 - 尚未接入微信支付、支付宝、认证、腾讯云 COS、腾讯云生产部署等外部服务。
 
@@ -59,9 +59,8 @@
 
 ## 4. 当前推荐推进顺序
 
-1. 重新保存或配置 GitHub `main` 主分支保护，并复查是否生效。
-2. 执行 GitHub Issue #1 / T006，细化第一版页面结构和导航。
-3. 同步准备腾讯云账号、腾讯云 COS、腾讯云备案资料和部署环境。
+1. 执行 GitHub Issue #1 / T006，细化第一版页面结构和导航。
+2. 同步准备腾讯云账号、腾讯云 COS、腾讯云备案资料和部署环境。
 
 ## 5. 当前最高优先级
 
@@ -71,7 +70,6 @@
 - 第一版到底哪些页面必须做。
 - 管理后台权限边界是否正确。
 - 腾讯云账号、COS Bucket、备案资料和部署环境如何实际开通。
-- GitHub `main` 主分支保护如何实际保存成功。
 - 第一版页面结构和导航如何细化。
 
 确认后再进入核心功能开发会更稳。
