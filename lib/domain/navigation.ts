@@ -20,9 +20,7 @@ export const primaryNavItems = [
   { href: "/", label: "首页" },
   { href: "/materials", label: "素材" },
   { href: "/upload", label: "上传者" },
-  { href: "/account", label: "个人中心" },
-  { href: "/admin", label: "管理后台" },
-  { href: "/observer", label: "观察员" }
+  { href: "/account", label: "个人中心" }
 ];
 
 export const publicRoutes: RouteDefinition[] = [
@@ -271,7 +269,7 @@ export const observerRoutes: RouteDefinition[] = [
   }
 ];
 
-export const pageRouteGroups: RouteGroup[] = [
+export const publicPageRouteGroups: RouteGroup[] = [
   {
     title: "前台浏览与交易入口",
     description: "访客和购买用户从这里浏览、搜索、查看详情、登录注册和进入订单支付。",
@@ -286,7 +284,10 @@ export const pageRouteGroups: RouteGroup[] = [
     title: "上传者中心",
     description: "上传者从上传入口提交素材，并在个人中心查看上传、审核状态和收益。",
     routes: uploaderRoutes
-  },
+  }
+];
+
+export const internalPageRouteGroups: RouteGroup[] = [
   {
     title: "管理后台",
     description: "超级管理员、运营管理员和财务管理员按权限进入后台模块。",
@@ -299,7 +300,9 @@ export const pageRouteGroups: RouteGroup[] = [
   }
 ];
 
-export const roleEntryRoutes = [
+export const pageRouteGroups: RouteGroup[] = [...publicPageRouteGroups, ...internalPageRouteGroups];
+
+export const publicRoleEntryRoutes = [
   {
     role: "访客",
     href: "/materials",
@@ -317,20 +320,25 @@ export const roleEntryRoutes = [
     href: "/upload",
     entry: "顶部“上传者”",
     description: "通过邀请码激活后进入认证上传，再到个人中心查看审核和收益。"
-  },
+  }
+];
+
+export const internalEntryRoutes = [
   {
     role: "管理员",
     href: "/admin",
-    entry: "顶部“管理后台”",
+    entry: "页面底部内部入口",
     description: "超级管理员、运营管理员、财务管理员进入同一后台，再按权限显示模块。"
   },
   {
     role: "外部观察员",
     href: "/observer",
-    entry: "顶部“观察员”",
+    entry: "页面底部内部入口",
     description: "合作方进入独立只读看板，只看平台经营汇总和合作方分成字段。"
   }
 ];
+
+export const roleEntryRoutes = [...publicRoleEntryRoutes, ...internalEntryRoutes];
 
 export const checkoutSteps = [
   "从素材详情选择购买",

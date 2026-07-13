@@ -1,7 +1,12 @@
+import Link from "next/link";
 import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
 import { RouteCardGrid } from "@/components/navigation/route-card";
 import { coreModules } from "@/lib/domain/project";
-import { pageRouteGroups, roleEntryRoutes } from "@/lib/domain/navigation";
+import {
+  internalEntryRoutes,
+  publicPageRouteGroups,
+  publicRoleEntryRoutes
+} from "@/lib/domain/navigation";
 
 export default function HomePage() {
   return (
@@ -18,8 +23,8 @@ export default function HomePage() {
       <div className="grid gap-8">
         <section>
           <h2 className="text-xl font-semibold text-ink">第一版角色从哪里进入</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            {roleEntryRoutes.map((role) => (
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {publicRoleEntryRoutes.map((role) => (
               <article className="rounded-lg border border-line bg-white p-5" key={role.role}>
                 <div className="text-sm font-semibold text-ink">{role.role}</div>
                 <a className="mt-2 block text-sm font-medium text-brand" href={role.href}>
@@ -44,9 +49,9 @@ export default function HomePage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-ink">第一版页面分组</h2>
+          <h2 className="text-xl font-semibold text-ink">第一版公开页面分组</h2>
           <div className="mt-5 grid gap-7">
-            {pageRouteGroups.map((group) => (
+            {publicPageRouteGroups.map((group) => (
               <div className="rounded-lg border border-line bg-paper p-5" key={group.title}>
                 <div className="mb-4 max-w-3xl">
                   <h3 className="text-base font-semibold text-ink">{group.title}</h3>
@@ -54,6 +59,21 @@ export default function HomePage() {
                 </div>
                 <RouteCardGrid routes={group.routes} />
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-t border-line pt-5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted">
+            <span>内部入口</span>
+            {internalEntryRoutes.map((route) => (
+              <Link
+                className="text-muted underline-offset-4 transition hover:text-ink hover:underline"
+                href={route.href}
+                key={route.href}
+              >
+                {route.role}
+              </Link>
             ))}
           </div>
         </section>
