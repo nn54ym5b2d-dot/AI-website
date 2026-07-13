@@ -1,12 +1,23 @@
 # API 草案
 
-版本：v1.3
-日期：2026-06-29
-状态：草案，技术方向和代码框架已确认，待 T008 细化具体接口
+版本：v1.5
+日期：2026-07-13
+状态：草案，已对齐 T007 数据库结构，待 T008 细化具体接口
 
 ## 1. 说明
 
 本文件先记录第一版可能需要的接口。具体路径、参数、鉴权方式和错误码，等 T008 核心 API 细化任务执行时再确认。
+
+T008 应以 `docs/数据库设计.md` v2.1 为数据依据，确保接口能对应用户、素材、文件、认证、订单、支付、退款、授权、下载、收益、后台权限和外部观察员汇总表。
+
+已确认的首版接口默认规则：人物/场景素材 50 元、物件/道具素材 10 元；素材购买收益按上传者 80%、平台 20%、外部观察员 0% 记录；授权永久有效；用户下载入口默认有效 365 天；财务管理员可以发起退款。
+
+安全边界：
+
+- 接口返回文件时不能暴露原始 COS object key、下载 token 或长期公开原文件地址。
+- 人物证明材料和认证证书文件只允许后台授权角色查看或处理。
+- 外部观察员接口只返回平台汇总、趋势和合作方分成相关数据，不返回用户隐私、支付敏感字段、内部日志或原文件信息。
+- 外部观察员接口不提供导出能力。
 
 ## 2. 用户与认证
 
@@ -55,7 +66,7 @@
 |---|---|
 | `GET /api/authorizations` | 查看自己的授权记录 |
 | `GET /api/authorizations/:id` | 查看授权详情 |
-| `POST /api/download-links` | 为已购买素材生成腾讯云 COS 限时下载链接 |
+| `POST /api/download-links` | 为已购买素材生成默认有效 365 天的平台下载入口；每次访问再换取短时 COS 签名 URL |
 | `GET /api/downloads` | 查看自己的下载记录 |
 
 ## 7. 上传者收益
@@ -82,7 +93,8 @@
 | `GET /api/admin/orders` | 订单列表 |
 | `GET /api/admin/payments` | 支付记录 |
 | `GET /api/admin/refunds` | 退款记录 |
-| `POST /api/admin/refunds/:id/confirm` | 财务确认退款记录 |
+| `POST /api/admin/refunds` | 超级管理员或财务管理员发起退款 |
+| `POST /api/admin/refunds/:id/process` | 超级管理员或财务管理员处理退款结果 |
 | `GET /api/admin/authorizations` | 授权记录 |
 | `GET /api/admin/revenue` | 收益记录 |
 | `GET /api/admin/audit-logs` | 操作日志 |
@@ -98,9 +110,9 @@
 | `GET /api/observer/assets-summary` | 查看人物/物件/场景素材上传、上架、认证汇总 |
 | `GET /api/observer/downloads-summary` | 查看下载量汇总和趋势 |
 | `GET /api/observer/revenue-summary` | 查看平台收益、退款、净收益和分成基数 |
-| `GET /api/observer/share-records` | 查看合作方预计分成、已结算和待结算金额 |
+| `GET /api/observer/share-records` | 查看合作方分成字段；首版比例和金额为 0，保留后续调整能力 |
 
-外部观察员 API 只返回只读汇总或脱敏字段，不提供导出接口。
+外部观察员 API 只返回只读汇总或脱敏字段，不提供导出接口。后续 T008 细化时，应优先对应 `platform_metric_snapshots` 和 `observer_share_records`，避免让观察员接口直接读取业务明细表。
 
 ## 10. 待确认
 

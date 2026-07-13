@@ -11,7 +11,7 @@ export const coreModules: CoreModule[] = [
   },
   {
     name: "购买授权",
-    description: "多素材订单、微信支付/支付宝、授权记录和限时下载。"
+    description: "多素材订单、微信支付/支付宝、永久授权记录和默认 365 天下载入口。"
   },
   {
     name: "后台管理",
@@ -34,7 +34,7 @@ export const roleSummaries: RoleSummary[] = [
   },
   {
     name: "外部观察员",
-    description: "只读查看上传量、下载量、收益汇总和合作方分成。"
+    description: "只读查看上传量、下载量、收益汇总和合作方分成字段；首版分成比例为 0。"
   }
 ];
 
@@ -76,7 +76,7 @@ export const adminSections: AdminSection[] = [
   },
   {
     name: "外部观察员看板",
-    description: "只读展示上传量、下载量、净收益和合作方分成。",
+    description: "只读展示上传量、下载量、净收益和合作方分成字段；首版比例为 0。",
     priority: "P0"
   },
   {

@@ -15,7 +15,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | 任务 | GitHub Issue | 链接 |
 |---|---|---|
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
-| T007 | #2 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
+| T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
@@ -444,7 +444,7 @@ T014
 - 建立限时下载链接生成服务的接口边界。
 - 建立上传者收益记录和收益汇总页面/接口占位。
 - 明确原始文件地址不能直接公开。
-- 如下载链接有效期仍未确认，先以配置项形式保留默认值。
+- 下载入口默认有效 365 天，并以配置项保留后续调整能力；每次实际下载再生成短时 COS 签名 URL。
 
 不做范围：
 - 不公开 COS 原始文件地址。
@@ -470,7 +470,7 @@ T014
 - 运行 `npm run build`
 
 备注：
-下载链接有效期建议在本任务前或本任务中由 Robert 确认。
+下载入口有效期已由 Robert 确认为默认 365 天。
 
 ---
 
@@ -492,7 +492,7 @@ T015
 本次范围：
 - 完善超级管理员、运营、财务、外部观察员的后台权限判断。
 - 开发外部观察员只读数据看板。
-- 展示平台上传量、下载量、订单金额、净收益、合作方分成基数、预计分成、已结算和待结算金额。
+- 展示平台上传量、下载量、订单金额、净收益、合作方分成基数、比例和金额；首版观察员分成比例和金额为 0。
 - 隐藏用户手机号、邮箱、证件信息、支付账户、完整支付流水号、原文件地址、下载原始链接和内部操作日志。
 - 禁止外部观察员导出数据。
 
