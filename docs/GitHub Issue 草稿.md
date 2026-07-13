@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v1.2
-日期：2026-06-30
+版本：v1.3
+日期：2026-07-13
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -16,7 +16,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 |---|---|---|
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
-| T008 | #3 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T008 | #3（Review） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
