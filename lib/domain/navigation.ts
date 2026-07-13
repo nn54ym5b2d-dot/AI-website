@@ -95,7 +95,7 @@ export const accountRoutes: RouteDefinition[] = [
   {
     title: "我的下载",
     href: "/account/downloads",
-    description: "查看已购买素材和限时下载入口。",
+    description: "查看已购买素材和默认有效 365 天的下载入口。",
     priority: "P0",
     roleEntry: "购买用户",
     slug: "downloads"
@@ -228,7 +228,7 @@ export const adminRoutes: RouteDefinition[] = [
   {
     title: "收益记录",
     href: "/admin/revenue",
-    description: "查看上传者收益、平台分成和后续结算字段。",
+    description: "查看上传者 80%、平台 20% 的首版收益记录和后续结算字段。",
     priority: "P0",
     roleEntry: "超级管理员、财务管理员",
     slug: "revenue"
@@ -263,7 +263,7 @@ export const observerRoutes: RouteDefinition[] = [
   {
     title: "外部观察员只读看板",
     href: "/observer",
-    description: "合作方只读查看平台上传量、下载量、收益汇总和合作方分成字段，不允许导出。",
+    description: "合作方只读查看平台上传量、下载量、收益汇总和合作方分成字段；首版分成比例为 0，不允许导出。",
     priority: "P0",
     roleEntry: "外部观察员"
   }
@@ -295,7 +295,7 @@ export const internalPageRouteGroups: RouteGroup[] = [
   },
   {
     title: "外部观察员后台",
-    description: "合作方使用独立只读入口查看平台经营汇总和分成相关数据。",
+    description: "合作方使用独立只读入口查看平台经营汇总和分成字段，首版分成比例为 0。",
     routes: observerRoutes
   }
 ];
@@ -334,7 +334,7 @@ export const internalEntryRoutes = [
     role: "外部观察员",
     href: "/observer",
     entry: "页面底部内部入口",
-    description: "合作方进入独立只读看板，只看平台经营汇总和合作方分成字段。"
+    description: "合作方进入独立只读看板，只看平台经营汇总和合作方分成字段；首版比例为 0。"
   }
 ];
 
@@ -345,7 +345,7 @@ export const checkoutSteps = [
   "登录或注册购买用户账号",
   "确认订单素材和金额",
   "选择微信支付或支付宝",
-  "支付成功后生成授权记录和限时下载入口"
+  "支付成功后生成永久授权记录和默认有效 365 天的下载入口"
 ];
 
 export const uploadSteps = [
@@ -367,9 +367,10 @@ export const observerMetrics = [
   "退款金额",
   "净收益",
   "合作方分成基数",
-  "合作方预计分成",
-  "已结算金额",
-  "待结算金额"
+  "合作方分成比例（首版 0%）",
+  "合作方预计分成（首版 0 元）",
+  "已结算金额（首版 0 元）",
+  "待结算金额（首版 0 元）"
 ];
 
 export function findRouteBySlug(routes: RouteDefinition[], slug: string) {

@@ -5,7 +5,7 @@ export default function ObserverPage() {
   return (
     <PageShell
       actions={<SecondaryLink href="/">返回首页</SecondaryLink>}
-      description="外部观察员是合作方，只读查看平台上传量、下载量、收益汇总和合作方分成字段，不允许编辑、审核、退款或导出。"
+      description="外部观察员是合作方，只读查看平台上传量、下载量、收益汇总和合作方分成字段；首版分成比例为 0，不允许编辑、审核、退款或导出。"
       title="外部观察员只读看板"
     >
       <div className="grid gap-8">
