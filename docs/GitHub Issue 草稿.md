@@ -16,7 +16,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 |---|---|---|
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
-| T008 | #3（Review） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T008 | #3（Review，PR #15） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
