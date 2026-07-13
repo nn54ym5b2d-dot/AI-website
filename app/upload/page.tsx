@@ -39,7 +39,7 @@ export default function UploadPage() {
           <h2 className="text-xl font-semibold text-ink">上传者中心相关页面</h2>
           <div className="mt-5">
             <RouteCardGrid
-              routes={accountRoutes.filter((route) => route.roleEntry.includes("上传者"))}
+              routes={accountRoutes.filter((route) => route.audiences.includes("uploader"))}
             />
           </div>
         </section>

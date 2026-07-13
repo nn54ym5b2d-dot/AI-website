@@ -23,7 +23,7 @@ export default function AdminPage() {
             <article className="rounded-md border border-line bg-paper p-4">
               <h3 className="text-sm font-semibold text-ink">超级管理员</h3>
               <p className="mt-2 text-sm leading-6 text-muted">
-                拥有全部权限，管理用户、素材、订单、支付、认证、收益、角色和系统设置。
+                拥有全部后台权限，管理用户、素材、订单、支付、认证、收益、角色和系统设置。
               </p>
             </article>
             <article className="rounded-md border border-line bg-paper p-4">

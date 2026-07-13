@@ -1,47 +1,53 @@
-import type { UserRole } from "@/types/domain";
+import type { AdminRole, RoleContext, UserRole } from "@/types/domain";
 
-const adminRoles = new Set<UserRole>(["super_admin", "operator", "finance", "observer"]);
-const contentAdminRoles = new Set<UserRole>(["super_admin", "operator"]);
-const financeActionRoles = new Set<UserRole>(["super_admin", "finance"]);
-const platformSummaryRoles = new Set<UserRole>([
-  "super_admin",
-  "operator",
-  "finance",
-  "observer"
-]);
+const adminRoles = new Set<AdminRole>(["super_admin", "operator", "finance"]);
+const contentAdminRoles = new Set<AdminRole>(["super_admin", "operator"]);
+const financeActionRoles = new Set<AdminRole>(["super_admin", "finance"]);
+const superAdminRoles = new Set<AdminRole>(["super_admin"]);
+
+function hasAdminRole(context: RoleContext, allowedRoles: ReadonlySet<AdminRole>) {
+  return (
+    context.userRoles.has("admin") &&
+    [...context.adminRoles].some((role) => adminRoles.has(role) && allowedRoles.has(role))
+  );
+}
 
 export function isAdminRole(role: UserRole) {
-  return adminRoles.has(role);
+  return role === "admin";
 }
 
-export function canAccessObserverDashboard(role: UserRole) {
-  return platformSummaryRoles.has(role);
+export function canAccessAdmin(context: RoleContext) {
+  return hasAdminRole(context, adminRoles);
 }
 
-export function canReviewAsset(role: UserRole) {
-  return contentAdminRoles.has(role);
+export function canAccessObserverDashboard(context: RoleContext) {
+  return context.userRoles.has("observer");
 }
 
-export function canManageAssetListing(role: UserRole) {
-  return contentAdminRoles.has(role);
+export function canReviewAsset(context: RoleContext) {
+  return hasAdminRole(context, contentAdminRoles);
 }
 
-export function canManageCertification(role: UserRole) {
-  return contentAdminRoles.has(role);
+export function canManageAssetListing(context: RoleContext) {
+  return hasAdminRole(context, contentAdminRoles);
 }
 
-export function canManageInvitations(role: UserRole) {
-  return contentAdminRoles.has(role);
+export function canManageCertification(context: RoleContext) {
+  return hasAdminRole(context, contentAdminRoles);
 }
 
-export function canConfirmRefund(role: UserRole) {
-  return financeActionRoles.has(role);
+export function canManageInvitations(context: RoleContext) {
+  return hasAdminRole(context, contentAdminRoles);
 }
 
-export function canManageSystemSettings(role: UserRole) {
-  return role === "super_admin";
+export function canConfirmRefund(context: RoleContext) {
+  return hasAdminRole(context, financeActionRoles);
 }
 
-export function canManageAdminRoles(role: UserRole) {
-  return role === "super_admin";
+export function canManageSystemSettings(context: RoleContext) {
+  return hasAdminRole(context, superAdminRoles);
+}
+
+export function canManageAdminRoles(context: RoleContext) {
+  return hasAdminRole(context, superAdminRoles);
 }

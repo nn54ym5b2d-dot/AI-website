@@ -1,3 +1,5 @@
+import "server-only";
+
 type AppEnv = {
   appName: string;
   appUrl: string;

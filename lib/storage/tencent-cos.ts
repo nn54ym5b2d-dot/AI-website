@@ -1,9 +1,12 @@
+import "server-only";
+
 import { getAppEnv } from "@/lib/config/env";
 
 export type CosObjectPurpose =
   | "asset-original"
   | "asset-preview"
   | "asset-thumbnail"
+  | "asset-download-bundle"
   | "person-proof"
   | "certification-file";
 

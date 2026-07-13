@@ -31,7 +31,7 @@ export default async function AssetDetailPage({ params }: AssetDetailPageProps) 
               ["素材编号", assetId],
               ["素材类型", "人物 / 物件 / 场景"],
               ["认证状态", "已认证后才允许上架"],
-              ["价格", "待 Robert 确认定价规则"],
+              ["价格", "人物/场景 50 元；物件/道具 10 元"],
               ["授权说明", "支付后生成统一商业授权记录"]
             ].map(([label, value]) => (
               <div className="rounded-md border border-line bg-paper p-4" key={label}>

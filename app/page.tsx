@@ -17,7 +17,7 @@ export default function HomePage() {
           <SecondaryLink href="/upload">上传者入口</SecondaryLink>
         </>
       }
-      description="面向 AI 视频、游戏、短剧广告和虚拟内容制作方的数字素材交易平台。T006 先明确页面结构、角色入口和路由关系，后续再接入真实业务。"
+      description="面向 AI 视频、游戏、短剧广告和虚拟内容制作方的数字素材交易平台。页面结构已确认，T009 起逐步接入本地真实数据和业务 API。"
       title="源素库"
     >
       <div className="grid gap-8">
@@ -27,9 +27,9 @@ export default function HomePage() {
             {publicRoleEntryRoutes.map((role) => (
               <article className="rounded-lg border border-line bg-white p-5" key={role.role}>
                 <div className="text-sm font-semibold text-ink">{role.role}</div>
-                <a className="mt-2 block text-sm font-medium text-brand" href={role.href}>
+                <Link className="mt-2 block text-sm font-medium text-brand" href={role.href}>
                   {role.entry}
-                </a>
+                </Link>
                 <p className="mt-3 text-sm leading-6 text-muted">{role.description}</p>
               </article>
             ))}

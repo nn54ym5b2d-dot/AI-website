@@ -14,7 +14,7 @@ export default function AccountPage() {
           <h2 className="text-xl font-semibold text-ink">购买用户页面</h2>
           <div className="mt-5">
             <RouteCardGrid
-              routes={accountRoutes.filter((route) => route.roleEntry.includes("购买用户"))}
+              routes={accountRoutes.filter((route) => route.audiences.includes("buyer"))}
             />
           </div>
         </section>
@@ -22,7 +22,7 @@ export default function AccountPage() {
           <h2 className="text-xl font-semibold text-ink">上传者页面</h2>
           <div className="mt-5">
             <RouteCardGrid
-              routes={accountRoutes.filter((route) => route.roleEntry.includes("上传者"))}
+              routes={accountRoutes.filter((route) => route.audiences.includes("uploader"))}
             />
           </div>
         </section>

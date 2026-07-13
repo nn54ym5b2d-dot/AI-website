@@ -17,6 +17,7 @@ AI 数字素材交易平台 MVP。
 npm run dev
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 

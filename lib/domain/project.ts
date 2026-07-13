@@ -11,7 +11,7 @@ export const coreModules: CoreModule[] = [
   },
   {
     name: "购买授权",
-    description: "多素材订单、微信支付/支付宝、永久授权记录和默认 365 天下载入口。"
+    description: "多素材订单、微信支付/支付宝、永久授权记录和默认 365 天 ZIP 下载入口。"
   },
   {
     name: "后台管理",

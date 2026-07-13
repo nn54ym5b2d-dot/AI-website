@@ -30,6 +30,7 @@ pnpm-debug.log*
 .vscode/
 *.swp
 *.swo
+~$*.docx
 
 # Local runtime files
 tmp/

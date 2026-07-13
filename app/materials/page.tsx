@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
 import { assetTypes } from "@/lib/domain/project";
 
@@ -10,7 +11,7 @@ export default function MaterialsPage() {
           <SecondaryLink href="/materials/demo-asset">查看详情骨架</SecondaryLink>
         </>
       }
-      description="第一版素材浏览按人物、物件/道具、场景三类展开。当前只建立分类和列表骨架，真实素材数据留到 T007/T008 后接入。"
+      description="第一版素材浏览按人物、物件/道具、场景三类展开。当前只建立分类和列表骨架，真实素材数据将在 T010 接入本地数据库和 API。"
       title="素材分类页"
     >
       <div className="grid gap-8">
@@ -19,9 +20,9 @@ export default function MaterialsPage() {
             <article className="rounded-lg border border-line bg-white p-5" key={asset.name}>
               <h2 className="text-base font-semibold text-ink">{asset.name}</h2>
               <p className="mt-2 text-sm leading-6 text-muted">{asset.rule}</p>
-              <a className="mt-4 block text-sm font-medium text-brand" href="/search">
+              <Link className="mt-4 block text-sm font-medium text-brand" href="/search">
                 查看该类素材
-              </a>
+              </Link>
             </article>
           ))}
         </section>

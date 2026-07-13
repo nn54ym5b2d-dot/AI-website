@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v2.0
+版本：v2.1
 日期：2026-07-13
-状态：T008 第一版接口合同，待 Robert 审核
+状态：T008 审核修订版，待 Robert 最终审核
 
 ## 1. 文档定位
 
@@ -10,7 +10,7 @@
 
 本次只确定接口边界，不实现完整 API，不接入真实微信支付、支付宝、腾讯云 COS、短信、邮件、微信登录或政府认证网站，也不生成正式 OpenAPI 文件。
 
-数据模型以 `docs/数据库设计.md` v2.1 为准。首版业务默认值：
+数据模型以 `docs/数据库设计.md` v2.3 为准。首版业务默认值：
 
 | 配置 | 首版值 |
 |---|---:|
@@ -22,6 +22,9 @@
 | 商业授权 | 永久有效，特殊情况可撤销 |
 | 用户下载入口 | 默认 365 天 |
 | 实际 COS 下载地址 | 每次下载时短时签发，建议不超过 10 分钟 |
+| 多角度原始素材交付 | 每份素材打包为一个 ZIP 下载 |
+
+实名认证不在 MVP API 范围内，后续版本如启用需另行设计开关、身份服务和隐私合规方案。人物素材必须提交必要证明材料；物件/道具和场景素材不要求该证明材料。
 
 ## 2. 通用约定
 
@@ -72,9 +75,10 @@
 - 为订单或认证上传费发起支付。
 - 提交素材审核。
 - 创建退款或重试退款处理。
-- 支付/退款回调的内部处理。
 
 同一个 key 携带不同请求体时返回 `409 IDEMPOTENCY_CONFLICT`。状态变更应使用数据库事务和条件更新，避免重复回调、重复点击或并发请求生成重复授权、收益或退款。
+
+支付和退款回调不依赖客户端提供 `Idempotency-Key`，而是以第三方事件唯一标识或可验证的交易组合键写入 `webhook_events` 去重；重复有效回调返回第三方要求的成功响应，但不得重复生成业务记录。
 
 ### 2.5 成功响应
 
@@ -123,7 +127,7 @@
 
 ### 2.7 运行时支撑数据
 
-`docs/数据库设计.md` v2.1 定义的是核心业务表。实现本接口合同时，还需要会话、验证码挑战、幂等记录、短期上传意图和第三方回调去重等运行时支撑数据。T009、T011、T013 应在各自实现阶段补充最小必要的 Prisma 模型、受控缓存或等价持久化方案，例如：
+`docs/数据库设计.md` v2.3 定义的是核心业务表。实现本接口合同时，还需要会话、验证码挑战、幂等记录、短期上传意图和第三方回调去重等运行时支撑数据。T009、T011、T013 应在各自实现阶段补充最小必要的 Prisma 模型、受控缓存或等价持久化方案，例如：
 
 - `user_sessions`：保存会话哈希、用户、过期和撤销时间。
 - `auth_challenges`：保存手机号/邮箱挑战哈希、用途、次数和过期时间。
@@ -158,6 +162,7 @@
 |---|---:|---|
 | `CHALLENGE_INVALID` | 422 | 手机或邮箱验证码无效 |
 | `CHALLENGE_EXPIRED` | 422 | 验证挑战已过期 |
+| `TERMS_ACCEPTANCE_REQUIRED` | 422 | 新用户未接受当前有效条款版本 |
 | `INVITE_CODE_INVALID` | 422 | 邀请码不存在或格式错误 |
 | `INVITE_CODE_USED` | 409 | 邀请码已使用 |
 | `INVITE_CODE_DISABLED` | 409 | 邀请码已禁用 |
@@ -184,10 +189,11 @@
 
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
+| `GET /api/v1/legal-documents/current` | 公开 | `type: terms_of_service\|privacy_policy\|commercial_license` | 当前生效文档的 `id`、`version`、`title`、`effectiveAt` 和公开正文/地址 | `RESOURCE_NOT_FOUND` |
 | `POST /api/v1/auth/challenges` | 公开 | `method: phone\|email`、`identifier`、`purpose: register\|login` | `challengeId`、`expiresAt`、`resendAfterSeconds`；不返回验证码 | `VALIDATION_ERROR`、`RATE_LIMITED`、`UPSTREAM_UNAVAILABLE` |
 | `POST /api/v1/auth/register` | 公开 | `challengeId`、`verificationCode`、`displayName`、`acceptedTermsVersion` | 设置会话 Cookie；返回 `user`、`roles` | `CHALLENGE_INVALID`、`CHALLENGE_EXPIRED`、`RESOURCE_CONFLICT` |
 | `POST /api/v1/auth/login` | 公开 | `challengeId`、`verificationCode` | 设置会话 Cookie；返回 `user`、`roles` | `CHALLENGE_INVALID`、`SESSION_INVALID` |
-| `POST /api/v1/auth/wechat` | 公开 | `code`、`redirectUri` | 创建或登录账号，设置会话 Cookie；返回 `user`、`roles`、`isNewUser` | `VALIDATION_ERROR`、`UPSTREAM_UNAVAILABLE` |
+| `POST /api/v1/auth/wechat` | 公开 | `code`、`redirectUri`；创建新用户时必填 `acceptedTermsVersion` | 创建或登录账号，设置会话 Cookie；返回 `user`、`roles`、`isNewUser` | `TERMS_ACCEPTANCE_REQUIRED`、`VALIDATION_ERROR`、`UPSTREAM_UNAVAILABLE` |
 | `GET /api/v1/auth/csrf` | 已登录 | 无 | `csrfToken`、`expiresAt` | `AUTH_REQUIRED` |
 | `POST /api/v1/auth/logout` | 已登录 | 无 | 清除当前会话 Cookie，返回 `loggedOut: true` | `CSRF_VALIDATION_FAILED` |
 | `GET /api/v1/me` | 已登录 | 无 | 当前用户非敏感资料、有效角色、上传者/管理员/观察员摘要 | `AUTH_REQUIRED`、`SESSION_INVALID` |
@@ -195,13 +201,15 @@
 
 邀请码激活必须在一个事务中锁定邀请码、写入使用者、创建 `uploader_profiles` 并增加 `uploader` 角色，避免同一邀请码并发使用。接口不返回邀请码创建者、其他使用者或内部备注。
 
+手机号/邮箱注册和微信首次创建账号都必须在同一事务中记录当前条款版本的接受事实；已有用户登录不重复写入，但当未来条款需要重新同意时，应走独立确认流程，不能伪造历史接受时间。
+
 ## 5. 公开素材浏览
 
 公开接口只返回 `listing_status=listed`、`review_status=approved` 且 `certification_status=certified` 的素材。未上架素材即使 ID 正确也返回 `404`，上传者查看自己的未上架素材应使用第 6 节接口。
 
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
-| `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`sort: newest\|popular`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、缩略图/预览图短期或公开预览地址 | `VALIDATION_ERROR` |
+| `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`minPriceCents`、`maxPriceCents`、`listedAfter`、`sort: newest\|popular\|price_asc\|price_desc`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、缩略图/预览图短期或公开预览地址 | `VALIDATION_ERROR` |
 | `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、预览文件、认证展示状态、价格、授权摘要；不含原文件和证明材料 | `RESOURCE_NOT_FOUND` |
 | `GET /api/v1/categories` | 公开 | 无 | 首版固定三类素材及展示名称 | 无 |
 | `GET /api/v1/tags` | 公开 | `q`、`limit` | 已上架素材使用的标签建议 | `VALIDATION_ERROR` |
@@ -215,6 +223,8 @@
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `POST /api/v1/uploader/assets` | 上传者 | `type`、`title`、可选 `description`、`tags[]` | 素材草稿；价格由系统规则写入，不接受上传者定价 | `FORBIDDEN`、`VALIDATION_ERROR` |
+| `GET /api/v1/uploader/profile` | 上传者 | 无 | 当前上传者公开资料和状态；不返回邀请码明文 | `FORBIDDEN` |
+| `PATCH /api/v1/uploader/profile` | 上传者 | `displayName?`、`bio?` | 更新后的上传者资料 | `FORBIDDEN`、`VALIDATION_ERROR` |
 | `GET /api/v1/uploader/assets` | 上传者 | `reviewStatus`、`listingStatus`、`certificationStatus`、分页参数 | 仅当前上传者的素材列表和状态摘要 | `FORBIDDEN` |
 | `GET /api/v1/uploader/assets/{assetId}` | 素材所属上传者 | 无 | 草稿详情、文件摘要、审核/认证/上架状态、驳回原因和认证费摘要 | `RESOURCE_NOT_FOUND` |
 | `PATCH /api/v1/uploader/assets/{assetId}` | 素材所属上传者 | 可修改 `title`、`description`、`tags[]` | 更新后的素材；不接受价格、审核、认证或上架状态 | `STATE_TRANSITION_INVALID`、`VALIDATION_ERROR` |
@@ -228,7 +238,7 @@
 
 ```text
 浏览器 -> 应用服务申请上传地址
-应用服务 -> 返回一次性短期签名 PUT 地址
+应用服务 -> 返回绑定专用暂存 object key 的短期签名 PUT 地址
 浏览器 -> 直接上传到私有 COS
 浏览器 -> 应用服务确认上传完成
 应用服务 -> 通过 COS HEAD/元数据校验后写 asset_files
@@ -241,9 +251,9 @@
 
 安全要求：
 
-- COS Bucket 必须为私有；签名上传地址建议 5-15 分钟失效，只允许指定 key、方法、MIME 和大小范围。
+- COS Bucket 必须为私有；签名上传地址建议 5-15 分钟失效，只允许指定暂存 key、方法、MIME 和大小范围。签名本身不能保证网络层“只使用一次”，业务层必须让每个 `upload_intent` 只成功完成一次。
 - 接口不单独返回 `cos_bucket`、`cos_region` 或 `cos_object_key`；`uploadUrl` 是临时敏感值，前端不得持久化，服务端日志不得记录其查询字符串。
-- `complete` 不能只相信前端，应通过 COS 查询对象是否存在，并核对大小、MIME、哈希或上传元数据。
+- `complete` 不能只相信前端，应通过 COS 查询对象是否存在，并核对大小、MIME、哈希或上传元数据；校验通过后复制/移动到不可变最终 key 并登记，失败或过期对象进入清理流程。
 - 未完成的上传意图过期后失效，孤立对象由后续清理任务删除。
 - `person_proof` 只允许人物素材；认证证书使用管理员专用上传接口。
 - 文件大小、MIME 白名单和图片像素上限作为配置项实现；准确数值待 COS 方案确认，不改变本接口形状。
@@ -264,6 +274,7 @@
 |---|---|---|---|---|
 | `GET /api/v1/admin/assets` | 超级、运营 | 类型、审核/认证/上架状态、分页参数 | 后台素材列表；人物证明材料只返回“是否存在”，不直接返回文件地址 | `FORBIDDEN` |
 | `GET /api/v1/admin/assets/{assetId}` | 超级、运营 | 无 | 素材、文件摘要、审核事件和认证记录 | `RESOURCE_NOT_FOUND` |
+| `PATCH /api/v1/admin/assets/{assetId}` | 超级、运营 | `title?`、`description?`、`tags?`、`category?` | 更新后的素材基础信息；写入操作日志 | `VALIDATION_ERROR`、`FORBIDDEN` |
 | `POST /api/v1/admin/assets/{assetId}/review` | 超级、运营 | `decision: approve\|reject`；驳回时必填 `reason` | 新审核状态、认证状态、`reviewedAt` | `STATE_TRANSITION_INVALID`、`VALIDATION_ERROR` |
 | `POST /api/v1/admin/assets/{assetId}/listing` | 超级、运营 | `action: list\|delist`、可选 `reason` | 新上架状态、`listedAt` | `CERTIFICATE_REQUIRED`、`STATE_TRANSITION_INVALID` |
 | `GET /api/v1/admin/certifications` | 超级、运营 | 状态、素材类型、分页参数 | 认证记录列表 | `FORBIDDEN` |
@@ -306,7 +317,7 @@
 1. 必须基于原始请求体验签，并校验时间戳、随机串、商户号、平台订单号、金额和币种。
 2. 使用第三方通知 ID 或“平台支付单号 + 第三方交易号 + 状态”做幂等去重。
 3. 验签和金额校验通过后，在数据库事务中更新支付状态。
-4. 素材购买支付成功时，在同一事务中更新订单、为每个订单明细创建一条授权、默认 365 天下载入口和收益记录。
+4. 素材购买支付成功时，在同一事务中更新订单、为每个订单明细创建一条授权、默认 365 天下载资格和收益记录；ZIP 可在事务提交后按不可变原文件清单生成，未就绪时下载接口返回处理中状态。
 5. 认证上传费支付成功时，只更新 `certification_fee_charges` 和素材审核/认证状态，不创建购买订单收益。
 6. 已处理的重复成功回调返回第三方要求的成功确认，不重复生成授权、下载入口或收益。
 7. 回调日志只能保存必要摘要和哈希，不保存密钥、完整支付账户或完整原始敏感载荷。
@@ -320,14 +331,16 @@
 |---|---|---|---|---|
 | `GET /api/v1/authorizations` | 已登录购买方 | 状态、分页参数 | 当前用户的授权列表、素材摘要和下载入口状态 | `AUTH_REQUIRED` |
 | `GET /api/v1/authorizations/{authorizationId}` | 授权所属用户 | 无 | 授权文本版本/快照、认证状态快照、状态、授予/撤销信息 | `RESOURCE_NOT_FOUND` |
-| `POST /api/v1/authorizations/{authorizationId}/download-links` | 授权所属用户 | 无；可复用仍有效入口 | `downloadLinkId`、`expiresAt`、`status`；不返回 token 或 COS object key | `AUTHORIZATION_REVOKED`、`STATE_TRANSITION_INVALID` |
-| `GET /api/v1/download-links/{downloadLinkId}/file` | 下载入口所属用户 | 无 | 校验后记录下载并 `302` 跳转到不超过 10 分钟的 COS 签名 URL | `DOWNLOAD_LINK_EXPIRED`、`DOWNLOAD_LINK_REVOKED`、`AUTHORIZATION_REVOKED` |
+| `POST /api/v1/authorizations/{authorizationId}/download-links` | 授权所属用户 | 无；可复用仍有效入口 | `downloadLinkId`、`format: zip`、`bundleStatus`、`expiresAt`、`status`；不返回 token 或 COS object key | `AUTHORIZATION_REVOKED`、`STATE_TRANSITION_INVALID` |
+| `GET /api/v1/download-links/{downloadLinkId}/file` | 下载入口所属用户 | 无 | 校验后记录一次素材包下载并 `302` 跳转到不超过 10 分钟的 ZIP 签名 URL | `DOWNLOAD_LINK_EXPIRED`、`DOWNLOAD_LINK_REVOKED`、`AUTHORIZATION_REVOKED` |
 | `GET /api/v1/downloads` | 已登录购买方 | 素材、时间、分页参数 | 当前用户下载记录；不返回历史 COS URL、token、IP 或 object key | `AUTH_REQUIRED` |
 
 下载安全边界：
 
 - 365 天的是平台下载资格，不是 365 天 COS URL。
 - 下载入口以登录会话和资源归属校验为主，API 不返回原始 token。
+- 每份素材的所有有效 `original` 文件按固定清单生成一个 ZIP；文件清单变化时生成新版本素材包，已成交授权继续按成交时/授权时快照规则交付，不能悄悄替换内容。
+- 下载入口在 365 天内可重复使用，状态为 `active`、`expired` 或 `revoked`；一次成功下载不会把入口改成 `used`。
 - 实际 COS 签名 URL 仅通过 `302 Location` 短时交付，不放入 JSON，不写访问日志查询字符串。
 - 每次下载前重新校验用户、授权、入口状态、文件归属和有效期；跳转前或成功确认后写下载记录。
 - 授权撤销或退款成功时，应同步撤销对应下载入口。
@@ -357,7 +370,7 @@
 | `GET /api/v1/admin/orders` | 可 | 可 | 可 | 订单和明细；联系方式、第三方流水按角色掩码 |
 | `GET /api/v1/admin/payments` | 可 | 可 | 可 | 运营只看非敏感摘要；财务可看对账所需字段 |
 | `GET /api/v1/admin/refunds` | 可 | 否 | 可 | 退款记录 |
-| `POST /api/v1/admin/refunds` | 可 | 否 | 可 | `paymentId`、`amountCents`、`reason`；要求 `Idempotency-Key` |
+| `POST /api/v1/admin/refunds` | 可 | 否 | 可 | `paymentId`、`items: [{orderItemId, amountCents}]`、`reason`；认证费退款使用 `certificationFeeChargeId`；要求 `Idempotency-Key` |
 | `POST /api/v1/admin/refunds/{refundId}/process` | 可 | 否 | 可 | 只允许 `submit\|retry\|cancel`，不能直接把状态写为成功 |
 | `GET /api/v1/admin/authorizations` | 可 | 可 | 可 | 授权记录列表 |
 | `POST /api/v1/admin/authorizations/{authorizationId}/revoke` | 可 | 否 | 否 | 特殊争议处理；必填 `reason`，自动撤销下载入口 |
@@ -371,11 +384,11 @@
 
 第 7 节的素材审核、上架和认证接口也属于管理后台。关键后台修改必须记录 `actor_user_id`、动作、目标、必要差异摘要、时间和 `requestId`；日志不得保存密码、Cookie、CSRF token、COS 签名 URL 或支付密钥。
 
-退款成功后的事务至少包括：更新退款和订单状态、按退款明细撤销授权与下载入口、创建收益冲正记录。部分退款只影响被退款的订单明细；客户端不得自行指定收益冲正金额。
+素材购买退款只能按完整订单明细退款：每个 `items[].amountCents` 必须等于该 `order_item` 尚未退款的完整成交金额，不允许对单个明细拆分金额。`refund.amount_cents` 必须等于所有退款明细之和。退款成功后的事务至少包括：更新退款和订单状态、按 `refund_items` 撤销授权与下载入口、创建收益冲正记录。订单中未退款的明细继续有效；客户端不得自行指定收益冲正金额。
 
 ## 11. 外部观察员只读接口
 
-以下接口只允许有效 `observer` 角色访问，只读取 `platform_metric_snapshots` 和当前观察员自己的 `observer_share_records`。观察员不能通过这些接口读取订单、用户、支付、下载或素材文件明细。
+以下接口只允许有效 `observer` 角色访问，只读取 `platform_metric_snapshots`、`platform_asset_type_metric_snapshots` 和当前观察员自己的 `observer_share_records`。观察员不能通过这些接口读取订单、用户、支付、下载或素材文件明细。
 
 通用查询参数：`periodType: day|week|month|custom`、`startAt?`、`endAt?`。自定义时间范围必须限制最大跨度，防止大范围扫描。
 
@@ -421,7 +434,7 @@
 1. 锁定支付和订单并确认金额。
 2. 把支付更新为 `success`，订单更新为 `paid`。
 3. 为每个 `order_item` 创建唯一授权记录。
-4. 为每个授权创建默认 365 天下载入口。
+4. 为每个授权创建默认 365 天下载资格，并关联/排队生成该素材的 ZIP 下载包。
 5. 为每个订单明细创建一条包含成交时 80% / 20% 比例及上传者、平台金额快照的收益记录。
 6. 写入必要操作/业务事件，提交事务后再执行非关键通知。
 
@@ -429,7 +442,7 @@
 
 ### 12.3 退款成功
 
-退款成功后按退款范围在事务中更新订单为 `refunded` 或 `partial_refunded`，撤销对应授权和下载入口，并创建反向收益记录。历史成交快照和原收益记录保留，不直接覆盖为零。
+退款成功后按 `refund_items` 在事务中更新订单为 `refunded` 或 `partial_refunded`，撤销被完整退款订单明细对应的授权和下载入口，并创建反向收益记录。历史成交快照和原收益记录保留，不直接覆盖为零；不允许对单个订单明细做金额拆分退款。
 
 ## 13. 安全与隐私要求
 
@@ -452,7 +465,7 @@
 | T011 上传者素材提交流程 | 第 6 节 |
 | T012 后台审核和认证记录 | 第 7、10 节 |
 | T013 订单、支付和授权占位流程 | 第 8、12 节 |
-| T014 下载和收益记录 | 第 9、12 节 |
+| T014 ZIP 下载和收益记录 | 第 9、12 节 |
 | T015 后台权限和外部观察员 | 第 10-11、13 节 |
 
 ## 15. 仍待确认但不阻塞接口结构

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 
 export default function SearchPage() {
@@ -11,7 +12,7 @@ export default function SearchPage() {
         <aside className="rounded-lg border border-line bg-white p-5">
           <h2 className="text-base font-semibold text-ink">筛选条件</h2>
           <div className="mt-4 grid gap-3 text-sm text-muted">
-            {["关键词", "素材类型", "认证状态", "价格区间", "上架时间"].map((filter) => (
+            {["关键词", "素材类型", "价格区间", "上架时间", "排序"].map((filter) => (
               <div className="rounded-md border border-line bg-paper p-3" key={filter}>
                 {filter}
               </div>
@@ -22,7 +23,7 @@ export default function SearchPage() {
           <h2 className="text-base font-semibold text-ink">结果列表骨架</h2>
           <div className="mt-4 grid gap-3">
             {[1, 2, 3].map((item) => (
-              <a
+              <Link
                 className="grid gap-3 rounded-md border border-line bg-paper p-4 text-sm md:grid-cols-[120px_1fr_auto]"
                 href="/materials/demo-asset"
                 key={item}
@@ -35,7 +36,7 @@ export default function SearchPage() {
                   <span className="mt-1 block text-muted">类型、认证状态、用途说明摘要。</span>
                 </span>
                 <span className="font-medium text-brand">查看详情</span>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
