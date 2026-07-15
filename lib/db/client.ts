@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getAppEnv } from "@/lib/config/env";
 
 export function getDatabaseUrl() {

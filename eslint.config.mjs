@@ -1,12 +1,10 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 
-export default [
-  {
-    ignores: [".next/**", "node_modules/**", "coverage/**", "dist/**", "out/**"]
-  },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+export default defineConfig([
+  ...nextVitals,
+  ...nextTypeScript,
   {
     rules: {
       "@typescript-eslint/no-unused-vars": [
@@ -17,5 +15,6 @@ export default [
         }
       ]
     }
-  }
-];
+  },
+  globalIgnores([".next/**", "node_modules/**", "coverage/**", "dist/**", "out/**"])
+]);

@@ -22,7 +22,12 @@ export type AdminSection = {
 export type UserRole =
   | "buyer"
   | "uploader"
-  | "super_admin"
-  | "operator"
-  | "finance"
+  | "admin"
   | "observer";
+
+export type AdminRole = "super_admin" | "operator" | "finance";
+
+export type RoleContext = {
+  userRoles: ReadonlySet<UserRole>;
+  adminRoles: ReadonlySet<AdminRole>;
+};

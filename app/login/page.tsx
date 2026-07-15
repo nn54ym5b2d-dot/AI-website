@@ -16,7 +16,9 @@ export default function LoginPage() {
         {["手机号登录", "邮箱登录", "微信登录"].map((method) => (
           <article className="rounded-lg border border-line bg-white p-5" key={method}>
             <h2 className="text-base font-semibold text-ink">{method}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">后续由 T009 接入真实登录能力。</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              T009 先接入可运行的本地登录和 provider adapter，真实第三方服务在 T017 接入。
+            </p>
           </article>
         ))}
       </section>

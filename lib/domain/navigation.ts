@@ -1,4 +1,12 @@
 export type RoutePriority = "P0" | "P1";
+export type RouteAudience =
+  | "public"
+  | "buyer"
+  | "uploader"
+  | "super_admin"
+  | "operator"
+  | "finance"
+  | "observer";
 
 export type RouteDefinition = {
   title: string;
@@ -6,6 +14,7 @@ export type RouteDefinition = {
   description: string;
   priority: RoutePriority;
   roleEntry: string;
+  audiences: RouteAudience[];
   slug?: string;
   notes?: string;
 };
@@ -29,21 +38,24 @@ export const publicRoutes: RouteDefinition[] = [
     href: "/",
     description: "展示平台定位、素材入口、推荐分类、搜索入口和角色入口。",
     priority: "P0",
-    roleEntry: "所有访客"
+    roleEntry: "所有访客",
+    audiences: ["public"]
   },
   {
     title: "素材分类页",
     href: "/materials",
     description: "按人物、物件/道具、场景浏览素材，承接首页和导航的素材入口。",
     priority: "P0",
-    roleEntry: "购买用户、上传者、访客"
+    roleEntry: "购买用户、上传者、访客",
+    audiences: ["public", "buyer", "uploader"]
   },
   {
     title: "搜索结果页",
     href: "/search",
-    description: "展示关键词搜索、素材类型、认证状态和价格区间等筛选骨架。",
+    description: "展示关键词搜索、素材类型、价格区间、上架时间和排序等筛选骨架。",
     priority: "P0",
-    roleEntry: "购买用户、上传者、访客"
+    roleEntry: "购买用户、上传者、访客",
+    audiences: ["public", "buyer", "uploader"]
   },
   {
     title: "素材详情页",
@@ -51,6 +63,7 @@ export const publicRoutes: RouteDefinition[] = [
     description: "展示素材预览、价格、认证状态、购买入口和授权提示。",
     priority: "P0",
     roleEntry: "购买用户、上传者、访客",
+    audiences: ["public", "buyer", "uploader"],
     slug: "demo-asset"
   },
   {
@@ -58,21 +71,24 @@ export const publicRoutes: RouteDefinition[] = [
     href: "/login",
     description: "后续承接手机号、邮箱、微信组合登录。",
     priority: "P0",
-    roleEntry: "所有用户"
+    roleEntry: "所有用户",
+    audiences: ["public"]
   },
   {
     title: "注册页",
     href: "/register",
     description: "购买用户注册；上传者通过邀请码激活上传权限。",
     priority: "P0",
-    roleEntry: "购买用户、上传者"
+    roleEntry: "购买用户、上传者",
+    audiences: ["public", "buyer", "uploader"]
   },
   {
     title: "订单支付页",
     href: "/checkout",
     description: "展示订单素材、金额、支付方式和支付状态占位。",
     priority: "P0",
-    roleEntry: "购买用户"
+    roleEntry: "购买用户",
+    audiences: ["buyer"]
   }
 ];
 
@@ -82,7 +98,8 @@ export const accountRoutes: RouteDefinition[] = [
     href: "/account",
     description: "购买用户和上传者的个人中心总入口。",
     priority: "P0",
-    roleEntry: "购买用户、上传者"
+    roleEntry: "购买用户、上传者",
+    audiences: ["buyer", "uploader"]
   },
   {
     title: "我的购买",
@@ -90,6 +107,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "查看订单和购买记录。",
     priority: "P0",
     roleEntry: "购买用户",
+    audiences: ["buyer"],
     slug: "purchases"
   },
   {
@@ -98,6 +116,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "查看已购买素材和默认有效 365 天的下载入口。",
     priority: "P0",
     roleEntry: "购买用户",
+    audiences: ["buyer"],
     slug: "downloads"
   },
   {
@@ -106,6 +125,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "查看已购买素材对应的授权记录。",
     priority: "P0",
     roleEntry: "购买用户",
+    audiences: ["buyer"],
     slug: "licenses"
   },
   {
@@ -114,6 +134,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "上传者查看自己提交的素材。",
     priority: "P0",
     roleEntry: "上传者",
+    audiences: ["uploader"],
     slug: "uploads"
   },
   {
@@ -122,6 +143,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "上传者查看素材审核、认证和上架状态。",
     priority: "P0",
     roleEntry: "上传者",
+    audiences: ["uploader"],
     slug: "upload-status"
   },
   {
@@ -130,6 +152,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "上传者查看素材收益记录。",
     priority: "P0",
     roleEntry: "上传者",
+    audiences: ["uploader"],
     slug: "revenue"
   },
   {
@@ -138,6 +161,7 @@ export const accountRoutes: RouteDefinition[] = [
     description: "上传者维护基础资料。",
     priority: "P1",
     roleEntry: "上传者",
+    audiences: ["uploader"],
     slug: "uploader-profile"
   }
 ];
@@ -146,11 +170,12 @@ export const uploaderRoutes: RouteDefinition[] = [
   {
     title: "认证上传页",
     href: "/upload",
-    description: "上传人物、物件/道具、场景素材，提交证明材料和认证上传费流程占位。",
+    description: "上传人物、物件/道具、场景素材；仅人物提交必要证明材料，并进入认证上传费流程。",
     priority: "P0",
-    roleEntry: "上传者"
+    roleEntry: "上传者",
+    audiences: ["uploader"]
   },
-  ...accountRoutes.filter((route) => route.roleEntry === "上传者")
+  ...accountRoutes.filter((route) => route.audiences.includes("uploader"))
 ];
 
 export const adminRoutes: RouteDefinition[] = [
@@ -159,7 +184,8 @@ export const adminRoutes: RouteDefinition[] = [
     href: "/admin",
     description: "查看核心数据概览、待处理事项和后台导航。",
     priority: "P0",
-    roleEntry: "超级管理员、运营管理员、财务管理员"
+    roleEntry: "超级管理员、运营管理员、财务管理员",
+    audiences: ["super_admin", "operator", "finance"]
   },
   {
     title: "素材审核",
@@ -167,6 +193,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "审核上传素材，处理初审通过或驳回。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "review"
   },
   {
@@ -175,6 +202,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "查看、上架、下架和维护素材基础信息。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "assets"
   },
   {
@@ -183,6 +211,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "录入或核验证书编号、凭证、认证状态和证书文件。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "certifications"
   },
   {
@@ -191,6 +220,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "创建、查看、禁用上传者邀请码。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "invitations"
   },
   {
@@ -199,6 +229,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "查看购买用户、上传者和后台账号。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "users"
   },
   {
@@ -207,6 +238,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "查看订单、订单明细和订单状态。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员、财务管理员",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "orders"
   },
   {
@@ -214,7 +246,8 @@ export const adminRoutes: RouteDefinition[] = [
     href: "/admin/payments",
     description: "查看支付和退款相关记录。",
     priority: "P0",
-    roleEntry: "超级管理员、财务管理员",
+    roleEntry: "超级管理员、运营管理员（只读）、财务管理员",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "payments"
   },
   {
@@ -223,6 +256,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "查看用户购买后生成的授权记录。",
     priority: "P0",
     roleEntry: "超级管理员、运营管理员、财务管理员",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "licenses"
   },
   {
@@ -230,7 +264,8 @@ export const adminRoutes: RouteDefinition[] = [
     href: "/admin/revenue",
     description: "查看上传者 80%、平台 20% 的首版收益记录和后续结算字段。",
     priority: "P0",
-    roleEntry: "超级管理员、财务管理员",
+    roleEntry: "超级管理员、运营管理员（只读）、财务管理员",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "revenue"
   },
   {
@@ -239,6 +274,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "创建和管理只读观察账号。",
     priority: "P1",
     roleEntry: "超级管理员",
+    audiences: ["super_admin"],
     slug: "observer-accounts"
   },
   {
@@ -247,6 +283,7 @@ export const adminRoutes: RouteDefinition[] = [
     description: "查看后台关键操作记录。",
     priority: "P1",
     roleEntry: "超级管理员、运营管理员、财务管理员",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "audit-logs"
   },
   {
@@ -254,7 +291,8 @@ export const adminRoutes: RouteDefinition[] = [
     href: "/admin/settings",
     description: "配置价格、认证上传费、分成比例等。",
     priority: "P1",
-    roleEntry: "超级管理员",
+    roleEntry: "超级管理员可修改；运营和财务只读",
+    audiences: ["super_admin", "operator", "finance"],
     slug: "settings"
   }
 ];
@@ -265,7 +303,8 @@ export const observerRoutes: RouteDefinition[] = [
     href: "/observer",
     description: "合作方只读查看平台上传量、下载量、收益汇总和合作方分成字段；首版分成比例为 0，不允许导出。",
     priority: "P0",
-    roleEntry: "外部观察员"
+    roleEntry: "外部观察员",
+    audiences: ["observer"]
   }
 ];
 
@@ -278,7 +317,7 @@ export const publicPageRouteGroups: RouteGroup[] = [
   {
     title: "购买用户个人中心",
     description: "购买用户查看订单、下载和授权记录。",
-    routes: accountRoutes.filter((route) => route.roleEntry.includes("购买用户"))
+    routes: accountRoutes.filter((route) => route.audiences.includes("buyer"))
   },
   {
     title: "上传者中心",
@@ -375,4 +414,8 @@ export const observerMetrics = [
 
 export function findRouteBySlug(routes: RouteDefinition[], slug: string) {
   return routes.find((route) => route.slug === slug);
+}
+
+export function routesForAudience(routes: RouteDefinition[], audience: RouteAudience) {
+  return routes.filter((route) => route.audiences.includes(audience));
 }

@@ -60,7 +60,7 @@
 - GitHub Actions 已接入并通过基础 CI 检查。
 - GitHub Pull Request 工作流已接入，主分支保护已启用；后续代码任务默认走分支 + PR + Actions。
 - Notion 总控页已创建，本地同步源为 `docs/项目总控.md`。
-- GitHub Issues 已创建 T006-T016，对应 #1-#11。
-- GitHub Project #1 已创建：`源素库 MVP 开发`，已加入 Issues #1-#11。
+- GitHub Issues 已创建 T006-T016（#1-#11）和 T017（#16）。
+- GitHub Project #1 已创建：`源素库 MVP 开发`，已加入 Issues #1-#11 和 #16。
 - 腾讯云部署预览只有在对应外部服务接通后才能正式使用。
 - 产品文档来自 `虚拟素材网站产品文档_v1.docx`，已拆分进 `docs/` 作为后续开发依据；如原 Word 文档后续更新，需要同步更新 `docs/`。

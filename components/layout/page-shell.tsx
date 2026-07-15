@@ -11,21 +11,23 @@ type PageShellProps = {
 
 export function PageShell({ title, description, children, actions }: PageShellProps) {
   return (
-    <main className="min-h-screen bg-paper">
+    <>
       <SiteHeader />
-      <section className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-12">
-        <div className="flex flex-col gap-5 border-b border-line pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <h1 className="text-3xl font-semibold leading-tight tracking-normal text-ink md:text-4xl">
-              {title}
-            </h1>
-            <p className="mt-4 text-base leading-7 text-muted">{description}</p>
+      <main className="min-h-[calc(100vh-4rem)] bg-paper">
+        <section className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-12">
+          <div className="flex flex-col gap-5 border-b border-line pb-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <h1 className="text-3xl font-semibold leading-tight tracking-normal text-ink md:text-4xl">
+                {title}
+              </h1>
+              <p className="mt-4 text-base leading-7 text-muted">{description}</p>
+            </div>
+            {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
           </div>
-          {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
-        </div>
-        <div className="py-8">{children}</div>
-      </section>
-    </main>
+          <div className="py-8">{children}</div>
+        </section>
+      </main>
+    </>
   );
 }
 
