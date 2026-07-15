@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v1.4
-日期：2026-07-13
+版本：v1.5
+日期：2026-07-15
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -16,8 +16,8 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 |---|---|---|
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
-| T008 | #3（Review，PR #15） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
-| T009 | #4 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
+| T008 | #3（Done，PR #15） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T009 | #4（Ready） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -196,7 +196,7 @@ T009
 
 本次范围：
 - 实现基础角色类型、权限判断和页面访问守卫雏形。
-- 建立 Prisma schema、首个 migration、可重复初始化的本地 PostgreSQL 和最小测试数据。
+- 使用 Docker Compose + PostgreSQL 16 + Prisma，建立 schema、首个 migration、可重复初始化的本地数据库和最小测试数据。
 - 实现注册、登录、退出、当前用户信息、邀请码激活上传者身份的可运行本地 API；手机号、邮箱、微信由 provider adapter 隔离。
 - 保存手机号/邮箱注册和微信首次注册接受的有效条款版本。
 - 支持手机号、邮箱、微信登录的结构设计，但真实短信、邮箱验证码、微信 OAuth 可先占位。
