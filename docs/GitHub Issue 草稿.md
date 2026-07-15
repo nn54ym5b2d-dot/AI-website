@@ -18,7 +18,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（Ready；Project 为 Todo；资料同步 PR #22 Draft） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T009A | #21（Ready；Project 为 Todo；资料同步 PR #22） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -300,7 +300,7 @@ T009
 - GitHub Actions `verify` 通过。
 
 备注：
-- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料同步见草稿 PR #22。
+- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料同步见 PR #22。
 - 当前默认简报：专业、可信、克制、具有创意、突出素材图片。
 - 当前先建立任务和同步资料，尚未生成三套方向或修改正式页面。
 - T009A 验收完成后，T010 才从 Blocked 调整为 Ready。
