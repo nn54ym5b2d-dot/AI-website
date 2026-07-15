@@ -1,6 +1,6 @@
 # 源素库项目启动入口
 
-版本：v3.4
+版本：v3.5
 日期：2026-07-15
 适用项目：源素库 / 虚拟素材网站 / AI 数字素材交易平台
 
@@ -41,7 +41,8 @@
 - Robert 已确认：素材购买只能按完整订单明细退款；多角度原文件打包 ZIP 下载；实名认证延期到 MVP 后；只有人物素材要求必要证明材料。
 - Robert 已确认 T009 本地数据库采用 Docker Compose + PostgreSQL 16 + Prisma；TencentDB for PostgreSQL 继续作为生产数据库，在 T017 接入。
 - T009 第一版实现已完成并进入 Review：PostgreSQL 16 Compose、Prisma 7 身份 schema、首个 migration、非真实 seed、手机号/邮箱本地验证码 provider、微信 adapter 入口、注册登录退出、当前用户、CSRF、邀请码激活、角色守卫和真实数据库自动化测试均已落地。
-- T009 已创建 Draft PR #19，当前以 PR #18 的 `codex/docs-consistency-sync` 分支为基准；PR #18 合并后需将 PR #19 的 base 改为 `main` 再完成最终审核。
+- 项目资料冲突与后续任务依赖同步已通过 PR #18 合并到 `main`。
+- T009 Draft PR #19 已改为直接以 `main` 为基准，等待最终审核和合并。
 
 当前未完成：
 

@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v1.8
+版本：v1.9
 日期：2026-07-15
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
