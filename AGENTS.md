@@ -59,6 +59,7 @@
 - 当前本地文件夹已连接 GitHub 仓库：`nn54ym5b2d-dot/AI-website`。
 - GitHub Actions 已接入并通过基础 CI 检查。
 - GitHub Pull Request 工作流已接入，主分支保护已启用；后续代码任务默认走分支 + PR + Actions。
+- T009A 项目资料同步草稿 PR #22 已创建，等待 Robert 验收。
 - Notion 总控页已创建，本地同步源为 `docs/项目总控.md`。
 - GitHub Issues 已创建 T006-T016（#1-#11）、T017（#16）和 T009A（#21）。
 - GitHub Project #1 已创建：`源素库 MVP 开发`，已加入 Issues #1-#11、#16 和 #21。

@@ -43,7 +43,7 @@
 - T009 已完成并通过 PR #19 合并到 `main`：PostgreSQL 16 Compose、Prisma 7 身份 schema、首个 migration、非真实 seed、手机号/邮箱本地验证码 provider、微信 adapter 入口、注册登录退出、当前用户、CSRF、邀请码激活、角色守卫和真实数据库自动化测试均已落地。
 - 项目资料冲突与后续任务依赖同步已通过 PR #18 合并到 `main`。
 - PR #19 已通过 Robert 验收并合并到 `main`，GitHub Issue #4 已自动关闭。
-- T009A 已正式创建为 GitHub Issue #21：`源素库 MVP 视觉设计基线与核心页面原型`，并已加入 GitHub Project #1；Project 状态为 `Todo`，本地任务状态为 `Ready`。
+- T009A 已正式创建为 GitHub Issue #21：`源素库 MVP 视觉设计基线与核心页面原型`，并已加入 GitHub Project #1；Project 状态为 `Todo`，本地任务状态为 `Ready`，项目资料同步见草稿 PR #22。
 
 当前未完成：
 
