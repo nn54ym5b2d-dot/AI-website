@@ -1,12 +1,12 @@
 # GitHub Issue 草稿
 
-版本：v2.0
+版本：v2.1
 日期：2026-07-15
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
 
-本文件保留 T006-T017 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
+本文件保留 T006-T017 与 T009A 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
 
 GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 
@@ -18,7 +18,8 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T010 | #5（Blocked，等待视觉 UI 基线） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
+| T009A | #21（Ready；Project 为 Todo；资料同步 PR #22） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T013 | #8 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
@@ -229,6 +230,80 @@ T009
 
 备注：
 本任务先做身份和权限基础，不做真实第三方登录。
+
+---
+
+## [T009A] 源素库 MVP 视觉设计基线与核心页面原型
+
+任务目标：
+在 T010-T016 功能开发前，建立经 Robert 确认、可在后续页面复用的源素库 MVP 视觉设计基线，并完成核心页面的响应式可运行原型。
+
+相关资料：
+- `PROJECT_START.md`
+- `docs/项目总控.md`
+- `docs/PRD.md`
+- `docs/页面清单.md`
+- `docs/角色权限.md`
+- `docs/视觉设计基线.md`
+- `docs/测试验收清单.md`
+- `docs/决策记录.md`
+
+关联任务编号：
+- 前置：T006、T009
+- 当前：T009A
+- 后续：T010-T016
+
+本次范围：
+- 整理参考网站、截图或品牌关键词，形成最小设计简报；没有参考时使用已确认的默认设计简报。
+- 使用相同页面内容生成三套差异明确的视觉方向，不先写正式页面代码。
+- 由 Robert 选择一套主方向，可对选中方向提出有限调整。
+- 将选中方向固化为颜色、字体、字号、间距、圆角、边框、阴影、图片比例、图标和组件状态规则。
+- 完成首页、素材浏览/搜索、素材详情、登录/注册、个人中心/上传、管理后台六组代表页面的响应式可运行原型。
+- 至少覆盖约 1440px 桌面端和约 390px 手机端。
+- 核心导航、搜索筛选、标签切换、登录注册表单和主要按钮可操作；使用明确标记的非真实演示素材与数据。
+- 形成可供 T010-T016 复用的公共 UI 组件和 `docs/视觉设计基线.md`。
+
+不做范围：
+- 不接入素材数据库、真实素材查询 API、支付、COS、上传、审核、下载或认证服务。
+- 不改变 T006 已确认的路由、角色入口和信息结构。
+- 不改变 T009 的身份、Cookie、CSRF、邀请码和角色权限逻辑。
+- 不完成所有后台子页面，不制作完整企业品牌手册，不要求本任务确定最终 Logo。
+- 不让三套视觉方向同时进入开发；必须先选定一套主方向。
+- 不把演示数据或生成素材描述为真实业务数据或已接通外部服务。
+
+影响范围：
+- `app/globals.css`
+- `tailwind.config.ts`
+- `components/layout/`
+- `components/navigation/`
+- 首页、素材浏览/搜索、素材详情、登录/注册、个人中心/上传、管理后台代表页面
+- `docs/视觉设计基线.md` 和相关项目状态资料
+
+验收标准：
+- Robert 已从三套方案中选择一套明确的主视觉方向。
+- 视觉基线文档记录颜色、字体、间距、图片比例和组件规范。
+- 六组代表页面使用统一视觉，桌面端与手机端均可正常浏览。
+- 素材图片是视觉重点，认证状态、价格和主要操作层级清楚。
+- 核心导航和基础交互可操作，演示素材与数据明确标记为非真实。
+- 登录注册和既有角色权限没有被视觉改动破坏。
+- 未提前接入 T010-T017 的真实业务功能或外部服务。
+- T010 能直接复用本任务确认的视觉规则和公共组件。
+
+测试要求：
+- 同视口对比选中视觉稿与页面实现，检查布局、裁切、留白、字体、颜色、边框和圆角。
+- 检查桌面端与手机端，不允许横向溢出或关键操作被遮挡。
+- 检查键盘焦点、颜色对比度、表单标签、按钮可点击区域和常见状态。
+- 运行 `npm run lint`
+- 运行 `npm run typecheck`
+- 运行 `npm test`
+- 运行 `npm run build`
+- GitHub Actions `verify` 通过。
+
+备注：
+- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料同步见 PR #22。
+- 当前默认简报：专业、可信、克制、具有创意、突出素材图片。
+- 当前先建立任务和同步资料，尚未生成三套方向或修改正式页面。
+- T009A 验收完成后，T010 才从 Blocked 调整为 Ready。
 
 ---
 
