@@ -7,7 +7,8 @@ AI 数字素材交易平台 MVP。
 - Next.js
 - TypeScript
 - Tailwind CSS
-- TencentDB for PostgreSQL + Prisma
+- 本地开发：Docker Compose + PostgreSQL 16 + Prisma
+- 生产数据库：TencentDB for PostgreSQL + Prisma
 - 腾讯云 COS
 - 腾讯云生产部署
 

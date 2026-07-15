@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v1.5
+版本：v1.6
 日期：2026-07-15
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
@@ -16,7 +16,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 |---|---|---|
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
-| T008 | #3（Done，PR #15） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Ready） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
@@ -402,7 +402,7 @@ T013
 - 建立订单创建、订单明细、支付状态、退款记录的前后端结构。
 - 支持一个订单包含多个素材。
 - 支付成功后为每个素材生成独立授权记录。
-- 支付方式结构支持微信支付和支付宝，但真实接口先占位。
+- 支付方式结构支持微信支付和支付宝；本任务使用可验证的本地测试 provider，真实商户接口在 T017 接入。
 - 实现可验证签名、金额校验和重复事件去重的本地测试 webhook provider；素材购买退款按完整订单明细记录 `refund_items`。
 - 更新相关文档中的支付和授权边界。
 
@@ -421,7 +421,7 @@ T013
 验收标准：
 - 用户能从素材详情或订单入口进入本地支付测试流程，页面明确标识测试 provider。
 - 一个订单可包含多个素材。
-- 支付成功占位后能生成授权记录结构。
+- 经验证的测试支付成功回调后，能幂等生成授权、ZIP 下载资格和初始收益记录。
 - 退款记录结构不破坏收益和授权逻辑。
 - 重复支付回调不重复生成授权、ZIP 下载资格或收益，拆分单个订单明细金额的退款被拒绝。
 
