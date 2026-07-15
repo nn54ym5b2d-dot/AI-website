@@ -2,12 +2,17 @@ import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { RouteCardGrid } from "@/components/navigation/route-card";
 import { assetTypes } from "@/lib/domain/project";
 import { accountRoutes, uploadSteps } from "@/lib/domain/navigation";
+import { requireAudience } from "@/lib/auth/page-guard";
 
-export default function UploadPage() {
+export const dynamic = "force-dynamic";
+
+export default async function UploadPage() {
+  const access = await requireAudience("/upload", ["uploader"]);
+
   return (
     <PageShell
       actions={<SecondaryLink href="/account/uploads">查看我的上传</SecondaryLink>}
-      description="上传者需要邀请码激活。当前页面只建立认证上传的信息结构，真实上传、支付、COS 和认证接口留到后续任务。"
+      description={`当前上传者：${access.uploaderProfile?.displayName ?? access.user.displayName}。身份已由邀请码和服务端角色守卫确认，真实上传、支付、COS 和认证接口留到后续任务。`}
       title="上传者入口"
     >
       <div className="grid gap-8">

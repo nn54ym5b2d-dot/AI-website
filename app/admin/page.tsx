@@ -1,19 +1,25 @@
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { RouteCardGrid } from "@/components/navigation/route-card";
 import { adminRoutes } from "@/lib/domain/navigation";
+import { canAccessAudience, requireAdminPage } from "@/lib/auth/page-guard";
 
-export default function AdminPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const access = await requireAdminPage("/admin");
+  const visibleRoutes = adminRoutes.filter((route) => canAccessAudience(access, route.audiences));
+
   return (
     <PageShell
       actions={<SecondaryLink href="/observer">外部观察员只读入口</SecondaryLink>}
-      description="后台入口覆盖超级管理员、运营管理员和财务管理员。当前只做模块骨架和导航，不做真实权限、审核、支付或数据库操作。"
+      description={`当前以 ${access.user.displayName} 登录。后台入口由服务端同时检查 admin 基础身份和有效后台子角色。`}
       title="管理后台"
     >
       <div className="grid gap-8">
         <section>
           <h2 className="text-xl font-semibold text-ink">后台模块</h2>
           <div className="mt-5">
-            <RouteCardGrid routes={adminRoutes} />
+            <RouteCardGrid routes={visibleRoutes} />
           </div>
         </section>
 

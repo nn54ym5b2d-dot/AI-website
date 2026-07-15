@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v1.6
+版本：v1.9
 日期：2026-07-15
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
@@ -17,7 +17,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
-| T009 | #4（Ready） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
+| T009 | #4（Review，Draft PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T010 | #5 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |

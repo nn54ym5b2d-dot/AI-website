@@ -1,0 +1,77 @@
+import { randomUUID } from "node:crypto";
+import { NextResponse } from "next/server";
+
+export type ApiErrorCode =
+  | "AUTH_REQUIRED"
+  | "SESSION_INVALID"
+  | "FORBIDDEN"
+  | "INVALID_REQUEST"
+  | "VALIDATION_ERROR"
+  | "RESOURCE_NOT_FOUND"
+  | "RESOURCE_CONFLICT"
+  | "RATE_LIMITED"
+  | "CSRF_VALIDATION_FAILED"
+  | "CHALLENGE_INVALID"
+  | "CHALLENGE_EXPIRED"
+  | "TERMS_ACCEPTANCE_REQUIRED"
+  | "INVITE_CODE_INVALID"
+  | "INVITE_CODE_USED"
+  | "INVITE_CODE_DISABLED"
+  | "INVITE_CODE_EXPIRED"
+  | "UPLOADER_ALREADY_ACTIVE"
+  | "UPSTREAM_UNAVAILABLE"
+  | "INTERNAL_ERROR";
+
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly code: ApiErrorCode,
+    message: string,
+    public readonly details?: Record<string, unknown>
+  ) {
+    super(message);
+  }
+}
+
+export function createRequestId() {
+  return `req_${randomUUID().replaceAll("-", "")}`;
+}
+
+export function apiSuccess<T>(data: T, requestId: string, init?: ResponseInit) {
+  return NextResponse.json({ data, requestId }, init);
+}
+
+export function apiErrorResponse(error: unknown, requestId: string) {
+  if (error instanceof ApiError) {
+    return NextResponse.json(
+      {
+        error: {
+          code: error.code,
+          message: error.message,
+          ...(error.details ? { details: error.details } : {})
+        },
+        requestId
+      },
+      { status: error.status }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "服务暂时不可用，请稍后重试。"
+      },
+      requestId
+    },
+    { status: 500 }
+  );
+}
+
+export async function readJson(request: Request) {
+  try {
+    return await request.json();
+  } catch {
+    throw new ApiError(400, "INVALID_REQUEST", "请求体必须是有效 JSON。 ");
+  }
+}
