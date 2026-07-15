@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { accountRoutes, findRouteBySlug } from "@/lib/domain/navigation";
+import { requireAudience } from "@/lib/auth/page-guard";
 
 type AccountSectionPageProps = {
   params: Promise<{ section: string }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return accountRoutes
@@ -20,10 +23,12 @@ export default async function AccountSectionPage({ params }: AccountSectionPageP
     notFound();
   }
 
+  await requireAudience(route.href, route.audiences);
+
   return (
     <PageShell
       actions={<SecondaryLink href="/account">返回个人中心</SecondaryLink>}
-      description={`${route.description} 当前是结构骨架，真实数据和权限将在后续任务接入。`}
+      description={`${route.description} 当前页面已接入服务端角色守卫，真实业务数据将在对应后续任务接入。`}
       title={route.title}
     >
       <section className="rounded-lg border border-line bg-white p-5">

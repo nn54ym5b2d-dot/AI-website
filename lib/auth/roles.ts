@@ -24,6 +24,14 @@ export function canAccessObserverDashboard(context: RoleContext) {
   return context.userRoles.has("observer");
 }
 
+export function canPurchase(context: RoleContext) {
+  return context.userRoles.has("buyer");
+}
+
+export function canUpload(context: RoleContext) {
+  return context.userRoles.has("uploader");
+}
+
 export function canReviewAsset(context: RoleContext) {
   return hasAdminRole(context, contentAdminRoles);
 }

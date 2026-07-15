@@ -8,7 +8,9 @@ import {
   canManageAdminRoles,
   canManageAssetListing,
   canManageSystemSettings,
-  canReviewAsset
+  canPurchase,
+  canReviewAsset,
+  canUpload
 } from "../lib/auth/roles.ts";
 import type { AdminRole, RoleContext, UserRole } from "../types/domain.ts";
 
@@ -63,6 +65,16 @@ test("超级管理员拥有全部后台权限，但仍需 admin 基础身份", (
   assert.equal(canConfirmRefund(superAdmin), true);
   assert.equal(canManageSystemSettings(superAdmin), true);
   assert.equal(canManageAdminRoles(superAdmin), true);
+  assert.equal(canPurchase(superAdmin), false);
+  assert.equal(canUpload(superAdmin), false);
   assert.equal(canAccessObserverDashboard(superAdmin), false);
   assert.equal(canAccessAdmin(invalidSuperAdmin), false);
+});
+
+test("购买和上传权限只来自对应基础角色，可与管理员身份组合", () => {
+  const multiRoleAdmin = context(["admin", "buyer", "uploader"], ["super_admin"]);
+
+  assert.equal(canAccessAdmin(multiRoleAdmin), true);
+  assert.equal(canPurchase(multiRoleAdmin), true);
+  assert.equal(canUpload(multiRoleAdmin), true);
 });

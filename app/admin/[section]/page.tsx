@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { adminRoutes, findRouteBySlug } from "@/lib/domain/navigation";
+import { requireAudience } from "@/lib/auth/page-guard";
 
 type AdminSectionPageProps = {
   params: Promise<{ section: string }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return adminRoutes
@@ -20,10 +23,12 @@ export default async function AdminSectionPage({ params }: AdminSectionPageProps
     notFound();
   }
 
+  await requireAudience(route.href, route.audiences);
+
   return (
     <PageShell
       actions={<SecondaryLink href="/admin">返回管理后台</SecondaryLink>}
-      description={`${route.description} 当前只做后台模块骨架，真实权限、表格和操作流将在后续任务实现。`}
+      description={`${route.description} 当前页面已接入服务端角色守卫，真实业务表格和操作流将在对应后续任务实现。`}
       title={route.title}
     >
       <section className="rounded-lg border border-line bg-white p-5">

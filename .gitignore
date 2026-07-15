@@ -12,6 +12,7 @@ dist/
 build/
 coverage/
 tsconfig.tsbuildinfo
+generated/
 
 # Environment and secrets
 .env
@@ -36,3 +37,4 @@ pnpm-debug.log*
 tmp/
 temp/
 .cache/
+.local/
