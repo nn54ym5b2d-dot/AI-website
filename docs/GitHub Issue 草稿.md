@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v2.1
-日期：2026-07-15
+版本：v2.2
+日期：2026-07-16
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -18,7 +18,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（Ready；Project 为 Todo；资料同步 PR #22） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T009A | #21（Ready；Project 为 Todo；项目资料 PR #22 已验收并合并） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -254,7 +254,7 @@ T009
 - 后续：T010-T016
 
 本次范围：
-- 整理参考网站、截图或品牌关键词，形成最小设计简报；没有参考时使用已确认的默认设计简报。
+- 使用已确认的设计简报和分方向参考网站：三套方案共同保持正式、专业、简约、现实影像优先和认证可信，同时保留 A 专业创作市场、B AI 影像实验室、C 数字素材档案馆的明确差异。
 - 使用相同页面内容生成三套差异明确的视觉方向，不先写正式页面代码。
 - 由 Robert 选择一套主方向，可对选中方向提出有限调整。
 - 将选中方向固化为颜色、字体、字号、间距、圆角、边框、阴影、图片比例、图标和组件状态规则。
@@ -300,8 +300,8 @@ T009
 - GitHub Actions `verify` 通过。
 
 备注：
-- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料同步见 PR #22。
-- 当前默认简报：专业、可信、克制、具有创意、突出素材图片。
+- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料 PR #22 已验收并合并。
+- 设计简报和第一轮参考网站已确认，详细借鉴内容与避免照搬项见 `docs/视觉设计基线.md` 第 3、5 节。
 - 当前先建立任务和同步资料，尚未生成三套方向或修改正式页面。
 - T009A 验收完成后，T010 才从 Blocked 调整为 Ready。
 
