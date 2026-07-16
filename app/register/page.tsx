@@ -1,19 +1,12 @@
-import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
+import Link from "next/link";
 import { AuthFlowForm } from "@/components/auth/auth-flow-form";
+import { PageShell } from "@/components/layout/page-shell";
 
 export default function RegisterPage() {
   return (
-    <PageShell
-      actions={
-        <>
-          <PrimaryLink href="/login">已有账号登录</PrimaryLink>
-          <SecondaryLink href="/upload">上传者入口</SecondaryLink>
-        </>
-      }
-      description="新账号默认获得购买用户角色，并在同一数据库事务中保存当前有效条款的接受记录；上传者角色需登录后使用邀请码激活。"
-      title="注册页"
-    >
+    <PageShell compact description="新账号默认获得购买用户身份；上传者权限需登录后使用有效邀请码激活。" eyebrow="Create account" title="注册源素库账号">
       <AuthFlowForm mode="register" />
+      <p className="mt-5 text-center text-sm text-muted">已有账号？ <Link className="font-semibold text-brand hover:text-brand-dark" href="/login">返回登录</Link></p>
     </PageShell>
   );
 }

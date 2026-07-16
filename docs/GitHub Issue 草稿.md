@@ -18,7 +18,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（Ready；Project 为 Todo；项目资料 PR #22 已验收并合并） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T009A | #21（In Progress；方向 A/方向 1 已选；第二阶段原型开发中） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -300,9 +300,9 @@ T009
 - GitHub Actions `verify` 通过。
 
 备注：
-- GitHub Issue #21，已加入 Project #1；本地状态为 Ready，Project 状态为 Todo；项目资料 PR #22 已验收并合并。
+- GitHub Issue #21 已进入第二阶段；本地和 Project 状态均为 In Progress；Robert 已选择方向 A（方向 1）。
 - 设计简报和第一轮参考网站已确认，详细借鉴内容与避免照搬项见 `docs/视觉设计基线.md` 第 3、5 节。
-- 当前先建立任务和同步资料，尚未生成三套方向或修改正式页面。
+- 第一阶段 A/B/C 已完成；第二阶段只把方向 A 转为六组可运行原型，不接真实业务服务。
 - T009A 验收完成后，T010 才从 Blocked 调整为 Ready。
 
 ---

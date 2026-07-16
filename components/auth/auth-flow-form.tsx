@@ -1,5 +1,6 @@
 "use client";
 
+import { EnvelopeSimple, Phone, ShieldCheck } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 type AuthFlowFormProps = {
@@ -91,23 +92,16 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
   }
 
   return (
-    <section className="rounded-lg border border-line bg-white p-5">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-ink">
-          登录方式
-          <select
-            className="rounded-md border border-line bg-paper px-3 py-2"
-            onChange={(event) => setMethod(event.target.value as "phone" | "email")}
-            value={method}
-          >
-            <option value="email">邮箱</option>
-            <option value="phone">手机号</option>
-          </select>
-        </label>
+    <section className="ui-panel p-5 shadow-panel sm:p-7">
+      <div className="mb-6 grid grid-cols-2 gap-2 rounded-lg bg-paper p-1.5" role="group" aria-label="验证方式">
+        <button className={`flex min-h-10 items-center justify-center gap-2 rounded-md text-sm font-semibold transition ${method === "email" ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"}`} onClick={() => setMethod("email")} type="button"><EnvelopeSimple aria-hidden="true" size={17} />邮箱</button>
+        <button className={`flex min-h-10 items-center justify-center gap-2 rounded-md text-sm font-semibold transition ${method === "phone" ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"}`} onClick={() => setMethod("phone")} type="button"><Phone aria-hidden="true" size={17} />手机号</button>
+      </div>
+      <div className="grid gap-4">
         <label className="grid gap-2 text-sm font-medium text-ink">
           {method === "email" ? "邮箱" : "手机号（含国家/地区代码）"}
           <input
-            className="rounded-md border border-line bg-paper px-3 py-2"
+            className="ui-input"
             onChange={(event) => setIdentifier(event.target.value)}
             placeholder={method === "email" ? "name@example.test" : "+8613800000000"}
             value={identifier}
@@ -120,12 +114,12 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
           <label className="grid gap-2 text-sm font-medium text-ink">
             显示名称
             <input
-              className="rounded-md border border-line bg-paper px-3 py-2"
+              className="ui-input"
               onChange={(event) => setDisplayName(event.target.value)}
               value={displayName}
             />
           </label>
-          <label className="flex items-start gap-3 text-sm leading-6 text-muted">
+          <label className="flex items-start gap-3 rounded-md bg-paper p-3 text-sm leading-6 text-muted">
             <input
               checked={termsAccepted}
               className="mt-1"
@@ -137,9 +131,9 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
         </div>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-5">
         <button
-          className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="ui-button-primary w-full"
           disabled={submitting || !identifier}
           onClick={requestChallenge}
           type="button"
@@ -153,7 +147,7 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
           <label className="grid gap-2 text-sm font-medium text-ink">
             6 位验证码
             <input
-              className="rounded-md border border-line bg-paper px-3 py-2"
+              className="ui-input tracking-[0.25em]"
               inputMode="numeric"
               maxLength={6}
               onChange={(event) => setVerificationCode(event.target.value)}
@@ -161,7 +155,7 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
             />
           </label>
           <button
-            className="w-fit rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="ui-button-primary w-full"
             disabled={submitting || verificationCode.length !== 6}
             onClick={completeAuth}
             type="button"
@@ -171,7 +165,8 @@ export function AuthFlowForm({ mode, nextPath = "/account" }: AuthFlowFormProps)
         </div>
       ) : null}
 
-      {message ? <p className="mt-4 text-sm leading-6 text-muted">{message}</p> : null}
+      {message ? <p className="mt-4 rounded-md border border-line bg-paper p-3 text-sm leading-6 text-muted" role="status">{message}</p> : null}
+      <div className="mt-6 flex items-start gap-2 border-t border-line pt-5 text-xs leading-5 text-muted"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-success" size={16} weight="fill" /><span>保留本地验证码、CSRF 与会话保护；真实短信、邮件和微信服务尚未接入。</span></div>
     </section>
   );
 }

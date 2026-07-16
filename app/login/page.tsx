@@ -1,25 +1,15 @@
-import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
+import Link from "next/link";
 import { AuthFlowForm } from "@/components/auth/auth-flow-form";
+import { PageShell } from "@/components/layout/page-shell";
 
-type LoginPageProps = {
-  searchParams: Promise<{ next?: string }>;
-};
+type LoginPageProps = { searchParams: Promise<{ next?: string }> };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { next } = await searchParams;
-
   return (
-    <PageShell
-      actions={
-        <>
-          <PrimaryLink href="/account">进入个人中心骨架</PrimaryLink>
-          <SecondaryLink href="/register">注册</SecondaryLink>
-        </>
-      }
-      description="手机号和邮箱使用一次性验证码；当前由本地测试 provider 交付，真实短信、邮件和微信服务在 T017 接入。"
-      title="登录页"
-    >
+    <PageShell compact description="使用邮箱或手机号验证码登录，继续浏览购买记录与上传者工作区。" eyebrow="Welcome back" title="登录源素库">
       <AuthFlowForm mode="login" nextPath={next} />
+      <p className="mt-5 text-center text-sm text-muted">还没有账号？ <Link className="font-semibold text-brand hover:text-brand-dark" href="/register">注册购买用户</Link></p>
     </PageShell>
   );
 }
