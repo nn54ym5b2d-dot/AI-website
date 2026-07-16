@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v2.2
+版本：v2.3
 日期：2026-07-16
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
@@ -18,7 +18,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（In Progress；方向 A/方向 1 已选；第二阶段原型开发中） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T009A | #21（Review；方向 A 原型草稿 PR #24） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -300,7 +300,7 @@ T009
 - GitHub Actions `verify` 通过。
 
 备注：
-- GitHub Issue #21 已进入第二阶段；本地和 Project 状态均为 In Progress；Robert 已选择方向 A（方向 1）。
+- GitHub Issue #21 的第二阶段已完成；本地状态为 Review，Project 保持 In Progress，草稿 PR #24 等待 Robert 审阅。
 - 设计简报和第一轮参考网站已确认，详细借鉴内容与避免照搬项见 `docs/视觉设计基线.md` 第 3、5 节。
 - 第一阶段 A/B/C 已完成；第二阶段只把方向 A 转为六组可运行原型，不接真实业务服务。
 - T009A 验收完成后，T010 才从 Blocked 调整为 Ready。
