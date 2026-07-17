@@ -10,7 +10,6 @@ export function SiteFooter() {
           <p className="mt-3 text-xs">第二阶段可交互视觉原型 · 当前素材与经营数据均为演示。</p>
         </div>
         <nav aria-label="辅助入口" className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-          <Link className="hover:text-ink" href="/register">注册</Link>
           <Link className="hover:text-ink" href="/admin">管理后台</Link>
           <Link className="hover:text-ink" href="/observer">观察员入口</Link>
         </nav>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, MagnifyingGlass, UploadSimple, UserCircle, X } from "@phosphor-icons/react";
+import { List, UploadSimple, UserCircle, X } from "@phosphor-icons/react";
 import { useState } from "react";
 
 const navItems = [
@@ -38,12 +38,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link aria-label="搜索素材" className="rounded-md p-2.5 text-muted transition hover:bg-paper hover:text-ink" href="/search">
-            <MagnifyingGlass aria-hidden="true" size={20} />
-          </Link>
           <Link className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-muted hover:bg-paper hover:text-ink" href="/login">
             <UserCircle aria-hidden="true" size={19} />
             登录
+          </Link>
+          <Link className="ui-button-secondary px-4" href="/register">
+            注册
           </Link>
           <Link className="ui-button-primary min-h-10 px-4" href="/upload">
             <UploadSimple aria-hidden="true" size={17} weight="bold" />
@@ -73,8 +73,9 @@ export function SiteHeader() {
             <Link className="rounded-md px-3 py-3 text-sm font-medium text-ink hover:bg-paper" href="/search" onClick={() => setOpen(false)}>
               搜索素材
             </Link>
-            <div className="mt-2 grid grid-cols-2 gap-2 border-t border-line pt-4">
+            <div className="mt-2 grid grid-cols-3 gap-2 border-t border-line pt-4">
               <Link className="ui-button-secondary" href="/login" onClick={() => setOpen(false)}>登录</Link>
+              <Link className="ui-button-secondary" href="/register" onClick={() => setOpen(false)}>注册</Link>
               <Link className="ui-button-primary" href="/upload" onClick={() => setOpen(false)}>上传素材</Link>
             </div>
           </nav>
