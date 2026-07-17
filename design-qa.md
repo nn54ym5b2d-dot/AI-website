@@ -1,6 +1,6 @@
 # Design QA：T009A 方向 A / 方向 1
 
-日期：2026-07-16
+日期：2026-07-16（最终测试复核：2026-07-17）
 目标：`artifacts/t009a/visual-directions/a-professional-creative-marketplace.png`
 对照：`artifacts/t009a/qa/direction-a-vs-home-desktop.png`
 
@@ -40,8 +40,8 @@
 - [x] 1280px 桌面页面和 390px 手机真实视口的截图与交互检查。
 - [x] 选中方向与首页实现并排对比，P1/P2 可见差异已迭代修正。
 - [x] `npm run lint`、`npm run typecheck`、`npm run test:unit` 和 `npm run build`。
-- [ ] 完整本地 `npm test`：当前环境无 Docker Compose / PostgreSQL 测试库，由 GitHub Actions 的 PostgreSQL service 补充验证。
-- [ ] GitHub Actions `verify`：推送草稿 PR 后检查。
+- [x] 完整本地 `npm test`：Docker Compose PostgreSQL 16 为 `healthy`；隔离的 `yuansu_test` 已完成 reset、migration、seed 和真实身份 API 测试，10/10 通过。
+- [x] GitHub Actions `verify`：PR #24 检查通过。
 
 ## 非阻塞项
 
