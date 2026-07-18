@@ -1,46 +1,14 @@
-import Link from "next/link";
-import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
+import { MaterialExplorer } from "@/components/materials/material-explorer";
+import { demoAssets } from "@/lib/domain/demo-content";
 
-export default function SearchPage() {
+type SearchPageProps = { searchParams: Promise<{ q?: string; category?: string }> };
+
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const { q = "", category = "全部" } = await searchParams;
   return (
-    <PageShell
-      actions={<SecondaryLink href="/materials/demo-asset">查看详情骨架</SecondaryLink>}
-      description="搜索结果页承接关键词搜索和筛选。当前只定义筛选栏、结果列表和详情跳转，不连接真实搜索服务。"
-      title="搜索结果页"
-    >
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="rounded-lg border border-line bg-white p-5">
-          <h2 className="text-base font-semibold text-ink">筛选条件</h2>
-          <div className="mt-4 grid gap-3 text-sm text-muted">
-            {["关键词", "素材类型", "价格区间", "上架时间", "排序"].map((filter) => (
-              <div className="rounded-md border border-line bg-paper p-3" key={filter}>
-                {filter}
-              </div>
-            ))}
-          </div>
-        </aside>
-        <section className="rounded-lg border border-line bg-white p-5">
-          <h2 className="text-base font-semibold text-ink">结果列表骨架</h2>
-          <div className="mt-4 grid gap-3">
-            {[1, 2, 3].map((item) => (
-              <Link
-                className="grid gap-3 rounded-md border border-line bg-paper p-4 text-sm md:grid-cols-[120px_1fr_auto]"
-                href="/materials/demo-asset"
-                key={item}
-              >
-                <span className="flex aspect-video items-center justify-center rounded border border-line bg-white text-muted">
-                  预览
-                </span>
-                <span>
-                  <span className="block font-medium text-ink">示例素材 {item}</span>
-                  <span className="mt-1 block text-muted">类型、认证状态、用途说明摘要。</span>
-                </span>
-                <span className="font-medium text-brand">查看详情</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </div>
+    <PageShell description="用关键词、素材类型与认证状态缩小范围；当前筛选只作用于页面内演示素材。" eyebrow="Search" title="搜索素材">
+      <MaterialExplorer assets={demoAssets} initialCategory={category} initialQuery={q} />
     </PageShell>
   );
 }

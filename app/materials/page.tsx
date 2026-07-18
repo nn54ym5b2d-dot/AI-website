@@ -1,41 +1,33 @@
-import Link from "next/link";
-import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
-import { assetTypes } from "@/lib/domain/project";
+import { Buildings, Cube, UserFocus } from "@phosphor-icons/react/ssr";
+import { PageShell, PrimaryLink } from "@/components/layout/page-shell";
+import { MaterialGrid } from "@/components/materials/material-card";
+import { DemoNotice } from "@/components/ui/demo-notice";
+import { demoAssets } from "@/lib/domain/demo-content";
+
+const categories = [
+  { label: "人物", count: "128", icon: UserFocus },
+  { label: "物件/道具", count: "67", icon: Cube },
+  { label: "场景", count: "214", icon: Buildings }
+];
 
 export default function MaterialsPage() {
   return (
-    <PageShell
-      actions={
-        <>
-          <PrimaryLink href="/search">搜索素材</PrimaryLink>
-          <SecondaryLink href="/materials/demo-asset">查看详情骨架</SecondaryLink>
-        </>
-      }
-      description="第一版素材浏览按人物、物件/道具、场景三类展开。当前只建立分类和列表骨架，真实素材数据将在 T010 接入本地数据库和 API。"
-      title="素材分类页"
-    >
-      <div className="grid gap-8">
-        <section className="grid gap-4 md:grid-cols-3">
-          {assetTypes.map((asset) => (
-            <article className="rounded-lg border border-line bg-white p-5" key={asset.name}>
-              <h2 className="text-base font-semibold text-ink">{asset.name}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{asset.rule}</p>
-              <Link className="mt-4 block text-sm font-medium text-brand" href="/search">
-                查看该类素材
-              </Link>
-            </article>
+    <PageShell actions={<PrimaryLink href="/search">搜索与筛选</PrimaryLink>} description="按人物、物件/道具、场景浏览已认证素材；价格与授权规则在浏览阶段清晰可见。" eyebrow="Asset library" title="发现适合项目的创作素材">
+      <div className="grid gap-10">
+        <section aria-label="素材分类" className="grid gap-3 sm:grid-cols-3">
+          {categories.map(({ icon: Icon, ...category }) => (
+            <a className="ui-panel flex items-center gap-4 p-5 transition hover:border-brand/40 hover:shadow-card" href={`/search?category=${encodeURIComponent(category.label)}`} key={category.label}>
+              <span className="grid size-11 place-items-center rounded-full bg-brand-soft text-brand"><Icon aria-hidden="true" size={22} weight="duotone" /></span>
+              <span><strong className="block text-sm text-ink">{category.label}</strong><span className="mt-1 block text-xs text-muted">{category.count} 条演示统计</span></span>
+            </a>
           ))}
         </section>
-
-        <section className="rounded-lg border border-line bg-white p-5">
-          <h2 className="text-xl font-semibold text-ink">列表信息结构</h2>
-          <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            {["素材封面", "素材类型", "认证状态", "价格和购买入口"].map((item) => (
-              <div className="rounded-md border border-line bg-paper p-4 text-sm text-muted" key={item}>
-                {item}
-              </div>
-            ))}
+        <section>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div><h2 className="text-xl font-bold text-ink">最新素材</h2><p className="mt-1 text-sm text-muted">统一采用 4:3 预览比例，减少浏览跳动。</p></div>
+            <DemoNotice />
           </div>
+          <MaterialGrid assets={demoAssets} />
         </section>
       </div>
     </PageShell>

@@ -44,27 +44,29 @@ export function InviteActivationForm() {
   }
 
   return (
-    <section className="rounded-lg border border-line bg-white p-5">
+    <section className="ui-panel p-5 sm:p-6">
       <h2 className="text-xl font-semibold text-ink">激活上传者身份</h2>
       <p className="mt-2 text-sm leading-6 text-muted">
         第一版必须使用有效邀请码。全新本地测试数据的邀请码见 README，不适用于生产环境。
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <input
-          className="rounded-md border border-line bg-paper px-3 py-2 text-sm"
+          aria-label="邀请码"
+          className="ui-input"
           onChange={(event) => setCode(event.target.value)}
           placeholder="邀请码"
           value={code}
         />
         <input
-          className="rounded-md border border-line bg-paper px-3 py-2 text-sm"
+          aria-label="上传者展示名称"
+          className="ui-input"
           onChange={(event) => setDisplayName(event.target.value)}
           placeholder="上传者展示名称"
           value={displayName}
         />
       </div>
       <button
-        className="mt-4 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        className="ui-button-primary mt-4"
         disabled={submitting || !code || displayName.length < 2}
         onClick={activate}
         type="button"

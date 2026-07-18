@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { RouteAudience } from "@/lib/domain/navigation";
 import { getAuthConfig } from "@/lib/auth/config";
+import { authEntryHref } from "@/lib/auth/redirect";
 import { getSessionAccessByToken, toRoleContext } from "@/lib/auth/session";
 import {
   canAccessAdmin,
@@ -19,7 +20,7 @@ export async function getPageAccess() {
 export async function requirePageAccess(nextPath: string) {
   const access = await getPageAccess();
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+    redirect(authEntryHref(nextPath));
   }
   return access;
 }

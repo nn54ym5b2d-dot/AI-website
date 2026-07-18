@@ -15,7 +15,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "tsx scripts/run-tests.ts",
-    "test:unit": "node --import tsx --test tests/auth-roles.test.ts tests/navigation.test.ts",
+    "test:unit": "node --import tsx --test tests/auth-roles.test.ts tests/auth-safety.test.ts tests/navigation.test.ts",
     "test:integration": "tsx scripts/run-tests.ts",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
@@ -25,6 +25,7 @@
     "auth:outbox": "tsx scripts/read-local-auth-outbox.ts"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",

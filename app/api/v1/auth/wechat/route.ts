@@ -7,7 +7,9 @@ import { setSessionCookie } from "@/lib/auth/session";
 const wechatSchema = z.object({
   code: z.string().min(1).max(500),
   redirectUri: z.url(),
-  acceptedTermsVersion: z.string().min(1).max(50).optional()
+  acceptedTermsVersion: z.string().min(1).max(50).optional(),
+  phoneChallengeId: z.uuid().optional(),
+  phoneVerificationCode: z.string().regex(/^\d{6}$/).optional()
 });
 
 export async function POST(request: Request) {

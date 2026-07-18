@@ -1,7 +1,12 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
-import { hashContent, hashInviteCode } from "../lib/auth/crypto";
+import { hashContent } from "../lib/auth/crypto";
+import {
+  ensureLocalUploaderInvite,
+  LEGACY_LOCAL_UPLOADER_INVITE_CODE,
+  LOCAL_UPLOADER_INVITE_CODE
+} from "../lib/auth/local-invite-seed";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -13,7 +18,6 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
 const TEST_TERMS_VERSION = "test-2026-07-15";
 const TEST_TERMS_CONTENT =
   "本条款只用于源素库本地开发和自动化测试，不是正式平台条款，也不适用于真实交易。";
-export const LOCAL_UPLOADER_INVITE_CODE = "YSK-LOCAL-UPLOADER-2026";
 
 async function ensureIdentityUser(input: {
   email: string;
@@ -106,22 +110,13 @@ async function main() {
     }
   });
 
-  await prisma.inviteCode.upsert({
-    where: { codeHash: hashInviteCode(LOCAL_UPLOADER_INVITE_CODE) },
-    update: {
-      displayPrefix: "YSK-LOCAL",
-      status: "unused",
-      usedByUserId: null,
-      usedAt: null,
-      expiresAt: new Date("2099-12-31T23:59:59.000Z")
-    },
-    create: {
-      codeHash: hashInviteCode(LOCAL_UPLOADER_INVITE_CODE),
-      displayPrefix: "YSK-LOCAL",
-      status: "unused",
-      createdByUserId: admin.id,
-      expiresAt: new Date("2099-12-31T23:59:59.000Z")
-    }
+  await ensureLocalUploaderInvite(prisma, {
+    code: LEGACY_LOCAL_UPLOADER_INVITE_CODE,
+    createdByUserId: admin.id
+  });
+  await ensureLocalUploaderInvite(prisma, {
+    code: LOCAL_UPLOADER_INVITE_CODE,
+    createdByUserId: admin.id
   });
 }
 
