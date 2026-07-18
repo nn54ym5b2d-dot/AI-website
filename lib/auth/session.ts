@@ -194,6 +194,33 @@ export async function issueCsrfToken(access: SessionAccess) {
   return { csrfToken, expiresAt };
 }
 
+function isLoopbackHostname(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
+
+function isAllowedRequestOrigin(requestOrigin: string | null, expectedOrigin: string) {
+  if (requestOrigin === expectedOrigin) {
+    return true;
+  }
+
+  if (!requestOrigin || process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  try {
+    const requestUrl = new URL(requestOrigin);
+    const expectedUrl = new URL(expectedOrigin);
+    return (
+      requestUrl.protocol === expectedUrl.protocol &&
+      requestUrl.port === expectedUrl.port &&
+      isLoopbackHostname(requestUrl.hostname) &&
+      isLoopbackHostname(expectedUrl.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function validateCsrf(request: Request, access: SessionAccess) {
   const config = getAuthConfig();
   const requestOrigin = request.headers.get("origin");
@@ -201,7 +228,7 @@ export function validateCsrf(request: Request, access: SessionAccess) {
   const csrfToken = request.headers.get("x-csrf-token");
 
   if (
-    requestOrigin !== expectedOrigin ||
+    !isAllowedRequestOrigin(requestOrigin, expectedOrigin) ||
     !csrfToken ||
     !access.csrfTokenHash ||
     !access.csrfExpiresAt ||

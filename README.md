@@ -5,9 +5,10 @@ AI 数字素材交易平台 MVP。
 ## 当前阶段
 
 - T009 用户注册登录和角色基础已完成并通过 PR #19 合并。
-- T009A `源素库 MVP 视觉设计基线与核心页面原型` 已创建为 GitHub Issue #21，并已加入 GitHub Project #1；项目资料同步见 PR #22。
-- T009A 当前为 `Ready`；T010 在视觉基线验收完成前保持 `Blocked`。
-- 本轮只建立设计任务和资料，不代表三套视觉方向或正式页面视觉已经完成。
+- T009A `源素库 MVP 视觉设计基线与核心页面原型` 已完成方向 A 六组响应式原型和统一登录/注册修订，当前在草稿 PR #24 等待 Review。
+- 页面顶部直接展示手机号与微信，不显示“主要方式”；邮箱位于下方独立区域。邮箱注册和首次微信登录必须绑定手机号，注册昵称由服务端生成，首版不接 QQ。
+- 本地 PostgreSQL 完整测试 14/14 以及 lint、typecheck、build 已通过；真实短信、邮件和微信 OAuth/二维码仍在 T017 接入。
+- T010 在 T009A 验收合并前保持 `Blocked`。
 
 ## 当前技术方向
 
@@ -39,7 +40,7 @@ npm run build
 2. 运行 `npm install` 安装依赖并生成 Prisma Client。
 3. 运行 `npm run db:up` 启动隔离的 PostgreSQL 16。项目默认使用本机端口 `54329`，避免占用常见的 `5432`。
 4. 运行 `npm run db:migrate` 应用已审查的 migration，再运行 `npm run db:seed` 载入非真实最小测试数据。
-5. 运行 `npm run dev`，打开 `http://localhost:3000/register` 或 `/login`。
+5. 运行 `npm run dev`，打开统一认证入口 `http://localhost:3000/login`。旧 `/register` 会安全转向该页面。
 
 手机号和邮箱验证码由本地测试 provider 随机生成，不会写入普通日志。请求验证码后，运行：
 
@@ -47,7 +48,7 @@ npm run build
 npm run auth:outbox
 ```
 
-该命令只读取被 Git 忽略的 `.local/auth-outbox.jsonl`。本地测试上传者邀请码为 `YSK-LOCAL-UPLOADER-2026`；它不是生产邀请码。
+该命令只读取被 Git 忽略的 `.local/auth-outbox.jsonl`。当前可用的本地测试上传者邀请码为 `YSK-LOCAL-UPLOADER-2026-02`；它不是生产邀请码。旧测试码如已关联上传者会永久保持已使用，重复运行 `npm run db:seed` 只补充缺失测试码，不会把已使用、禁用或过期的邀请码重新开放。
 
 完整测试会先检查数据库名必须以 `_test` 结尾，再重置隔离的 `yuansu_test` 数据库：
 

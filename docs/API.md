@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v2.4
-日期：2026-07-15
-状态：T008 接口合同已批准；T009 身份接口已实现并通过 PR #19 合并
+版本：v2.7
+日期：2026-07-18
+状态：T008 接口合同已批准；T009 身份基础已通过 PR #19 合并；手机号主身份与邮箱/微信绑定规则按 Robert 最新决定修订
 
 ## 1. 文档定位
 
@@ -165,6 +165,7 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 | `CHALLENGE_INVALID` | 422 | 手机或邮箱验证码无效 |
 | `CHALLENGE_EXPIRED` | 422 | 验证挑战已过期 |
 | `TERMS_ACCEPTANCE_REQUIRED` | 422 | 新用户未接受当前有效条款版本 |
+| `PHONE_BINDING_REQUIRED` | 422 | 邮箱注册或首次微信登录尚未完成手机号验证绑定 |
 | `INVITE_CODE_INVALID` | 422 | 邀请码不存在或格式错误 |
 | `INVITE_CODE_USED` | 409 | 邀请码已使用 |
 | `INVITE_CODE_DISABLED` | 409 | 邀请码已禁用 |
@@ -187,23 +188,25 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 
 ## 4. 用户登录与邀请码激活
 
-手机号和邮箱第一版统一使用验证码挑战；微信使用 OAuth 临时 `code`。短信、邮件和微信开放平台尚未接入，开发时必须通过 provider adapter 隔离，不得在代码中写入真实密钥或固定万能验证码。
+手机号和邮箱第一版统一使用验证码挑战；微信使用 OAuth 临时 `code`。页面采用“验证即登录/注册”：同一入口验证后先查已有身份，已存在则登录，不存在才进入建号或绑定流程。手机号是新账号的主身份：手机号验证后可直接创建账号；新邮箱必须同时通过邮箱和手机号两个注册挑战；首次微信使用必须通过手机号注册挑战，已绑定微信的账号可直接登录。短信、邮件和微信开放平台尚未接入，开发时必须通过 provider adapter 隔离，不得在代码中写入真实密钥或固定万能验证码。
 
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `GET /api/v1/legal-documents/current` | 公开 | `type: terms_of_service\|privacy_policy\|commercial_license` | 当前生效文档的 `id`、`version`、`title`、`effectiveAt` 和公开正文/地址 | `RESOURCE_NOT_FOUND` |
 | `POST /api/v1/auth/challenges` | 公开 | `method: phone\|email`、`identifier`、`purpose: register\|login` | `challengeId`、`expiresAt`、`resendAfterSeconds`；不返回验证码 | `VALIDATION_ERROR`、`RATE_LIMITED`、`UPSTREAM_UNAVAILABLE` |
-| `POST /api/v1/auth/register` | 公开 | `challengeId`、`verificationCode`、`displayName`、`acceptedTermsVersion` | 设置会话 Cookie；返回 `user`、`roles` | `CHALLENGE_INVALID`、`CHALLENGE_EXPIRED`、`RESOURCE_CONFLICT` |
-| `POST /api/v1/auth/login` | 公开 | `challengeId`、`verificationCode` | 设置会话 Cookie；返回 `user`、`roles` | `CHALLENGE_INVALID`、`SESSION_INVALID` |
-| `POST /api/v1/auth/wechat` | 公开 | `code`、`redirectUri`；创建新用户时必填 `acceptedTermsVersion` | 创建或登录账号，设置会话 Cookie；返回 `user`、`roles`、`isNewUser` | `TERMS_ACCEPTANCE_REQUIRED`、`VALIDATION_ERROR`、`UPSTREAM_UNAVAILABLE` |
+| `POST /api/v1/auth/register` | 公开 | `purpose=register` 主验证的 `challengeId`、`verificationCode`；创建新账号时必填 `acceptedTermsVersion`；新邮箱另需 `phoneChallengeId`、`phoneVerificationCode` | 统一登录/注册：已有手机号或邮箱返回 `200` 并登录；新手机号返回 `201` 并建号；新邮箱验证后要求绑定手机号，手机号已有账号时绑定而不重复建号；设置会话 Cookie并返回 `isNewUser` | `CHALLENGE_INVALID`、`CHALLENGE_EXPIRED`、`TERMS_ACCEPTANCE_REQUIRED`、`PHONE_BINDING_REQUIRED`、`RESOURCE_CONFLICT` |
+| `POST /api/v1/auth/login` | 公开 | `purpose=login` 的 `challengeId`、`verificationCode` | 保留给旧客户端和内部测试的明确登录接口；设置会话 Cookie并返回 `user`、`roles` | `CHALLENGE_INVALID`、`SESSION_INVALID` |
+| `POST /api/v1/auth/wechat` | 公开 | `code`、`redirectUri`；首次使用另需 `phoneChallengeId`、`phoneVerificationCode`；创建新用户时必填 `acceptedTermsVersion` | 已绑定微信直接登录；首次使用把微信绑定到已验证手机号对应账号，手机号不存在时才创建账号；设置会话 Cookie并返回 `isNewUser` | `PHONE_BINDING_REQUIRED`、`TERMS_ACCEPTANCE_REQUIRED`、`RESOURCE_CONFLICT`、`UPSTREAM_UNAVAILABLE` |
 | `GET /api/v1/auth/csrf` | 已登录 | 无 | `csrfToken`、`expiresAt` | `AUTH_REQUIRED` |
 | `POST /api/v1/auth/logout` | 已登录 | 无 | 清除当前会话 Cookie，返回 `loggedOut: true` | `CSRF_VALIDATION_FAILED` |
 | `GET /api/v1/me` | 已登录 | 无 | 当前用户非敏感资料、有效角色、上传者/管理员/观察员摘要 | `AUTH_REQUIRED`、`SESSION_INVALID` |
 | `POST /api/v1/invites/activate` | 已登录，尚非上传者 | `code`、`uploaderDisplayName` | `uploaderProfile`、更新后的 `roles` | `INVITE_CODE_*`、`UPLOADER_ALREADY_ACTIVE` |
 
-邀请码激活必须在一个事务中锁定邀请码、写入使用者、创建 `uploader_profiles` 并增加 `uploader` 角色，避免同一邀请码并发使用。接口不返回邀请码创建者、其他使用者或内部备注。
+邀请码激活必须在一个事务中锁定邀请码、写入使用者、创建 `uploader_profiles` 并增加 `uploader` 角色，避免同一邀请码并发使用。邀请码只要已有 `usedByUserId` 或 `uploaderProfile` 关联，即使遗留状态错误地显示为 `unused`，也必须返回 `INVITE_CODE_USED`，不得继续写入并泄漏数据库唯一约束错误。接口不返回邀请码创建者、其他使用者或内部备注。
 
-手机号/邮箱注册和微信首次创建账号都必须在同一事务中记录当前条款版本的接受事实；已有用户登录不重复写入，但当未来条款需要重新同意时，应走独立确认流程，不能伪造历史接受时间。
+手机号注册、邮箱加手机号注册和微信加手机号首次创建账号都必须在同一事务中记录当前条款版本的接受事实。邮箱、手机号或微信身份之间的绑定必须在验证码消费和身份唯一性检查的同一事务中完成；如果两种已验证身份分别属于不同账号，返回冲突并停止自动合并。已有用户登录不重复写入，但当未来条款需要重新同意时，应走独立确认流程，不能伪造历史接受时间。
+
+注册表单不再接收用户填写的 `displayName`。手机号或邮箱首次建号时由服务端生成 `源素用户·XXXXXXXX` 格式的随机昵称；微信首次建号优先使用经清理和长度限制的授权昵称，未提供有效昵称时同样随机生成。昵称不是登录凭证、允许重复；已有账号绑定邮箱或微信时不得覆盖原昵称。
 
 ## 5. 公开素材浏览
 

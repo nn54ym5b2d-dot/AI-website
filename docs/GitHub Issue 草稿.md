@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v2.4
-日期：2026-07-17
+版本：v2.6
+日期：2026-07-18
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -18,7 +18,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
 | T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（Review；方向 A 原型草稿 PR #24；本地完整测试 10/10 和 `verify` 通过） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T009A | #21（Review；方向 A 原型和单一认证入口、差异化回跳、登录态头部修订见草稿 PR #24；本轮 QA、真实登录回跳和完整检查通过） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（Blocked，等待 T009A） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
@@ -261,12 +261,16 @@ T009
 - 完成首页、素材浏览/搜索、素材详情、登录/注册、个人中心/上传、管理后台六组代表页面的响应式可运行原型。
 - 至少覆盖约 1440px 桌面端和约 390px 手机端。
 - 核心导航、搜索筛选、标签切换、登录注册表单和主要按钮可操作；使用明确标记的非真实演示素材与数据。
+- 按 Robert 最新决定将手机号与微信作为登录/注册主要入口，把邮箱放在下方独立区域；邮箱注册和首次微信登录必须验证绑定手机号；首版不做 QQ。
+- 页面删除“主要方式”和注册“显示名称”；手机号、邮箱统一为验证后由服务端判断登录或注册，普通新账号昵称由服务端随机生成，微信新账号优先使用经清理的授权昵称。
+- 公开头部把登录与注册合并为“登录/注册”；普通入口认证成功回首页并显示用户图标/昵称，上传入口认证成功进入 `/upload`。非上传者在该页先激活邀请码，已有上传者直接进入提交表单。
+- 手机号和微信入口标签只写“登录”；手机号状态的条款与主按钮位于“其他方式”分隔线之前，邮箱状态的动作仍跟随邮箱字段；`/register` 仅作兼容跳转。
 - 形成可供 T010-T016 复用的公共 UI 组件和 `docs/视觉设计基线.md`。
 
 不做范围：
 - 不接入素材数据库、真实素材查询 API、支付、COS、上传、审核、下载或认证服务。
 - 不改变 T006 已确认的路由、角色入口和信息结构。
-- 不改变 T009 的身份、Cookie、CSRF、邀请码和角色权限逻辑。
+- 不削弱 T009 的 Cookie、CSRF、验证码哈希、条款审计、邀请码和角色权限安全边界；手机号主身份与邮箱/微信绑定规则是 Robert 2026-07-17 批准的范围变更。
 - 不完成所有后台子页面，不制作完整企业品牌手册，不要求本任务确定最终 Logo。
 - 不让三套视觉方向同时进入开发；必须先选定一套主方向。
 - 不把演示数据或生成素材描述为真实业务数据或已接通外部服务。
@@ -301,7 +305,8 @@ T009
 
 备注：
 - GitHub Issue #21 的第二阶段已完成；本地状态为 Review，Project 保持 In Progress，草稿 PR #24 等待 Robert 审阅。
-- 2026-07-17 复核：Docker Compose PostgreSQL 16 状态 `healthy`，完整 `npm test` 10/10 通过，PR #24 GitHub Actions `verify` 通过。
+- 2026-07-17 最新复核：单一认证入口、普通/上传来源回跳、登录态头部和上传者激活衔接已完成；本轮 Docker Compose PostgreSQL 完整 `npm test` 14/14、lint、typecheck、build、817×735 桌面、390×844 手机、真实本地登录回跳与设计 QA 全部通过。
+- 2026-07-18 修复本地重复 seed 把已使用邀请码错误恢复为未使用、继而触发上传者资料唯一约束 500 的问题；旧上传者数据保留，新测试码独立创建，激活接口增加遗留关联防御，PostgreSQL 14/14 测试通过。
 - 设计简报和第一轮参考网站已确认，详细借鉴内容与避免照搬项见 `docs/视觉设计基线.md` 第 3、5 节。
 - 第一阶段 A/B/C 已完成；第二阶段只把方向 A 转为六组可运行原型，不接真实业务服务。
 - T009A 验收完成后，T010 才从 Blocked 调整为 Ready。

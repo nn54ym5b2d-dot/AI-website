@@ -67,18 +67,18 @@ export const publicRoutes: RouteDefinition[] = [
     slug: "demo-asset"
   },
   {
-    title: "登录页",
+    title: "登录/注册页",
     href: "/login",
-    description: "后续承接手机号、邮箱、微信组合登录。",
+    description: "统一认证入口；手机号与微信位于顶部，邮箱作为下方辅助方式。",
     priority: "P0",
     roleEntry: "所有用户",
     audiences: ["public"]
   },
   {
-    title: "注册页",
+    title: "旧注册链接",
     href: "/register",
-    description: "购买用户注册；上传者通过邀请码激活上传权限。",
-    priority: "P0",
+    description: "兼容旧链接并安全转向统一登录/注册页。",
+    priority: "P1",
     roleEntry: "购买用户、上传者",
     audiences: ["public", "buyer", "uploader"]
   },

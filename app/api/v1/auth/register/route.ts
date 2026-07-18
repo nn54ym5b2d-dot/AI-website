@@ -1,14 +1,15 @@
 import { z } from "zod";
 import { apiErrorResponse, apiSuccess, createRequestId, readJson } from "@/lib/api/http";
 import { parseInput } from "@/lib/api/validation";
-import { registerWithChallenge } from "@/lib/auth/service";
+import { getUserRoleSummary, registerWithChallenge } from "@/lib/auth/service";
 import { setSessionCookie } from "@/lib/auth/session";
 
 const registerSchema = z.object({
   challengeId: z.uuid(),
   verificationCode: z.string().regex(/^\d{6}$/),
-  displayName: z.string().min(2).max(40),
-  acceptedTermsVersion: z.string().min(1).max(50)
+  phoneChallengeId: z.uuid().optional(),
+  phoneVerificationCode: z.string().regex(/^\d{6}$/).optional(),
+  acceptedTermsVersion: z.string().min(1).max(50).optional()
 });
 
 export async function POST(request: Request) {
@@ -16,6 +17,7 @@ export async function POST(request: Request) {
   try {
     const input = parseInput(registerSchema, await readJson(request));
     const result = await registerWithChallenge({ ...input, requestId });
+    const roleSummary = await getUserRoleSummary(result.user.id);
     const response = apiSuccess(
       {
         user: {
@@ -24,11 +26,11 @@ export async function POST(request: Request) {
           avatarUrl: result.user.avatarUrl,
           primaryLoginMethod: result.user.primaryLoginMethod
         },
-        roles: result.roles,
-        adminRoles: []
+        ...roleSummary,
+        isNewUser: result.isNewUser
       },
       requestId,
-      { status: 201 }
+      { status: result.isNewUser ? 201 : 200 }
     );
     setSessionCookie(response, result.session.token, result.session.expiresAt);
     return response;

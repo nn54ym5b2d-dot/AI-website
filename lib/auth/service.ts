@@ -18,6 +18,7 @@ import {
   getAuthProvider,
   type AuthProviderAdapter
 } from "@/lib/auth/provider";
+import { selectInitialDisplayName } from "@/lib/auth/display-name";
 import { createSession, type SessionAccess } from "@/lib/auth/session";
 import { getPrisma } from "@/lib/db/prisma";
 
@@ -40,9 +41,14 @@ function normalizeIdentifier(method: ChallengeMethod, identifier: string) {
   return phone;
 }
 
-async function findCurrentTerms(version?: string) {
+type LegalDocumentLookup = Pick<Prisma.TransactionClient, "legalDocumentVersion">;
+
+async function findCurrentTerms(
+  version?: string,
+  database: LegalDocumentLookup = getPrisma()
+) {
   const now = new Date();
-  const terms = await getPrisma().legalDocumentVersion.findFirst({
+  const terms = await database.legalDocumentVersion.findFirst({
     where: {
       documentType: "terms_of_service",
       ...(version ? { version } : {}),
@@ -162,48 +168,125 @@ async function consumeChallenge(
   }
 }
 
-function contactFields(provider: AuthProvider, identifier: string) {
-  return provider === "email" ? { email: identifier } : provider === "phone" ? { phone: identifier } : {};
-}
-
 function providerSubject(provider: AuthProvider, identifier: string) {
   return provider === "email" ? identifier.toLowerCase() : identifier;
 }
 
-async function createRegisteredUser(input: {
+type VerifiedIdentity = {
   provider: AuthProvider;
   identifier: string;
-  displayName: string;
-  acceptedTermsVersion: string;
+};
+
+function contactFields(identities: VerifiedIdentity[]) {
+  const email = identities.find((identity) => identity.provider === "email")?.identifier;
+  const phone = identities.find((identity) => identity.provider === "phone")?.identifier;
+  return {
+    ...(email ? { email } : {}),
+    ...(phone ? { phone } : {})
+  };
+}
+
+function identityKey(identity: VerifiedIdentity) {
+  return `${identity.provider}:${providerSubject(identity.provider, identity.identifier)}`;
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
+async function completeVerifiedRegistration(input: {
+  identities: VerifiedIdentity[];
+  primaryProvider: AuthProvider;
+  preferredDisplayName?: string;
+  acceptedTermsVersion?: string;
   source: string;
   requestId: string;
-  challengeId?: string;
+  challengeIds: string[];
 }) {
-  const terms = await findCurrentTerms(input.acceptedTermsVersion);
-  const displayName = input.displayName.trim();
-
-  if (displayName.length < 2 || displayName.length > 40) {
-    throw new ApiError(422, "VALIDATION_ERROR", "显示名称需为 2 到 40 个字符。 ");
-  }
-
   try {
     return await getPrisma().$transaction(async (transaction) => {
-      if (input.challengeId) {
-        await consumeChallenge(transaction, input.challengeId);
+      for (const challengeId of input.challengeIds) {
+        await consumeChallenge(transaction, challengeId);
       }
 
-      return transaction.user.create({
-        data: {
-          displayName,
-          primaryLoginMethod: input.provider,
-          ...contactFields(input.provider, input.identifier),
-          authIdentities: {
-            create: {
-              provider: input.provider,
-              providerSubject: providerSubject(input.provider, input.identifier),
+      const matchingIdentities = await transaction.authIdentity.findMany({
+        where: {
+          OR: input.identities.map((identity) => ({
+            provider: identity.provider,
+            providerSubject: providerSubject(identity.provider, identity.identifier)
+          }))
+        },
+        include: { user: true }
+      });
+      const matchingUserIds = new Set(matchingIdentities.map((identity) => identity.userId));
+
+      if (matchingUserIds.size > 1) {
+        throw new ApiError(409, "RESOURCE_CONFLICT", "邮箱与手机号已分别绑定不同账号，请联系客服处理。 ");
+      }
+
+      const existingIdentity = matchingIdentities[0];
+      if (existingIdentity) {
+        if (existingIdentity.user.status !== "active") {
+          throw new ApiError(401, "SESSION_INVALID", "账号当前不可登录。 ");
+        }
+
+        const existingByKey = new Map(matchingIdentities.map((identity) => [
+          identityKey({ provider: identity.provider, identifier: identity.providerSubject }),
+          identity
+        ]));
+        for (const identity of input.identities) {
+          const storedIdentity = existingByKey.get(identityKey(identity));
+          if (storedIdentity) {
+            if (!storedIdentity.isVerified) {
+              await transaction.authIdentity.update({
+                where: { id: storedIdentity.id },
+                data: { isVerified: true, verifiedAt: new Date() }
+              });
+            }
+            continue;
+          }
+          await transaction.authIdentity.create({
+            data: {
+              userId: existingIdentity.userId,
+              provider: identity.provider,
+              providerSubject: providerSubject(identity.provider, identity.identifier),
               isVerified: true,
               verifiedAt: new Date()
             }
+          });
+        }
+
+        const user = await transaction.user.update({
+          where: { id: existingIdentity.userId },
+          data: {
+            ...contactFields(input.identities),
+            ...(input.identities.some((identity) => identity.provider === "phone")
+              ? { primaryLoginMethod: "phone" as const }
+              : {}),
+            lastLoginAt: new Date()
+          }
+        });
+
+        return { user, isNewUser: false };
+      }
+
+      if (!input.acceptedTermsVersion) {
+        throw new ApiError(422, "TERMS_ACCEPTANCE_REQUIRED", "创建新账号前请接受当前有效的平台条款。 ");
+      }
+      const terms = await findCurrentTerms(input.acceptedTermsVersion, transaction);
+
+      const user = await transaction.user.create({
+        data: {
+          displayName: selectInitialDisplayName(input.preferredDisplayName),
+          primaryLoginMethod: input.primaryProvider,
+          ...contactFields(input.identities),
+          authIdentities: {
+            create: input.identities.map((identity) => ({
+              provider: identity.provider,
+              providerSubject: providerSubject(identity.provider, identity.identifier),
+              isVerified: true,
+              verifiedAt: new Date()
+            }))
           },
           roleMemberships: { create: { role: "buyer" } },
           termsAcceptances: {
@@ -215,10 +298,11 @@ async function createRegisteredUser(input: {
           }
         }
       });
+      return { user, isNewUser: true };
     });
   } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "P2002") {
-      throw new ApiError(409, "RESOURCE_CONFLICT", "该登录身份已注册。 ");
+    if (isUniqueConstraintError(error)) {
+      throw new ApiError(409, "RESOURCE_CONFLICT", "邮箱、手机号或第三方身份已绑定其他账号。 ");
     }
     throw error;
   }
@@ -227,23 +311,75 @@ async function createRegisteredUser(input: {
 export async function registerWithChallenge(input: {
   challengeId: string;
   verificationCode: string;
-  displayName: string;
-  acceptedTermsVersion: string;
+  acceptedTermsVersion?: string;
   requestId: string;
+  phoneChallengeId?: string;
+  phoneVerificationCode?: string;
 }) {
   const challenge = await verifyChallenge(input.challengeId, input.verificationCode, "register");
-  const user = await createRegisteredUser({
-    provider: challenge.provider,
-    identifier: challenge.identifier,
-    displayName: input.displayName,
-    acceptedTermsVersion: input.acceptedTermsVersion,
-    source: `${challenge.provider}_register`,
-    requestId: input.requestId,
-    challengeId: challenge.id
-  });
-  const session = await createSession(user.id);
+  if (challenge.provider !== "phone" && challenge.provider !== "email") {
+    throw new ApiError(422, "VALIDATION_ERROR", "注册验证方式无效。 ");
+  }
 
-  return { user, roles: ["buyer"] as const, session };
+  if (challenge.provider === "email") {
+    const existingEmailIdentity = await getPrisma().authIdentity.findUnique({
+      where: {
+        provider_providerSubject: {
+          provider: "email",
+          providerSubject: providerSubject("email", challenge.identifier)
+        }
+      }
+    });
+
+    if (existingEmailIdentity) {
+      const authentication = await completeVerifiedRegistration({
+        identities: [{ provider: "email", identifier: challenge.identifier }],
+        primaryProvider: "phone",
+        source: "email_authenticate",
+        requestId: input.requestId,
+        challengeIds: [challenge.id]
+      });
+      const session = await createSession(authentication.user.id);
+      return { ...authentication, session };
+    }
+
+    if (!input.phoneChallengeId || !input.phoneVerificationCode) {
+      throw new ApiError(422, "PHONE_BINDING_REQUIRED", "邮箱注册必须验证并绑定手机号。 ");
+    }
+    const phoneChallenge = await verifyChallenge(
+      input.phoneChallengeId,
+      input.phoneVerificationCode,
+      "register"
+    );
+    if (phoneChallenge.provider !== "phone") {
+      throw new ApiError(422, "PHONE_BINDING_REQUIRED", "邮箱注册必须使用手机号验证码完成绑定。 ");
+    }
+    const registration = await completeVerifiedRegistration({
+      identities: [
+        { provider: "phone", identifier: phoneChallenge.identifier },
+        { provider: "email", identifier: challenge.identifier }
+      ],
+      primaryProvider: "phone",
+      acceptedTermsVersion: input.acceptedTermsVersion,
+      source: "email_phone_authenticate",
+      requestId: input.requestId,
+      challengeIds: [challenge.id, phoneChallenge.id]
+    });
+    const session = await createSession(registration.user.id);
+    return { ...registration, session };
+  }
+
+  const registration = await completeVerifiedRegistration({
+    identities: [{ provider: "phone", identifier: challenge.identifier }],
+    primaryProvider: "phone",
+    acceptedTermsVersion: input.acceptedTermsVersion,
+    source: "phone_authenticate",
+    requestId: input.requestId,
+    challengeIds: [challenge.id]
+  });
+  const session = await createSession(registration.user.id);
+
+  return { ...registration, session };
 }
 
 export async function loginWithChallenge(input: {
@@ -281,6 +417,8 @@ export async function loginWithWechat(input: {
   code: string;
   redirectUri: string;
   acceptedTermsVersion?: string;
+  phoneChallengeId?: string;
+  phoneVerificationCode?: string;
   requestId: string;
 }) {
   let wechatIdentity;
@@ -303,7 +441,7 @@ export async function loginWithWechat(input: {
   let user: User;
   let isNewUser = false;
   if (identity) {
-    if (identity.user.status !== "active") {
+    if (!identity.isVerified || identity.user.status !== "active") {
       throw new ApiError(401, "SESSION_INVALID", "账号当前不可登录。 ");
     }
     user = await getPrisma().user.update({
@@ -311,18 +449,32 @@ export async function loginWithWechat(input: {
       data: { lastLoginAt: new Date() }
     });
   } else {
-    if (!input.acceptedTermsVersion) {
-      throw new ApiError(422, "TERMS_ACCEPTANCE_REQUIRED", "首次微信登录需接受当前平台条款。 ");
+    if (!input.phoneChallengeId || !input.phoneVerificationCode) {
+      throw new ApiError(422, "PHONE_BINDING_REQUIRED", "首次微信登录必须验证并绑定手机号。 ");
     }
-    user = await createRegisteredUser({
-      provider: "wechat",
-      identifier: wechatIdentity.subject,
-      displayName: wechatIdentity.displayName ?? "微信用户",
+    const phoneChallenge = await verifyChallenge(
+      input.phoneChallengeId,
+      input.phoneVerificationCode,
+      "register"
+    );
+    if (phoneChallenge.provider !== "phone") {
+      throw new ApiError(422, "PHONE_BINDING_REQUIRED", "首次微信登录必须使用手机号验证码完成绑定。 ");
+    }
+
+    const registration = await completeVerifiedRegistration({
+      identities: [
+        { provider: "phone", identifier: phoneChallenge.identifier },
+        { provider: "wechat", identifier: wechatIdentity.subject }
+      ],
+      primaryProvider: "phone",
+      preferredDisplayName: wechatIdentity.displayName,
       acceptedTermsVersion: input.acceptedTermsVersion,
-      source: "wechat_register",
-      requestId: input.requestId
+      source: "wechat_phone_authenticate",
+      requestId: input.requestId,
+      challengeIds: [phoneChallenge.id]
     });
-    isNewUser = true;
+    user = registration.user;
+    isNewUser = registration.isNewUser;
   }
 
   const session = await createSession(user.id);
@@ -344,7 +496,8 @@ export async function activateUploaderInvite(
 
   return getPrisma().$transaction(async (transaction) => {
     const invite = await transaction.inviteCode.findUnique({
-      where: { codeHash: hashInviteCode(input.code) }
+      where: { codeHash: hashInviteCode(input.code) },
+      include: { uploaderProfile: true }
     });
 
     if (!invite) {
@@ -358,6 +511,9 @@ export async function activateUploaderInvite(
     }
     if (invite.status === "expired" || (invite.expiresAt && invite.expiresAt <= new Date())) {
       throw new ApiError(409, "INVITE_CODE_EXPIRED", "邀请码已过期。 ");
+    }
+    if (invite.usedByUserId || invite.uploaderProfile) {
+      throw new ApiError(409, "INVITE_CODE_USED", "邀请码已关联其他上传者。 ");
     }
 
     const claimed = await transaction.inviteCode.updateMany({

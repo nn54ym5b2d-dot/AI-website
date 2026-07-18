@@ -46,12 +46,13 @@ class LocalAuthProvider implements AuthProviderAdapter {
   async exchangeWechatCode(code: string, _redirectUri: string) {
     const expectedCode = process.env.AUTH_LOCAL_WECHAT_CODE;
     const subject = process.env.AUTH_LOCAL_WECHAT_SUBJECT;
+    const displayName = process.env.AUTH_LOCAL_WECHAT_DISPLAY_NAME;
 
     if (!expectedCode || !subject || !safeEqual(code, expectedCode)) {
       throw new AuthProviderUnavailableError("Local WeChat test identity is not configured.");
     }
 
-    return { subject };
+    return { subject, ...(displayName ? { displayName } : {}) };
   }
 }
 
