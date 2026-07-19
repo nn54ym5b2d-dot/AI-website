@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v2.7
-日期：2026-07-18
+版本：v2.8
+日期：2026-07-19
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -12,21 +12,23 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 
 ## GitHub Issue 映射
 
-| 任务 | GitHub Issue | 链接 |
-|---|---|---|
-| T006 | #1 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
-| T007 | #2（Done，PR #14） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
-| T008 | #3（Done，PR #15；状态同步 PR #17） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
-| T009 | #4（Done，PR #19） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
-| T009A | #21（Done；PR #24 已通过 Actions 并合并到 `main`） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
-| T010 | #5（Ready） | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
-| T011 | #6 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
-| T012 | #7 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
-| T013 | #8 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
-| T014 | #9 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
-| T015 | #10 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
-| T016 | #11 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
-| T017 | #16 | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
+| 任务 | GitHub Issue | 统一状态 | 链接 |
+|---|---|---|---|
+| T006 | #1 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/1> |
+| T007 | #2（PR #14） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/2> |
+| T008 | #3（PR #15；状态同步 PR #17） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
+| T009 | #4（PR #19） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
+| T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
+| T010 | #5 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
+| T011 | #6 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
+| T012 | #7 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
+| T013 | #8 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
+| T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
+| T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
+| T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
+
+以上状态已于 2026-07-19 与 GitHub Project #1 实际卡片状态逐项复核一致。
 
 每个任务默认规则：
 
