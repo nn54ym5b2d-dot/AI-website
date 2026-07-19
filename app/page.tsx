@@ -10,14 +10,13 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { MaterialGrid } from "@/components/materials/material-card";
+import { MaterialFeed } from "@/components/materials/material-feed";
 import { DemoNotice } from "@/components/ui/demo-notice";
-import { demoAssets } from "@/lib/domain/demo-content";
 
 const categories = [
-  { label: "人物素材", detail: "真实人物参考与角色形象", href: "/search?category=人物", icon: UserFocus },
-  { label: "物件/道具", detail: "可复用的物件与道具参考", href: "/search?category=物件%2F道具", icon: Armchair },
-  { label: "场景素材", detail: "空间、建筑与环境氛围", href: "/search?category=场景", icon: Buildings }
+  { label: "人物素材", detail: "真实人物参考与角色形象", href: "/search?type=person", icon: UserFocus },
+  { label: "物件/道具", detail: "可复用的物件与道具参考", href: "/search?type=object", icon: Armchair },
+  { label: "场景素材", detail: "空间、建筑与环境氛围", href: "/search?type=scene", icon: Buildings }
 ];
 
 export default function HomePage() {
@@ -59,11 +58,11 @@ export default function HomePage() {
             <div>
               <p className="ui-eyebrow">Featured assets</p>
               <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-ink sm:text-3xl">本周精选素材</h2>
-              <div className="mt-3"><DemoNotice /></div>
+              <div className="mt-3"><DemoNotice>本地种子素材 · 真实 API 查询</DemoNotice></div>
             </div>
             <Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:text-brand-dark" href="/materials">查看全部素材<ArrowRight aria-hidden="true" size={16} weight="bold" /></Link>
           </div>
-          <MaterialGrid assets={demoAssets} />
+          <MaterialFeed limit={3} sort="newest" />
         </div></section>
       </main>
       <SiteFooter />

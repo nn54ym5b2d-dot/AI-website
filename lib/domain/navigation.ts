@@ -59,12 +59,12 @@ export const publicRoutes: RouteDefinition[] = [
   },
   {
     title: "素材详情页",
-    href: "/materials/demo-asset",
-    description: "展示素材预览、价格、认证状态、购买入口和授权提示。",
+    href: "/materials/10000000-0000-4000-8000-000000000001",
+    description: "通过公开素材 API 展示水印预览、价格、认证状态、购买入口和授权提示。",
     priority: "P0",
     roleEntry: "购买用户、上传者、访客",
     audiences: ["public", "buyer", "uploader"],
-    slug: "demo-asset"
+    slug: "10000000-0000-4000-8000-000000000001"
   },
   {
     title: "登录/注册页",

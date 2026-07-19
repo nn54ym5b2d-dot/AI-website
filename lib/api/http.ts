@@ -42,6 +42,15 @@ export function apiSuccess<T>(data: T, requestId: string, init?: ResponseInit) {
   return NextResponse.json({ data, requestId }, init);
 }
 
+export function apiPaginatedSuccess<T>(
+  data: T[],
+  meta: { nextCursor: string | null; hasMore: boolean },
+  requestId: string,
+  init?: ResponseInit
+) {
+  return NextResponse.json({ data, meta, requestId }, init);
+}
+
 export function apiErrorResponse(error: unknown, requestId: string) {
   if (error instanceof ApiError) {
     return NextResponse.json(

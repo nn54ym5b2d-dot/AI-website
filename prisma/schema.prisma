@@ -64,6 +64,62 @@ enum AuthChallengePurpose {
   @@map("auth_challenge_purpose")
 }
 
+enum AssetType {
+  person
+  object
+  scene
+
+  @@map("asset_type")
+}
+
+enum AssetReviewStatus {
+  draft
+  pending_review
+  approved
+  rejected
+
+  @@map("asset_review_status")
+}
+
+enum AssetListingStatus {
+  unlisted
+  listed
+  delisted
+
+  @@map("asset_listing_status")
+}
+
+enum CertificationStatus {
+  not_started
+  pending_payment
+  pending_review
+  certifying
+  certified
+  exception
+
+  @@map("certification_status")
+}
+
+enum AssetFileType {
+  original
+  preview
+  thumbnail
+  person_proof
+  certificate_file
+  certificate_snapshot
+  download_bundle
+
+  @@map("asset_file_type")
+}
+
+enum FileAccessScope {
+  private
+  public_preview
+  signed_download_only
+
+  @@map("file_access_scope")
+}
+
 model User {
   id                 String       @id @default(uuid()) @db.Uuid
   displayName        String       @map("display_name")
@@ -77,16 +133,18 @@ model User {
   updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  authIdentities             AuthIdentity[]
-  termsAcceptances           UserTermsAcceptance[]
-  roleMemberships            UserRoleMembership[]
-  uploaderProfile            UploaderProfile?
-  inviteCodesCreated         InviteCode[]          @relation("InviteCreatedBy")
-  inviteCodesUsed            InviteCode[]          @relation("InviteUsedBy")
-  adminRoleAssignments       AdminRoleAssignment[] @relation("AdminRoleUser")
+  authIdentities              AuthIdentity[]
+  termsAcceptances            UserTermsAcceptance[]
+  roleMemberships             UserRoleMembership[]
+  uploaderProfile             UploaderProfile?
+  inviteCodesCreated          InviteCode[]          @relation("InviteCreatedBy")
+  inviteCodesUsed             InviteCode[]          @relation("InviteUsedBy")
+  adminRoleAssignments        AdminRoleAssignment[] @relation("AdminRoleUser")
   adminRoleAssignmentsCreated AdminRoleAssignment[] @relation("AdminRoleCreatedBy")
-  observerProfile            ObserverProfile?
-  sessions                   UserSession[]
+  observerProfile             ObserverProfile?
+  sessions                    UserSession[]
+  assetFilesUploaded          AssetFile[]           @relation("AssetFileUploadedBy")
+  assetsReviewed              Asset[]               @relation("AssetReviewedBy")
 
   @@index([status, createdAt])
   @@map("users")
@@ -167,6 +225,7 @@ model UploaderProfile {
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id])
+  assets       Asset[]
 
   @@map("uploader_profiles")
 }
@@ -252,4 +311,73 @@ model AuthChallenge {
   @@index([identifierHash, purpose, createdAt])
   @@index([expiresAt, consumedAt])
   @@map("auth_challenges")
+}
+
+model Asset {
+  id                  String              @id @default(uuid()) @db.Uuid
+  uploaderProfileId   String              @map("uploader_profile_id") @db.Uuid
+  assetType           AssetType           @map("asset_type")
+  title               String
+  description         String?
+  reviewStatus        AssetReviewStatus   @default(draft) @map("review_status")
+  listingStatus       AssetListingStatus  @default(unlisted) @map("listing_status")
+  certificationStatus CertificationStatus @default(not_started) @map("certification_status")
+  priceCents          Int                 @map("price_cents")
+  currency            String              @default("CNY")
+  rejectionReason     String?             @map("rejection_reason")
+  submittedAt         DateTime?           @map("submitted_at") @db.Timestamptz(3)
+  reviewedByUserId    String?             @map("reviewed_by_user_id") @db.Uuid
+  reviewedAt          DateTime?           @map("reviewed_at") @db.Timestamptz(3)
+  listedAt            DateTime?           @map("listed_at") @db.Timestamptz(3)
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?           @map("deleted_at") @db.Timestamptz(3)
+  uploaderProfile     UploaderProfile     @relation(fields: [uploaderProfileId], references: [id])
+  reviewedBy          User?               @relation("AssetReviewedBy", fields: [reviewedByUserId], references: [id])
+  tags                AssetTag[]
+  files               AssetFile[]
+
+  @@index([assetType, listingStatus, certificationStatus])
+  @@index([uploaderProfileId, createdAt])
+  @@index([reviewStatus, createdAt])
+  @@index([listingStatus, listedAt, id])
+  @@map("assets")
+}
+
+model AssetTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  assetId   String   @map("asset_id") @db.Uuid
+  tag       String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, tag])
+  @@index([tag])
+  @@map("asset_tags")
+}
+
+model AssetFile {
+  id               String          @id @default(uuid()) @db.Uuid
+  assetId          String          @map("asset_id") @db.Uuid
+  uploadedByUserId String          @map("uploaded_by_user_id") @db.Uuid
+  fileType         AssetFileType   @map("file_type")
+  accessScope      FileAccessScope @map("access_scope")
+  cosBucket        String          @map("cos_bucket")
+  cosRegion        String          @map("cos_region")
+  cosObjectKey     String          @map("cos_object_key")
+  fileHash         String          @map("file_hash")
+  fileSizeBytes    BigInt          @map("file_size_bytes")
+  mimeType         String          @map("mime_type")
+  width            Int?
+  height           Int?
+  metadata         Json            @default("{}")
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt        DateTime?       @map("deleted_at") @db.Timestamptz(3)
+  asset            Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  uploadedBy       User            @relation("AssetFileUploadedBy", fields: [uploadedByUserId], references: [id])
+
+  @@unique([cosBucket, cosRegion, cosObjectKey])
+  @@index([assetId, fileType])
+  @@index([fileHash])
+  @@map("asset_files")
 }
