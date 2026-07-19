@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v3.2
+版本：v3.3
 日期：2026-07-19
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
@@ -19,10 +19,10 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T008 | #3（PR #15；状态同步 PR #17） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（PR #19） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
-| T010 | #5（草稿 PR #28） | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
-| T011 | #6 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
+| T010 | #5（PR #28） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
+| T011 | #6 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
-| T013 | #8 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
@@ -365,7 +365,7 @@ T010
 备注：
 本任务以可用浏览和本地真实数据闭环为主；腾讯云生产数据接入后续处理。
 
-执行结果（2026-07-19）：已在 `codex/t010-material-browser` 完成素材、标签、文件 Prisma 模型与 migration、三类非真实 seed、四个公开 API、首页/分类/搜索/详情页和固化水印衍生图闭环，草稿 PR #28 已创建，当前状态为 Review。真实 COS、图片处理、CDN、支付和原文件下载未接入；待 Robert 验收并合并后再转为 Done。
+执行结果（2026-07-19）：已在 `codex/t010-material-browser` 完成素材、标签、文件 Prisma 模型与 migration、三类非真实 seed、四个公开 API、首页/分类/搜索/详情页和固化水印衍生图闭环。Robert 完成网页预览并确认没问题；PR #28 的 `verify` 通过后压缩合并到 `main`（`5072265`），Issue #5 已关闭，当前状态为 Done。真实 COS、图片处理、CDN、支付和原文件下载未接入。
 
 ---
 
