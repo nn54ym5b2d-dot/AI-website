@@ -19,7 +19,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T008 | #3（PR #15；状态同步 PR #17） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/3> |
 | T009 | #4（PR #19） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
-| T010 | #5（PR #28） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
+| T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
