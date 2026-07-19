@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v2.7
-日期：2026-07-18
-状态：T008 接口合同已批准；T009 身份基础已通过 PR #19 合并；手机号主身份与邮箱/微信绑定规则按 Robert 最新决定修订
+版本：v3.0
+日期：2026-07-19
+状态：T008 接口合同已批准；T009 身份基础已通过 PR #19 合并；水印衍生图、CDN 分发和私有 ZIP 交付边界已确认
 
 ## 1. 文档定位
 
@@ -12,7 +12,7 @@
 
 T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战、注册、登录、退出、当前用户、CSRF、微信 adapter 入口和邀请码激活已形成可运行本地 API。真实短信、邮件和微信服务仍未接入；开发环境使用明确标识的本地 provider，验证码不在 API 响应或普通日志中返回。
 
-数据模型以 `docs/数据库设计.md` v2.5 为准。首版业务默认值：
+数据模型以 `docs/数据库设计.md` v3.1 为准。首版业务默认值：
 
 | 配置 | 首版值 |
 |---|---:|
@@ -214,12 +214,12 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
-| `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`minPriceCents`、`maxPriceCents`、`listedAfter`、`sort: newest\|popular\|price_asc\|price_desc`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、缩略图/预览图短期或公开预览地址 | `VALIDATION_ERROR` |
-| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、预览文件、认证展示状态、价格、授权摘要；不含原文件和证明材料 | `RESOURCE_NOT_FOUND` |
+| `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`minPriceCents`、`maxPriceCents`、`listedAfter`、`sort: newest\|popular\|price_asc\|price_desc`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、已生成水印缩略图/预览图的 CDN 地址 | `VALIDATION_ERROR` |
+| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、带水印的预览文件、认证展示状态、价格、授权摘要；不含原文件和证明材料 | `RESOURCE_NOT_FOUND` |
 | `GET /api/v1/categories` | 公开 | 无 | 首版固定三类素材及展示名称 | 无 |
 | `GET /api/v1/tags` | 公开 | `q`、`limit` | 已上架素材使用的标签建议 | `VALIDATION_ERROR` |
 
-搜索参数必须限制长度并做数据库参数化查询。公开预览可以使用处理后的水印图或 CDN 地址，但不能由预览地址推导原文件地址。
+搜索参数必须限制长度并做数据库参数化查询。公开接口只返回已经生成成功的独立水印预览图/缩略图 CDN 地址；不得在公开请求中临时读取原图加工，也不能由预览地址推导原文件地址。T010 使用本地种子或受控适配器提供已生成衍生图，真实腾讯云图片处理和 CDN 在 T017 接入。
 
 ## 6. 上传者素材与文件上传
 
@@ -251,8 +251,8 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
-| `POST /api/v1/uploader/assets/{assetId}/file-uploads` | 素材所属上传者 | `fileType: original\|preview\|thumbnail\|person_proof`、`fileName`、`mimeType`、`sizeBytes`、`sha256` | `uploadId`、短期 `uploadUrl`、`method: PUT`、`requiredHeaders`、`expiresAt`、`maxBytes` | `STATE_TRANSITION_INVALID`、`UPLOAD_FILE_REJECTED`、`RATE_LIMITED` |
-| `POST /api/v1/uploader/assets/{assetId}/file-uploads/{uploadId}/complete` | 素材所属上传者 | 可选 `etag` | 经服务端核验后的 `fileId`、`fileType`、`status: ready`、非敏感元数据 | `UPLOAD_INTENT_EXPIRED`、`UPLOAD_FILE_REJECTED` |
+| `POST /api/v1/uploader/assets/{assetId}/file-uploads` | 素材所属上传者 | `fileType: original\|person_proof`、`fileName`、`mimeType`、`sizeBytes`、`sha256` | `uploadId`、短期 `uploadUrl`、`method: PUT`、`requiredHeaders`、`expiresAt`、`maxBytes` | `STATE_TRANSITION_INVALID`、`UPLOAD_FILE_REJECTED`、`RATE_LIMITED` |
+| `POST /api/v1/uploader/assets/{assetId}/file-uploads/{uploadId}/complete` | 素材所属上传者 | 可选 `etag` | 经服务端核验后的 `fileId`、`fileType`、`status: ready`、`derivativeStatus: pending\|not_applicable`、非敏感元数据 | `UPLOAD_INTENT_EXPIRED`、`UPLOAD_FILE_REJECTED` |
 
 安全要求：
 
@@ -261,6 +261,8 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 - `complete` 不能只相信前端，应通过 COS 查询对象是否存在，并核对大小、MIME、哈希或上传元数据；校验通过后复制/移动到不可变最终 key 并登记，失败或过期对象进入清理流程。
 - 未完成的上传意图过期后失效，孤立对象由后续清理任务删除。
 - `person_proof` 只允许人物素材；认证证书使用管理员专用上传接口。
+- `preview` 和 `thumbnail` 不接受上传者直接指定为公开文件；原文件确认成功后，由受控异步处理任务生成独立水印预览图/缩略图，并把处理状态、来源文件 ID 和水印模板版本写入文件元数据。
+- 衍生图处理失败时保持素材不可上架并允许受控重试；不得把私有原文件地址作为回退值返回。Next.js 只触发/查询任务和保存元数据，不读取或处理图片正文。
 - 文件大小、MIME 白名单和图片像素上限作为配置项实现；准确数值待 COS 方案确认，不改变本接口形状。
 
 ### 6.3 提交审核和认证上传费
@@ -395,7 +397,7 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 
 以下接口只允许有效 `observer` 角色访问，只读取 `platform_metric_snapshots`、`platform_asset_type_metric_snapshots` 和当前观察员自己的 `observer_share_records`。观察员不能通过这些接口读取订单、用户、支付、下载或素材文件明细。
 
-通用查询参数：`periodType: day|week|month|custom`、`startAt?`、`endAt?`。自定义时间范围必须限制最大跨度，防止大范围扫描。
+通用查询参数：`periodType: day|week|month|custom`、`startAt?`、`endAt?`。当 `periodType=custom` 时，`startAt` 和 `endAt` 必填，结束时间不得早于开始时间，单次自定义区间最大跨度为一年。
 
 | 方法与路径 | 成功返回 |
 |---|---|
@@ -456,7 +458,8 @@ T009 实现状态：第 2-4 节的条款查询、手机号/邮箱验证码挑战
 - Cookie、CSRF token、支付密钥、COS 密钥、签名 URL、完整回调载荷和验证码不写普通日志。
 - 敏感字段在日志、后台列表和错误详情中做掩码；外部观察员完全不可见。
 - 支付回调保存原始请求体仅限验签所需的短生命周期处理；持久化只保存必要摘要。
-- 预览文件与原文件使用不同对象和权限，不能通过替换路径参数访问原文件。
+- 水印预览文件/缩略图与原文件使用不同对象和权限，公开 CDN 只允许访问水印衍生图，不能通过替换路径参数访问原文件。
+- Next.js 不代理、缓存、解码或处理图片文件正文；水印生成由异步处理 provider 完成，购买后只对通过授权校验的私有 ZIP 签发短时下载地址。
 - 后台和观察员入口不是安全边界；所有权限必须在 API 服务端实施。
 - 生产环境只使用 HTTPS，并设置合理的 CSP、HSTS、Cookie 和跨域策略；MVP 默认不开放跨站 API 调用。
 - 不在 API 返回或源代码中暴露腾讯云、微信、支付宝、短信、邮件或数据库凭证。
