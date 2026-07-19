@@ -13,9 +13,9 @@ type HeaderUser = {
 
 const navItems = [
   { href: "/materials", label: "发现素材" },
-  { href: "/materials?category=人物", label: "人物" },
-  { href: "/materials?category=物件", label: "物件/道具" },
-  { href: "/materials?category=场景", label: "场景" }
+  { href: "/search?type=person", label: "人物" },
+  { href: "/search?type=object", label: "物件/道具" },
+  { href: "/search?type=scene", label: "场景" }
 ];
 
 const authHref = authEntryHref("/");
