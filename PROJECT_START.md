@@ -50,7 +50,7 @@
 - GitHub CLI 已重新连接账号 `nn54ym5b2d-dot`，并获得仓库、Actions 和 Project 管理权限；Project #1 的状态规则已统一为 `Backlog / Ready / In Progress / Review / Blocked / Done`。
 - GitHub Project #1 已于 2026-07-19 同步：T006-T009、T009A 为 Done，T010 为 Review，T011-T016 为 Blocked，T017 为 Backlog，与本地任务清单一致。
 - Robert 已确认素材水印交付架构：原文件、证明材料和购买后的 ZIP 始终存放于私有存储；系统从原文件异步预生成独立水印预览图和缩略图，公开页面经 CDN 只分发这些衍生文件；购买后由应用服务校验授权并签发私有 ZIP 的短时下载地址。Next.js 只处理元数据、权限和签名，不读取或处理图片文件正文。真实腾讯云 COS、数据万象/图片处理和 CDN 接入仍统一在 T017 完成。
-- T010 / Issue #5 已在 `codex/t010-material-browser` 完成开发并进入 Review：已落地素材、标签、文件 Prisma 模型和 migration，非真实三类素材 seed，公开素材列表/详情/分类/标签 API，首页、分类、搜索筛选和详情页真实数据库闭环，以及固化水印的本地公开衍生图；原文件元数据保持私有，页面请求不处理图片正文。
+- T010 / Issue #5 已在 `codex/t010-material-browser` 完成开发并通过草稿 PR #28 进入 Review：已落地素材、标签、文件 Prisma 模型和 migration，非真实三类素材 seed，公开素材列表/详情/分类/标签 API，首页、分类、搜索筛选和详情页真实数据库闭环，以及固化水印的本地公开衍生图；原文件元数据保持私有，页面请求不处理图片正文。
 
 当前未完成：
 
