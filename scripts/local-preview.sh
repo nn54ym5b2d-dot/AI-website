@@ -5,7 +5,14 @@ set -u
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 preview_url="http://127.0.0.1:3000"
 docker_app="/Applications/Docker.app"
+docker_app_bin="$docker_app/Contents/Resources/bin"
 docker_compose_plugin="/Applications/Docker.app/Contents/Resources/cli-plugins/docker-compose"
+
+# Finder 启动的 .command 不一定继承 Docker Desktop 的命令路径。
+# 显式加入应用内目录，避免凭据程序 docker-credential-desktop 因失效的系统软链接而找不到。
+if [[ -d "$docker_app_bin" ]]; then
+  export PATH="$docker_app_bin:$PATH"
+fi
 
 cd "$project_root" || exit 1
 
