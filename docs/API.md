@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v3.6
+版本：v3.7
 日期：2026-07-20
-状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012 Review；T013 Ready
+状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012 Review；T012A-T016 Blocked
 
 ## 1. 文档定位
 
@@ -217,9 +217,10 @@ T010 实现状态：第 5 节的素材列表、详情、分类和标签接口已
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`minPriceCents`、`maxPriceCents`、`listedAfter`、`sort: newest\|popular\|price_asc\|price_desc`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、已生成水印缩略图/预览图的 CDN 地址 | `VALIDATION_ERROR` |
-| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、带水印的预览文件、认证展示状态、价格、授权摘要；不含原文件和证明材料 | `RESOURCE_NOT_FOUND` |
+| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、带水印的预览文件、价格、授权摘要，以及可公开的认证状态、证书编号、来源和签发日期；不含原文件、证明材料、证书/凭证文件或内部备注 | `RESOURCE_NOT_FOUND` |
 | `GET /api/v1/categories` | 公开 | 无 | 首版固定三类素材及展示名称 | 无 |
 | `GET /api/v1/tags` | 公开 | `q`、`limit` | 已上架素材使用的标签建议 | `VALIDATION_ERROR` |
+| `GET /api/v1/legal-documents/current?type=terms_of_service\|privacy_policy\|commercial_license` | 公开 | 文档类型 | 当前有效版本、标题、正文、版本号和生效时间；非正式本地文本带明确环境标记 | `RESOURCE_NOT_FOUND`、`VALIDATION_ERROR` |
 
 搜索参数必须限制长度并做数据库参数化查询。公开接口只返回已经生成成功的独立水印预览图/缩略图 CDN 地址；不得在公开请求中临时读取原图加工，也不能由预览地址推导原文件地址。T010 使用本地种子或受控适配器提供已生成衍生图，真实腾讯云图片处理和 CDN 在 T017 接入。
 
@@ -485,9 +486,12 @@ T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 1
 | T010 素材浏览和详情页 | 第 5 节 |
 | T011 上传者素材提交流程 | 第 6 节 |
 | T012 后台审核和认证记录 | 第 7、10 节 |
+| T012A 后台基础管理与现有入口补全 | 第 4-6、10、13 节 |
 | T013 订单、支付测试流程和授权记录 | 第 8、12 节 |
 | T014 ZIP 下载和收益记录 | 第 9、12 节 |
 | T015 后台权限和外部观察员 | 第 10-11、13 节 |
+| T016 全流程和无占位收口 | 第 2-13 节全部正式路由 |
+| T017 生产 provider 和正式法律文本 | 第 2、4-13 节外部服务边界 |
 
 ## 15. 仍待确认但不阻塞接口结构
 
