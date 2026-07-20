@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.1
+版本：v4.2
 日期：2026-07-20
-状态：已由 Robert 审核确认；T012 / #7 已完成，T012A / #33 本地实现完成并转为 Review
+状态：已由 Robert 审核确认；T012 / #7 已完成，T012A / #33 通过草稿 PR #35 进入 Review，远程检查通过
 
 ## 使用说明
 
@@ -29,7 +29,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012 已由 Robert 验收并通过 PR #32 压缩合并到 `main`（`8e5b42b`），Issue #7 已关闭并转为 Done。全站占位审计后创建的 T012A / Issue #33 已完成本地实现和检查并进入 Review；Issues #8-#11、#16 的扩充范围和 T013-T017 后续依赖保持不变。
+T012 已由 Robert 验收并通过 PR #32 压缩合并到 `main`（`8e5b42b`），Issue #7 已关闭并转为 Done。全站占位审计后创建的 T012A / Issue #33 已通过草稿 PR #35 进入 Review，远程 `verify` 已通过；Issues #8-#11、#16 的扩充范围和 T013-T017 后续依赖保持不变。
 
 每个任务默认规则：
 
