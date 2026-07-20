@@ -21,14 +21,14 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
-| T012 | #7 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
+| T012 | #7 / PR #32 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T011 已由 Robert 验收并通过 PR #30 压缩合并，Issue #6 已关闭，GitHub Project #1 已转为 Done。T012 已在独立分支完成本地实现和自动化检查并进入 Review；Issue #7 已记录开始执行，草稿 PR、Project 卡片和 Robert 页面验收仍待完成。
+T011 已由 Robert 验收并通过 PR #30 压缩合并，Issue #6 已关闭，GitHub Project #1 已转为 Done。T012 已在独立分支完成本地实现和自动化检查，通过草稿 PR #32 进入 Review；修复测试共享数据库竞态后的 Actions `verify` 已通过，Issue #7 已关联 PR，Project 卡片已转 Review，等待 Robert 页面验收。
 
 每个任务默认规则：
 
