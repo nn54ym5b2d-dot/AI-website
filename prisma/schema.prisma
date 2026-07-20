@@ -105,6 +105,7 @@ enum AssetFileType {
   preview
   thumbnail
   person_proof
+  supporting_proof
   certificate_file
   certificate_snapshot
   download_bundle

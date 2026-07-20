@@ -35,7 +35,7 @@ type AssetEditInput = {
 };
 
 type UploadIntentInput = {
-  fileType: "original" | "person_proof";
+  fileType: "original" | "person_proof" | "supporting_proof";
   fileName: string;
   mimeType: string;
   sizeBytes: number;
@@ -233,7 +233,10 @@ export async function createAssetUploadIntent(
   const asset = await findOwnedAsset(access, assetId);
   assertDraftEditable(asset);
   if (input.fileType === "person_proof" && asset.assetType !== "person") {
-    throw new ApiError(422, "UPLOAD_FILE_REJECTED", "只有人物素材可以上传人物证明材料。 ");
+    throw new ApiError(422, "UPLOAD_FILE_REJECTED", "物件和场景素材请使用选填证明材料类型。 ");
+  }
+  if (input.fileType === "supporting_proof" && asset.assetType === "person") {
+    throw new ApiError(422, "UPLOAD_FILE_REJECTED", "人物素材必须使用必要证明材料类型。 ");
   }
 
   const intentId = crypto.randomUUID();

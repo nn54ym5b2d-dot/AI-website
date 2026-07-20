@@ -8,7 +8,7 @@ AI 数字素材交易平台 MVP。
 - T009A `源素库 MVP 视觉设计基线与核心页面原型` 已由 Robert 验收；PR #24 已合并，状态同步 PR #25 已合并到 `main`（`fe7dcb4`）。
 - 页面顶部直接展示手机号与微信，不显示“主要方式”；邮箱位于下方独立区域。邮箱注册和首次微信登录必须绑定手机号，注册昵称由服务端生成，首版不接 QQ。
 - T010 / Issue #5 已由 Robert 验收并通过 PR #28 压缩合并到 `main`（`5072265`），状态为 `Done`：PostgreSQL/Prisma 素材数据、公开查询 API、首页/分类/搜索/详情页和本地固化水印衍生图已形成闭环。
-- T011 / Issue #6 已在 `codex/t011-uploader-submission` 完成本地实现并通过草稿 PR #30 进入 `Review`：两套上传表单、素材草稿、上传意图、完成确认、不可变最终 key、独立水印衍生对象元数据、认证费待支付和幂等提交均已跑通；T013 / Issue #8 仍为 `Ready`。
+- T011 / Issue #6 已在 `codex/t011-uploader-submission` 完成本地实现并通过草稿 PR #30 进入 `Review`：两套上传表单、素材草稿、上传意图、完成确认、不可变最终 key、独立水印衍生对象元数据、人物必填/物件场景选填证明材料、提交后的待支付结果页和幂等提交均已跑通；T013 / Issue #8 仍为 `Ready`。
 - 本地 PostgreSQL 完整测试当前为 18/18，lint、typecheck、build 和 T011 桌面/390px 浏览器闭环检查已通过；真实短信、邮件、微信 OAuth/二维码、COS、图片处理和 CDN 仍在 T017 接入。
 - 本地任务清单和 GitHub Project #1 统一使用 `Backlog / Ready / In Progress / Review / Blocked / Done` 六种状态。
 
@@ -26,6 +26,8 @@ AI 数字素材交易平台 MVP。
 
 ```bash
 npm install
+npm run preview:local
+npm run preview:stop
 npm run db:up
 npm run db:migrate
 npm run db:seed
@@ -37,6 +39,28 @@ npm run build
 ```
 
 ## 本地启动
+
+### 一键预览（macOS）
+
+在 Finder 中打开项目文件夹，双击 `启动本机预览.command`。脚本会自动：
+
+1. 检查 Node.js 24、npm 和 Docker Desktop。
+2. 必要时启动 Docker Desktop，并启动本地 PostgreSQL。
+3. 首次运行时安装依赖、创建仅限本机使用的 `.env` 和随机认证密钥。
+4. 应用已审查的 migration，幂等补充非真实测试数据。
+5. 启动 Next.js 开发服务器并自动打开 `http://127.0.0.1:3000`。
+
+预览期间请保持启动脚本的终端窗口打开；页面支持代码热更新。结束时在该窗口按 `Control+C`，或者双击 `停止本机预览.command`。停止脚本会关闭网站和 PostgreSQL，但保留数据库内容。
+
+也可以在终端运行：
+
+```bash
+npm run preview:local
+```
+
+首次双击 `.command` 文件若被 macOS 阻止，可在 Finder 中右键文件，选择“打开”，确认一次后以后即可直接双击。
+
+### 手动启动
 
 1. 复制 `.env.example` 为 `.env`，把 `AUTH_SECRET` 改为至少 24 个字符的本地随机值。示例数据库账号和密码只允许本地开发使用。
 2. 运行 `npm install` 安装依赖并生成 Prisma Client。

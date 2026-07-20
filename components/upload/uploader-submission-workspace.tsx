@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowRight,
   CheckCircle,
   CircleNotch,
   FileImage,
@@ -8,12 +9,13 @@ import {
   ShieldCheck,
   UploadSimple
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type AssetType = "person" | "object" | "scene";
 type AssetFile = {
   id: string;
-  fileType: "original" | "preview" | "thumbnail" | "person_proof" | string;
+  fileType: "original" | "preview" | "thumbnail" | "person_proof" | "supporting_proof" | string;
   sizeBytes: number;
   mimeType: string;
   processingStatus: string | null;
@@ -204,7 +206,10 @@ export function UploaderSubmissionWorkspace() {
     }
   }
 
-  async function uploadFiles(files: FileList | null, fileType: "original" | "person_proof") {
+  async function uploadFiles(
+    files: FileList | null,
+    fileType: "original" | "person_proof" | "supporting_proof"
+  ) {
     if (!draft || !files?.length) return;
     setBusy(true);
     setMessage("正在由浏览器计算文件哈希并建立受控上传意图…");
@@ -298,11 +303,61 @@ export function UploaderSubmissionWorkspace() {
     const files = draft?.files ?? [];
     return {
       originals: files.filter((file) => file.fileType === "original").length,
-      proofs: files.filter((file) => file.fileType === "person_proof").length,
+      proofs: files.filter((file) => ["person_proof", "supporting_proof"].includes(file.fileType)).length,
       previews: files.filter((file) => file.fileType === "preview").length,
       thumbnails: files.filter((file) => file.fileType === "thumbnail").length
     };
   }, [draft]);
+
+  if (draft?.certificationStatus === "pending_payment" && draft.certificationFeeCharge) {
+    return (
+      <section className="ui-panel overflow-hidden">
+        <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-8 text-center sm:px-8 sm:py-10">
+          <CheckCircle aria-hidden="true" className="mx-auto text-success" size={52} weight="fill" />
+          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-success">Submission received</p>
+          <h2 className="mt-2 text-2xl font-bold text-ink sm:text-3xl">素材资料已提交</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-muted">
+            当前等待支付认证上传费。完成支付后，素材才会进入平台审核流程。
+          </p>
+        </div>
+
+        <div className="grid gap-6 p-5 sm:p-8">
+          <dl className="grid gap-4 rounded-lg border border-line bg-paper p-5 text-sm sm:grid-cols-2">
+            <SummaryRow label="素材名称" value={draft.title} />
+            <SummaryRow label="素材类型" value={TYPE_LABEL[draft.type]} />
+            <SummaryRow
+              label="认证上传费"
+              value={`¥${(draft.certificationFeeCharge.amountCents / 100).toFixed(0)}`}
+            />
+            <SummaryRow label="当前状态" value="等待支付" />
+          </dl>
+
+          <div className="rounded-lg border border-warning/30 bg-amber-50 p-4">
+            <div className="flex gap-3">
+              <Info aria-hidden="true" className="mt-0.5 shrink-0 text-warning" size={20} />
+              <div>
+                <p className="text-sm font-semibold text-ink">真实支付尚未接入</p>
+                <p className="mt-1 text-xs leading-6 text-muted">
+                  当前本地流程只保存待支付记录，不会伪造支付成功或提前进入审核。支付测试流程将在 T013 接入。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link className="ui-button-primary" href="/account/uploads">查看我的上传</Link>
+            <button
+              className="ui-button-secondary"
+              onClick={() => startNew(draft.type === "person" ? "person" : "general")}
+              type="button"
+            >
+              继续上传素材
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -328,7 +383,7 @@ export function UploaderSubmissionWorkspace() {
             type="button"
           >
             <span className="text-sm font-bold text-ink">物件 / 场景共用表单</span>
-            <span className="mt-2 block text-xs leading-5 text-muted">共用字段；不要求人物证明材料。</span>
+            <span className="mt-2 block text-xs leading-5 text-muted">共用字段；证明材料可按需上传。</span>
           </button>
         </div>
 
@@ -477,11 +532,21 @@ export function UploaderSubmissionWorkspace() {
                   />
                 </label>
               ) : (
-                <div className="flex min-h-44 flex-col items-center justify-center rounded-lg border border-line bg-paper p-5 text-center">
-                  <CheckCircle aria-hidden="true" className="text-success" size={28} />
-                  <span className="mt-3 text-sm font-semibold text-ink">无需人物证明材料</span>
-                  <span className="mt-1 text-xs leading-5 text-muted">物件 / 道具和场景共用此规则</span>
-                </div>
+                <label className={`flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed p-5 text-center ${editable ? "border-line bg-paper hover:border-brand" : "cursor-not-allowed border-line bg-paper/60 opacity-60"}`}>
+                  <ShieldCheck aria-hidden="true" className="text-brand" size={28} />
+                  <span className="mt-3 text-sm font-semibold text-ink">证明材料（选填）</span>
+                  <span className="mt-1 text-xs leading-5 text-muted">如有来源、版权或所有权证明，可选择上传。</span>
+                  <input
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    disabled={!editable || busy}
+                    onChange={(event) => {
+                      void uploadFiles(event.target.files, "supporting_proof");
+                      event.target.value = "";
+                    }}
+                    type="file"
+                  />
+                </label>
               )}
             </div>
             <div className="mt-5 rounded-lg border border-line bg-white p-4">
@@ -500,7 +565,12 @@ export function UploaderSubmissionWorkspace() {
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
               <div>
                 <p className="text-sm font-bold">提交到认证流程</p>
-                <p className="mt-2 max-w-2xl text-xs leading-6 text-white/70">提交前会检查原文件、人物证明材料和每份原文件的水印衍生对象。真实认证费支付尚未接入，提交后停在待支付状态，不会伪造进入初审。</p>
+                <p className="mt-2 max-w-2xl text-xs leading-6 text-white/70">
+                  {draft.type === "person"
+                    ? "提交前会检查原文件、必要证明材料和每份原文件的水印衍生对象。"
+                    : "提交前会检查原文件和每份原文件的水印衍生对象。"}
+                  真实认证费支付尚未接入，提交后停在待支付状态，不会伪造进入初审。
+                </p>
               </div>
               <button className="ui-button-primary shrink-0" disabled={busy || !editable} onClick={() => void submit()} type="button">
                 检查并提交
@@ -538,8 +608,24 @@ export function UploaderSubmissionWorkspace() {
         </section>
         <section className="ui-panel p-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-bold text-ink">最近上传记录</h2>
-            <span className="text-xs text-muted">{assets.length}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="font-bold text-ink">最近上传记录</h2>
+              <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand">
+                {assets.length}
+              </span>
+            </div>
+            <Link
+              className="group inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-brand transition hover:text-brand-dark"
+              href="/account/uploads"
+            >
+              查看我的上传
+              <ArrowRight
+                aria-hidden="true"
+                className="transition-transform group-hover:translate-x-1"
+                size={15}
+                weight="bold"
+              />
+            </Link>
           </div>
           <div className="mt-4 grid gap-2">
             {assets.length ? assets.slice(0, 8).map((asset) => (

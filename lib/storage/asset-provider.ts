@@ -9,7 +9,7 @@ type UploadTargetInput = {
   intentId: string;
   assetId: string;
   fileName: string;
-  fileType: "original" | "person_proof";
+  fileType: "original" | "person_proof" | "supporting_proof";
   expiresAt: Date;
 };
 
@@ -58,7 +58,11 @@ export function getAssetProviderConfig() {
 export function createUploadTarget(input: UploadTargetInput) {
   const config = getAssetProviderConfig();
   const fileName = normalizedFileName(input.fileName);
-  const purpose = input.fileType === "person_proof" ? "person-proof" : "original";
+  const purpose = input.fileType === "person_proof"
+    ? "person-proof"
+    : input.fileType === "supporting_proof"
+      ? "supporting-proof"
+      : "original";
 
   return {
     provider: config.provider,

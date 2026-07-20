@@ -22,7 +22,7 @@ export default async function UploadPage() {
   }
 
   return (
-    <PageShell actions={<SecondaryLink href="/account/uploads">查看我的上传</SecondaryLink>} description={`当前上传者：${access.uploaderProfile?.displayName ?? access.user.displayName}。人物使用独立表单；物件/道具和场景使用共用表单。当前本地 provider 可验证上传与处理状态，但不代表真实 COS 已接通。`} eyebrow="Uploader workspace" title="提交认证素材">
+    <PageShell actions={<SecondaryLink href="/account">返回个人中心</SecondaryLink>} description={`当前上传者：${access.uploaderProfile?.displayName ?? access.user.displayName}。人物使用独立表单；物件/道具和场景使用共用表单。当前本地 provider 可验证上传与处理状态，但不代表真实 COS 已接通。`} eyebrow="Uploader workspace" title="提交认证素材">
       <UploaderSubmissionWorkspace />
     </PageShell>
   );

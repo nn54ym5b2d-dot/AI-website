@@ -6,7 +6,7 @@ import { createAssetUploadIntent } from "@/lib/uploader/assets";
 
 const paramsSchema = z.object({ assetId: z.string().uuid() });
 const uploadIntentSchema = z.object({
-  fileType: z.enum(["original", "person_proof"]),
+  fileType: z.enum(["original", "person_proof", "supporting_proof"]),
   fileName: z.string().trim().min(1).max(180),
   mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
   sizeBytes: z.number().int().min(1).max(25_000_000),
