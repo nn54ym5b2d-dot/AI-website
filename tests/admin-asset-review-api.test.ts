@@ -51,7 +51,14 @@ function writeHeaders(session: { cookie: string; csrfToken: string }) {
   return { cookie: session.cookie, origin: appUrl, "x-csrf-token": session.csrfToken };
 }
 
-test("T012 后台审核、认证、上架、退款队列、敏感文件和审计日志形成数据库闭环", { skip: !shouldRun }, async () => {
+test("T012 后台审核、认证、上架、退款队列、敏感文件和审计日志形成数据库闭环", { skip: !shouldRun }, async (t) => {
+  t.after(async () => {
+    await getPrisma().asset.update({
+      where: { id: personAssetId },
+      data: { listingStatus: "unlisted", listedAt: null }
+    });
+  });
+
   const operator = await sessionFor("operator@example.test");
   const finance = await sessionFor("finance@example.test");
   const observer = await sessionFor("observer@example.test");
