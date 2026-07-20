@@ -3,10 +3,12 @@ import test from "node:test";
 import { GET as getCsrf } from "../app/api/v1/auth/csrf/route.ts";
 import { GET as listInvites, POST as createInvite } from "../app/api/v1/admin/invite-codes/route.ts";
 import { POST as disableInvite } from "../app/api/v1/admin/invite-codes/[inviteId]/disable/route.ts";
+import { POST as revealInvite } from "../app/api/v1/admin/invite-codes/[inviteId]/reveal/route.ts";
 import { GET as getSettings, PATCH as patchSettings } from "../app/api/v1/admin/settings/route.ts";
 import { GET as getProfile, PATCH as patchProfile } from "../app/api/v1/uploader/profile/route.ts";
 import { GET as getPublicAsset } from "../app/api/v1/assets/[assetId]/route.ts";
 import { createSession } from "../lib/auth/session.ts";
+import { hashInviteCode } from "../lib/auth/crypto.ts";
 import { getPrisma } from "../lib/db/prisma.ts";
 
 const shouldRun = process.env.RUN_DB_TESTS === "1";
@@ -52,6 +54,15 @@ test("T012A 邀请码、系统设置、上传者资料和公开认证摘要遵�
   const listText = JSON.stringify(await listResponse.json());
   assert.equal(listText.includes(created.code), false);
   assert.equal(listText.includes("••••"), true);
+  const revealResponse = await revealInvite(new Request(`${appUrl}/api/v1/admin/invite-codes/${created.id}/reveal`, { method: "POST", headers: { "content-type": "application/json", ...writeHeaders(operator) }, body: "{}" }), { params: Promise.resolve({ inviteId: created.id }) });
+  assert.equal(revealResponse.status, 200);
+  assert.equal((await body<{ code: string }>(revealResponse)).data.code, created.code);
+  const revealAudit = await getPrisma().auditLog.findFirstOrThrow({ where: { action: "invite_code.revealed", targetId: created.id }, orderBy: { createdAt: "desc" } });
+  assert.equal(JSON.stringify(revealAudit.metadata).includes(created.code), false);
+  const seededAdmin = await getPrisma().user.findUniqueOrThrow({ where: { email: "admin@example.test" } });
+  const legacyInvite = await getPrisma().inviteCode.create({ data: { codeHash: hashInviteCode("YSK-LEGACY-UNRECOVERABLE"), displayPrefix: "YSK-LEGAC", createdByUserId: seededAdmin.id } });
+  const legacyReveal = await revealInvite(new Request(`${appUrl}/api/v1/admin/invite-codes/${legacyInvite.id}/reveal`, { method: "POST", headers: { "content-type": "application/json", ...writeHeaders(operator) }, body: "{}" }), { params: Promise.resolve({ inviteId: legacyInvite.id }) });
+  assert.equal(legacyReveal.status, 409);
   const disabled = await disableInvite(new Request(`${appUrl}/api/v1/admin/invite-codes/${created.id}/disable`, { method: "POST", headers: { "content-type": "application/json", ...writeHeaders(operator) }, body: "{}" }), { params: Promise.resolve({ inviteId: created.id }) });
   assert.equal(disabled.status, 200);
   const concurrentCreateResponse = await createInvite(new Request(`${appUrl}/api/v1/admin/invite-codes`, { method: "POST", headers: { "content-type": "application/json", ...writeHeaders(operator) }, body: JSON.stringify({ note: "并发禁用测试" }) }));

@@ -493,7 +493,7 @@ T012
 T012A；前置 T012，后置 T013。
 
 本次范围：
-- 完成 `/admin/invitations` 真实列表、创建、一次明文、掩码回显和禁用未使用邀请码。
+- 完成 `/admin/invitations` 真实列表、创建、掩码回显、逐条眼睛按需查看完整邀请码和禁用未使用邀请码；新码加密保存并记录查看审计，旧哈希历史码明确不可恢复。
 - 落地 `system_settings` migration/seed、API 与 `/admin/settings`，并区分 365 天平台下载资格和短时 ZIP URL 期限。
 - 完成 `/account/uploads`、`/account/upload-status`、`/account/uploader-profile` 和个人中心已落地计数真实化。
 - 提供管理员用户列表/详情与角色摘要只读基础；高权限写操作留给 T015。

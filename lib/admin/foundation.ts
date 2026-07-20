@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { ApiError } from "@/lib/api/http";
-import { hashInviteCode } from "@/lib/auth/crypto";
+import { getAuthConfig } from "@/lib/auth/config";
+import { decryptInviteCode, encryptInviteCode, hashInviteCode } from "@/lib/auth/crypto";
 import { getPrisma } from "@/lib/db/prisma";
 import type { SessionAccess } from "@/lib/auth/session";
 
@@ -26,6 +27,7 @@ export async function listInviteCodes() {
   return invites.map((invite) => ({
     id: invite.id,
     code: maskInvite(invite.displayPrefix),
+    revealable: Boolean(invite.codeCiphertext),
     status: effectiveInviteStatus(invite),
     note: invite.note,
     createdBy: invite.createdBy.displayName,
@@ -47,10 +49,12 @@ export async function createInviteCode(
   }
   const code = `YSK-${randomBytes(8).toString("hex").toUpperCase()}`;
   const displayPrefix = code.slice(0, 9);
+  const codeCiphertext = encryptInviteCode(code, getAuthConfig().authSecret);
   const invite = await getPrisma().$transaction(async (transaction) => {
     const created = await transaction.inviteCode.create({
       data: {
         codeHash: hashInviteCode(code),
+        codeCiphertext,
         displayPrefix,
         note: input.note?.trim() || null,
         expiresAt,
@@ -76,8 +80,46 @@ export async function createInviteCode(
     note: invite.note,
     expiresAt: invite.expiresAt?.toISOString() ?? null,
     createdAt: invite.createdAt.toISOString(),
-    disclosure: "完整邀请码仅在本次创建响应中显示，请立即安全交付；之后只能查看掩码。"
+    disclosure: "邀请码已加密保存；管理员之后可通过列表中的眼睛按钮按需查看。"
   };
+}
+
+export async function revealInviteCode(access: SessionAccess, inviteId: string, requestId: string) {
+  return getPrisma().$transaction(async (transaction) => {
+    const invite = await transaction.inviteCode.findUnique({ where: { id: inviteId } });
+    if (!invite) throw new ApiError(404, "RESOURCE_NOT_FOUND", "邀请码不存在。");
+    if (!invite.codeCiphertext) {
+      throw new ApiError(
+        409,
+        "INVITE_CODE_NOT_RECOVERABLE",
+        "该历史邀请码创建时只保存了单向哈希，无法恢复完整内容。"
+      );
+    }
+
+    let code: string;
+    try {
+      code = decryptInviteCode(invite.codeCiphertext, getAuthConfig().authSecret);
+    } catch {
+      throw new ApiError(
+        409,
+        "INVITE_CODE_DECRYPTION_FAILED",
+        "邀请码无法使用当前加密密钥解密，请检查环境配置。"
+      );
+    }
+
+    await transaction.auditLog.create({
+      data: {
+        actorUserId: access.user.id,
+        action: "invite_code.revealed",
+        targetType: "invite_code",
+        targetId: inviteId,
+        requestId,
+        metadata: { displayPrefix: invite.displayPrefix }
+      }
+    });
+
+    return { id: invite.id, code };
+  });
 }
 
 export async function disableInviteCode(access: SessionAccess, inviteId: string, requestId: string) {

@@ -1,4 +1,18 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual
+} from "node:crypto";
+
+const inviteCodeCipherVersion = "v1";
+const inviteCodeCipherAad = Buffer.from("yuansu:invite-code:v1");
+
+function inviteCodeCipherKey(secret: string) {
+  return createHash("sha256").update(`invite-code:${secret}`).digest();
+}
 
 export function createOpaqueToken(byteLength = 32) {
   return randomBytes(byteLength).toString("base64url");
@@ -15,6 +29,38 @@ export function hashWithSecret(value: string, secret: string) {
 
 export function hashInviteCode(value: string) {
   return createHash("sha256").update(value.trim().toUpperCase()).digest("hex");
+}
+
+export function encryptInviteCode(value: string, secret: string) {
+  const initializationVector = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", inviteCodeCipherKey(secret), initializationVector);
+  cipher.setAAD(inviteCodeCipherAad);
+  const encrypted = Buffer.concat([cipher.update(value.trim().toUpperCase(), "utf8"), cipher.final()]);
+  const authenticationTag = cipher.getAuthTag();
+  return [
+    inviteCodeCipherVersion,
+    initializationVector.toString("base64url"),
+    authenticationTag.toString("base64url"),
+    encrypted.toString("base64url")
+  ].join(".");
+}
+
+export function decryptInviteCode(value: string, secret: string) {
+  const [version, initializationVector, authenticationTag, encrypted] = value.split(".");
+  if (version !== inviteCodeCipherVersion || !initializationVector || !authenticationTag || !encrypted) {
+    throw new Error("Unsupported invite-code ciphertext.");
+  }
+  const decipher = createDecipheriv(
+    "aes-256-gcm",
+    inviteCodeCipherKey(secret),
+    Buffer.from(initializationVector, "base64url")
+  );
+  decipher.setAAD(inviteCodeCipherAad);
+  decipher.setAuthTag(Buffer.from(authenticationTag, "base64url"));
+  return Buffer.concat([
+    decipher.update(Buffer.from(encrypted, "base64url")),
+    decipher.final()
+  ]).toString("utf8");
 }
 
 export function hashContent(value: string) {
