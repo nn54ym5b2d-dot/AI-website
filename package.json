@@ -8,6 +8,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "preview:local": "zsh scripts/local-preview.sh",
+    "preview:stop": "zsh scripts/stop-local-preview.sh",
     "dev": "next dev",
     "build": "next build",
     "postinstall": "prisma generate",

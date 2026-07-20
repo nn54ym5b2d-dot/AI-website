@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v3.3
-日期：2026-07-19
+版本：v3.6
+日期：2026-07-20
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
 ## 使用说明
@@ -20,7 +20,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T009 | #4（PR #19） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
-| T011 | #6 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
+| T011 | #6 / 草稿 PR #30 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
@@ -28,7 +28,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-以上状态已于 2026-07-19 与 GitHub Project #1 实际卡片状态逐项复核一致。
+以上状态中的 T011 已按本地实现转为 Review；草稿 PR #30 已创建，Issue #6 已补充结果评论，GitHub Project #1 已重新读取确认为 Review。
 
 每个任务默认规则：
 
@@ -387,9 +387,9 @@ T011
 本次范围：
 - 开发上传者素材创建/编辑/提交页面。
 - 使用两套素材表单：人物素材一套；物件/道具和场景素材共用一套。
-- 人物素材要求必要证明材料；物件/场景不强制证明材料。
+- 人物素材要求必要证明材料；物件/场景提供来源、版权或所有权证明的选填上传。
 - 所有素材必须进入认证流程，获得认证证书后才能上架。
-- 建立文件上传 provider adapter、受控本地测试实现、上传意图和文件元数据持久化；仅人物素材要求证明材料。
+- 建立文件上传 provider adapter、受控本地测试实现、上传意图和文件元数据持久化；人物素材证明必填，物件/场景证明选填且始终私有。
 - 原文件完成校验后，通过可替换处理适配器异步生成独立水印预览图和缩略图，记录来源文件、处理状态和水印模板版本；处理失败时不得回退为公开原图。
 
 不做范围：
@@ -409,7 +409,7 @@ T011
 验收标准：
 - 上传者能通过人物表单提交人物素材，并通过共用表单提交物件/道具或场景素材。
 - 人物素材证明材料规则被明确执行或提示。
-- 素材提交后进入待审核/认证相关状态。
+- 素材最终提交后切换到独立待支付结果页；真实支付成功后才进入待审核状态。
 - 原文件地址不被公开展示。
 - 本地测试 provider 能证明水印衍生图与原文件是不同对象；Next.js 不处理图片正文。
 

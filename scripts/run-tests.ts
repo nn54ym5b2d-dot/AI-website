@@ -26,6 +26,8 @@ const runtimeEnv = {
   DATABASE_URL: testDatabaseUrl,
   RUN_DB_TESTS: "1",
   AUTH_PROVIDER: "local",
+  ASSET_STORAGE_PROVIDER: "local_test",
+  ASSET_LOCAL_TEST_ENABLED: "true",
   AUTH_LOCAL_OUTBOX_PATH: ".local/test-auth-outbox.jsonl",
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 };
