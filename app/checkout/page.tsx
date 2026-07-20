@@ -1,29 +1,29 @@
-import { PageShell, PrimaryLink, SecondaryLink } from "@/components/layout/page-shell";
-import { checkoutSteps } from "@/lib/domain/navigation";
+import Link from "next/link";
+import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { CheckoutWorkspace } from "@/components/transactions/checkout-workspace";
+import { requireAudience } from "@/lib/auth/page-guard";
+import { getBuyerOrder, getCertificationFeeCheckout, listBuyerOrders } from "@/lib/transactions/service";
 
-export default function CheckoutPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ orderId?: string; certificationFeeChargeId?: string }> }) {
+  const access = await requireAudience("/checkout", ["buyer", "uploader"]);
+  const query = await searchParams;
+  const resource = query.orderId
+    ? { kind: "order" as const, value: await getBuyerOrder(access, query.orderId) }
+    : query.certificationFeeChargeId
+      ? { kind: "certification_fee" as const, value: await getCertificationFeeCheckout(access, query.certificationFeeChargeId) }
+      : null;
+  const orders = !resource && access.roles.includes("buyer") ? await listBuyerOrders(access) : [];
+
   return (
-    <PageShell
-      actions={
-        <>
-          <PrimaryLink href="/account/purchases">查看购买记录</PrimaryLink>
-          <SecondaryLink href="/materials">继续浏览</SecondaryLink>
-        </>
-      }
-      description="订单支付页展示多素材订单、金额、微信支付/支付宝入口和支付状态。当前不接入真实支付。"
-      title="订单支付页"
-    >
-      <section className="rounded-lg border border-line bg-white p-5">
-        <h2 className="text-xl font-semibold text-ink">购买下载流程</h2>
-        <ol className="mt-5 grid gap-3 md:grid-cols-2">
-          {checkoutSteps.map((step, index) => (
-            <li className="rounded-md border border-line bg-paper p-4 text-sm text-muted" key={step}>
-              <span className="mr-2 font-semibold text-brand">{index + 1}.</span>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </section>
+    <PageShell actions={<SecondaryLink href="/materials">继续浏览素材</SecondaryLink>} description="本页运行可验证的本地测试支付流程；真实微信支付和支付宝商户网关尚未接入。" eyebrow="Local test checkout" title="订单与认证费结算">
+      {resource ? <CheckoutWorkspace resource={resource} /> : (
+        <section className="ui-panel overflow-hidden">
+          <div className="border-b border-line px-5 py-4"><h2 className="font-bold text-ink">选择待支付订单</h2><p className="mt-1 text-xs text-muted">服务端订单草稿刷新后仍保留。</p></div>
+          <div className="divide-y divide-line">{orders.filter((order) => order.status === "pending_payment").map((order) => <Link className="flex items-center justify-between gap-4 p-5 hover:bg-paper" href={`/checkout?orderId=${order.id}`} key={order.id}><div><strong className="text-sm text-ink">{order.orderNo}</strong><p className="mt-1 text-xs text-muted">{order.items.length} 份素材</p></div><span className="font-semibold text-brand">¥{(order.totalAmountCents / 100).toFixed(2)}</span></Link>)}{!orders.some((order) => order.status === "pending_payment") ? <p className="p-6 text-sm text-muted">当前没有待支付订单，请先从素材详情加入待购清单。</p> : null}</div>
+        </section>
+      )}
     </PageShell>
   );
 }

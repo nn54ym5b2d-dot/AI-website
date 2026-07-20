@@ -336,16 +336,17 @@ export function UploaderSubmissionWorkspace() {
             <div className="flex gap-3">
               <Info aria-hidden="true" className="mt-0.5 shrink-0 text-warning" size={20} />
               <div>
-                <p className="text-sm font-semibold text-ink">真实支付尚未接入</p>
+                <p className="text-sm font-semibold text-ink">本地测试支付已开放</p>
                 <p className="mt-1 text-xs leading-6 text-muted">
-                  当前本地流程只保存待支付记录，不会伪造支付成功或提前进入审核。支付测试流程将在 T013 接入。
+                  可使用明确标识的本地测试适配器完成签名回调验证；真实微信支付和支付宝商户接口仍未接入。
                 </p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link className="ui-button-primary" href="/account/uploads">查看我的上传</Link>
+            <Link className="ui-button-primary" href={`/checkout?certificationFeeChargeId=${encodeURIComponent(draft.certificationFeeCharge.id)}`}>支付认证上传费</Link>
+            <Link className="ui-button-secondary" href="/account/uploads">查看我的上传</Link>
             <button
               className="ui-button-secondary"
               onClick={() => startNew(draft.type === "person" ? "person" : "general")}

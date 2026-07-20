@@ -1,0 +1,8 @@
+import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { requireAudience } from "@/lib/auth/page-guard";
+import { listBuyerAuthorizations } from "@/lib/transactions/service";
+export const dynamic = "force-dynamic";
+export default async function LicensesPage() {
+  const access = await requireAudience("/account/licenses", ["buyer"]); const records = await listBuyerAuthorizations(access);
+  return <PageShell actions={<SecondaryLink href="/account">返回个人中心</SecondaryLink>} description="支付成功后按订单明细幂等生成永久商业授权；退款明细只撤销对应授权。" eyebrow="My workspace" title="我的授权记录"><div className="grid gap-4">{records.map((record) => <article className="ui-panel p-5" key={record.id}><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold text-ink">{record.assetTitle}</h2><p className="mt-1 text-xs text-muted">订单 {record.orderNo} · 协议版本 {record.licenseVersion}</p></div><span className={`rounded-full px-3 py-1 text-xs ${record.status === "active" ? "bg-emerald-50 text-success" : "bg-rose-50 text-danger"}`}>{record.status}</span></div><dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3"><div><dt className="text-xs text-muted">授权时间</dt><dd className="mt-1 text-ink">{new Date(record.grantedAt).toLocaleString("zh-CN")}</dd></div><div><dt className="text-xs text-muted">下载资格</dt><dd className="mt-1 text-ink">{record.downloadEligibility?.status ?? "无"}</dd></div><div><dt className="text-xs text-muted">ZIP 状态</dt><dd className="mt-1 text-ink">{record.downloadEligibility?.bundleStatus ?? "无"}（T014 生成）</dd></div></dl></article>)}{!records.length ? <p className="ui-panel p-6 text-sm text-muted">尚无授权记录。</p> : null}</div></PageShell>;
+}

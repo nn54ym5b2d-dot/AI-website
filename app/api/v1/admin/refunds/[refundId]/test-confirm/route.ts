@@ -1,0 +1,5 @@
+import { apiErrorResponse, apiSuccess, createRequestId } from "@/lib/api/http";
+import { requireFinanceAdminAccess } from "@/lib/admin/access";
+import { createLocalTestEvent } from "@/lib/transactions/test-provider";
+import { getRefundForTestConfirmation, processLocalTestWebhook } from "@/lib/transactions/service";
+export async function POST(request: Request, context: { params: Promise<{ refundId: string }> }) { const requestId = createRequestId(); try { await requireFinanceAdminAccess(request, true); const { refundId } = await context.params; const refund = await getRefundForTestConfirmation(refundId); const fixture = createLocalTestEvent({ eventType: "refund.succeeded", provider: refund.provider, resourceNo: refund.refundNo, amountCents: refund.amountCents }); return apiSuccess({ ...(await processLocalTestWebhook(fixture.rawBody, fixture.signature)), providerMode: "local_test", eventId: fixture.event.eventId }, requestId); } catch (error) { return apiErrorResponse(error, requestId); } }
