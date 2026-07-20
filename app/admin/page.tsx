@@ -21,7 +21,17 @@ export default async function AdminPage() {
   ] : [];
 
   return (
-    <PageShell actions={<SecondaryLink href="/observer">观察员只读入口</SecondaryLink>} description={`当前以 ${access.user.displayName} 登录。所有后台权限继续由服务端按有效子角色检查。`} eyebrow="Operations" title="管理后台">
+    <PageShell
+      actions={
+        <>
+          <SecondaryLink href="/">退出管理后台</SecondaryLink>
+          <SecondaryLink href="/observer">观察员只读入口</SecondaryLink>
+        </>
+      }
+      description={`当前以 ${access.user.displayName} 登录。所有后台权限继续由服务端按有效子角色检查。`}
+      eyebrow="Operations"
+      title="管理后台"
+    >
       <div className="grid gap-8">
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           {[
