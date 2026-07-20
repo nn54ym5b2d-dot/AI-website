@@ -149,6 +149,15 @@ enum PaymentStatus {
   @@map("payment_status")
 }
 
+enum RefundStatus {
+  pending
+  success
+  failed
+  cancelled
+
+  @@map("refund_status")
+}
+
 model User {
   id                 String       @id @default(uuid()) @db.Uuid
   displayName        String       @map("display_name")
@@ -166,14 +175,18 @@ model User {
   termsAcceptances            UserTermsAcceptance[]
   roleMemberships             UserRoleMembership[]
   uploaderProfile             UploaderProfile?
-  inviteCodesCreated          InviteCode[]             @relation("InviteCreatedBy")
-  inviteCodesUsed             InviteCode[]             @relation("InviteUsedBy")
-  adminRoleAssignments        AdminRoleAssignment[]    @relation("AdminRoleUser")
-  adminRoleAssignmentsCreated AdminRoleAssignment[]    @relation("AdminRoleCreatedBy")
+  inviteCodesCreated          InviteCode[]                 @relation("InviteCreatedBy")
+  inviteCodesUsed             InviteCode[]                 @relation("InviteUsedBy")
+  adminRoleAssignments        AdminRoleAssignment[]        @relation("AdminRoleUser")
+  adminRoleAssignmentsCreated AdminRoleAssignment[]        @relation("AdminRoleCreatedBy")
   observerProfile             ObserverProfile?
   sessions                    UserSession[]
-  assetFilesUploaded          AssetFile[]              @relation("AssetFileUploadedBy")
-  assetsReviewed              Asset[]                  @relation("AssetReviewedBy")
+  assetFilesUploaded          AssetFile[]                  @relation("AssetFileUploadedBy")
+  assetsReviewed              Asset[]                      @relation("AssetReviewedBy")
+  assetReviewEvents           AssetReviewEvent[]
+  certificationsVerified      CertificationRecord[]        @relation("CertificationVerifiedBy")
+  certificationRefundRequests CertificationRefundRequest[] @relation("CertificationRefundRequestedBy")
+  auditLogs                   AuditLog[]
   uploadIntents               UploadIntent[]
   certificationFeeCharges     CertificationFeeCharge[]
   idempotencyRecords          IdempotencyRecord[]
@@ -346,31 +359,36 @@ model AuthChallenge {
 }
 
 model Asset {
-  id                     String                  @id @default(uuid()) @db.Uuid
-  uploaderProfileId      String                  @map("uploader_profile_id") @db.Uuid
-  assetType              AssetType               @map("asset_type")
-  title                  String
-  description            String?
-  reviewStatus           AssetReviewStatus       @default(draft) @map("review_status")
-  listingStatus          AssetListingStatus      @default(unlisted) @map("listing_status")
-  certificationStatus    CertificationStatus     @default(not_started) @map("certification_status")
-  priceCents             Int                     @map("price_cents")
-  currency               String                  @default("CNY")
-  rejectionReason        String?                 @map("rejection_reason")
-  submittedAt            DateTime?               @map("submitted_at") @db.Timestamptz(3)
-  reviewedByUserId       String?                 @map("reviewed_by_user_id") @db.Uuid
-  reviewedAt             DateTime?               @map("reviewed_at") @db.Timestamptz(3)
-  listedAt               DateTime?               @map("listed_at") @db.Timestamptz(3)
-  createdAt              DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt              DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt              DateTime?               @map("deleted_at") @db.Timestamptz(3)
-  uploaderProfile        UploaderProfile         @relation(fields: [uploaderProfileId], references: [id])
-  reviewedBy             User?                   @relation("AssetReviewedBy", fields: [reviewedByUserId], references: [id])
-  tags                   AssetTag[]
-  files                  AssetFile[]
-  uploadIntents          UploadIntent[]
-  processingJobs         AssetDerivativeJob[]
-  certificationFeeCharge CertificationFeeCharge?
+  id                         String                      @id @default(uuid()) @db.Uuid
+  uploaderProfileId          String                      @map("uploader_profile_id") @db.Uuid
+  assetType                  AssetType                   @map("asset_type")
+  title                      String
+  description                String?
+  category                   String?
+  reviewStatus               AssetReviewStatus           @default(draft) @map("review_status")
+  listingStatus              AssetListingStatus          @default(unlisted) @map("listing_status")
+  certificationStatus        CertificationStatus         @default(not_started) @map("certification_status")
+  priceCents                 Int                         @map("price_cents")
+  currency                   String                      @default("CNY")
+  rejectionReason            String?                     @map("rejection_reason")
+  submittedAt                DateTime?                   @map("submitted_at") @db.Timestamptz(3)
+  reviewedByUserId           String?                     @map("reviewed_by_user_id") @db.Uuid
+  reviewedAt                 DateTime?                   @map("reviewed_at") @db.Timestamptz(3)
+  listedAt                   DateTime?                   @map("listed_at") @db.Timestamptz(3)
+  createdAt                  DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                  DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt                  DateTime?                   @map("deleted_at") @db.Timestamptz(3)
+  uploaderProfile            UploaderProfile             @relation(fields: [uploaderProfileId], references: [id])
+  reviewedBy                 User?                       @relation("AssetReviewedBy", fields: [reviewedByUserId], references: [id])
+  tags                       AssetTag[]
+  files                      AssetFile[]
+  uploadIntents              UploadIntent[]
+  processingJobs             AssetDerivativeJob[]
+  certificationFeeCharge     CertificationFeeCharge?
+  reviewEvents               AssetReviewEvent[]
+  certificationRecord        CertificationRecord?
+  certificationRefundRequest CertificationRefundRequest?
+  auditLogs                  AuditLog[]
 
   @@index([assetType, listingStatus, certificationStatus])
   @@index([uploaderProfileId, createdAt])
@@ -392,26 +410,28 @@ model AssetTag {
 }
 
 model AssetFile {
-  id                    String               @id @default(uuid()) @db.Uuid
-  assetId               String               @map("asset_id") @db.Uuid
-  uploadedByUserId      String               @map("uploaded_by_user_id") @db.Uuid
-  fileType              AssetFileType        @map("file_type")
-  accessScope           FileAccessScope      @map("access_scope")
-  cosBucket             String               @map("cos_bucket")
-  cosRegion             String               @map("cos_region")
-  cosObjectKey          String               @map("cos_object_key")
-  fileHash              String               @map("file_hash")
-  fileSizeBytes         BigInt               @map("file_size_bytes")
-  mimeType              String               @map("mime_type")
-  width                 Int?
-  height                Int?
-  metadata              Json                 @default("{}")
-  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
-  deletedAt             DateTime?            @map("deleted_at") @db.Timestamptz(3)
-  asset                 Asset                @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  uploadedBy            User                 @relation("AssetFileUploadedBy", fields: [uploadedByUserId], references: [id])
-  completedUploadIntent UploadIntent?
-  derivativeSourceJobs  AssetDerivativeJob[] @relation("DerivativeSourceFile")
+  id                     String                @id @default(uuid()) @db.Uuid
+  assetId                String                @map("asset_id") @db.Uuid
+  uploadedByUserId       String                @map("uploaded_by_user_id") @db.Uuid
+  fileType               AssetFileType         @map("file_type")
+  accessScope            FileAccessScope       @map("access_scope")
+  cosBucket              String                @map("cos_bucket")
+  cosRegion              String                @map("cos_region")
+  cosObjectKey           String                @map("cos_object_key")
+  fileHash               String                @map("file_hash")
+  fileSizeBytes          BigInt                @map("file_size_bytes")
+  mimeType               String                @map("mime_type")
+  width                  Int?
+  height                 Int?
+  metadata               Json                  @default("{}")
+  createdAt              DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt              DateTime?             @map("deleted_at") @db.Timestamptz(3)
+  asset                  Asset                 @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  uploadedBy             User                  @relation("AssetFileUploadedBy", fields: [uploadedByUserId], references: [id])
+  completedUploadIntent  UploadIntent?
+  derivativeSourceJobs   AssetDerivativeJob[]  @relation("DerivativeSourceFile")
+  certificateFileFor     CertificationRecord[] @relation("CertificationFile")
+  certificateSnapshotFor CertificationRecord[] @relation("CertificationSnapshotFile")
 
   @@unique([cosBucket, cosRegion, cosObjectKey])
   @@index([assetId, fileType])
@@ -476,21 +496,102 @@ model AssetDerivativeJob {
 }
 
 model CertificationFeeCharge {
-  id             String        @id @default(uuid()) @db.Uuid
-  assetId        String        @unique @map("asset_id") @db.Uuid
-  uploaderUserId String        @map("uploader_user_id") @db.Uuid
-  amountCents    Int           @default(1000) @map("amount_cents")
-  currency       String        @default("CNY")
-  status         PaymentStatus @default(pending)
-  paidAt         DateTime?     @map("paid_at") @db.Timestamptz(3)
-  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
-  asset          Asset         @relation(fields: [assetId], references: [id])
-  uploaderUser   User          @relation(fields: [uploaderUserId], references: [id])
+  id             String                      @id @default(uuid()) @db.Uuid
+  assetId        String                      @unique @map("asset_id") @db.Uuid
+  uploaderUserId String                      @map("uploader_user_id") @db.Uuid
+  amountCents    Int                         @default(1000) @map("amount_cents")
+  currency       String                      @default("CNY")
+  status         PaymentStatus               @default(pending)
+  paidAt         DateTime?                   @map("paid_at") @db.Timestamptz(3)
+  createdAt      DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  asset          Asset                       @relation(fields: [assetId], references: [id])
+  uploaderUser   User                        @relation(fields: [uploaderUserId], references: [id])
+  refundRequest  CertificationRefundRequest?
 
   @@index([uploaderUserId, createdAt])
   @@index([status, createdAt])
   @@map("certification_fee_charges")
+}
+
+model AssetReviewEvent {
+  id          String             @id @default(uuid()) @db.Uuid
+  assetId     String             @map("asset_id") @db.Uuid
+  fromStatus  AssetReviewStatus? @map("from_status")
+  toStatus    AssetReviewStatus  @map("to_status")
+  actorUserId String             @map("actor_user_id") @db.Uuid
+  reason      String?
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  asset       Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor       User               @relation(fields: [actorUserId], references: [id])
+
+  @@index([assetId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("asset_review_events")
+}
+
+model CertificationRecord {
+  id                        String              @id @default(uuid()) @db.Uuid
+  assetId                   String              @unique @map("asset_id") @db.Uuid
+  status                    CertificationStatus @default(certifying)
+  governmentSiteName        String?             @map("government_site_name")
+  certificateNo             String?             @map("certificate_no")
+  credential                String?
+  certificateFileId         String?             @map("certificate_file_id") @db.Uuid
+  certificateSnapshotFileId String?             @map("certificate_snapshot_file_id") @db.Uuid
+  certificateIssuedAt       DateTime?           @map("certificate_issued_at") @db.Timestamptz(3)
+  certificationStartedAt    DateTime?           @map("certification_started_at") @db.Timestamptz(3)
+  verifiedByUserId          String?             @map("verified_by_user_id") @db.Uuid
+  verifiedAt                DateTime?           @map("verified_at") @db.Timestamptz(3)
+  notes                     String?
+  createdAt                 DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                 DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  asset                     Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  certificateFile           AssetFile?          @relation("CertificationFile", fields: [certificateFileId], references: [id])
+  certificateSnapshotFile   AssetFile?          @relation("CertificationSnapshotFile", fields: [certificateSnapshotFileId], references: [id])
+  verifiedBy                User?               @relation("CertificationVerifiedBy", fields: [verifiedByUserId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("certification_records")
+}
+
+model CertificationRefundRequest {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  assetId                  String                 @unique @map("asset_id") @db.Uuid
+  certificationFeeChargeId String                 @unique @map("certification_fee_charge_id") @db.Uuid
+  amountCents              Int                    @map("amount_cents")
+  currency                 String                 @default("CNY")
+  reason                   String
+  status                   RefundStatus           @default(pending)
+  requestedByUserId        String                 @map("requested_by_user_id") @db.Uuid
+  requestedAt              DateTime               @default(now()) @map("requested_at") @db.Timestamptz(3)
+  createdAt                DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  asset                    Asset                  @relation(fields: [assetId], references: [id])
+  certificationFeeCharge   CertificationFeeCharge @relation(fields: [certificationFeeChargeId], references: [id])
+  requestedBy              User                   @relation("CertificationRefundRequestedBy", fields: [requestedByUserId], references: [id])
+
+  @@index([status, requestedAt])
+  @@map("certification_refund_requests")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String   @map("actor_user_id") @db.Uuid
+  action      String
+  targetType  String   @map("target_type")
+  targetId    String?  @map("target_id") @db.Uuid
+  assetId     String?  @map("asset_id") @db.Uuid
+  requestId   String?  @map("request_id")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  actor       User     @relation(fields: [actorUserId], references: [id])
+  asset       Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([assetId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
 }
 
 model IdempotencyRecord {

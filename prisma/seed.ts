@@ -164,6 +164,16 @@ async function main() {
     displayName: "本地超级管理员",
     role: "admin"
   });
+  const operator = await ensureIdentityUser({
+    email: "operator@example.test",
+    displayName: "本地运营管理员",
+    role: "admin"
+  });
+  const finance = await ensureIdentityUser({
+    email: "finance@example.test",
+    displayName: "本地财务管理员",
+    role: "admin"
+  });
   const observer = await ensureIdentityUser({
     email: "observer@example.test",
     displayName: "本地外部观察员",
@@ -176,6 +186,24 @@ async function main() {
     create: {
       userId: admin.id,
       adminRole: "super_admin",
+      createdByUserId: admin.id
+    }
+  });
+  await prisma.adminRoleAssignment.upsert({
+    where: { userId_adminRole: { userId: operator.id, adminRole: "operator" } },
+    update: { status: "active" },
+    create: {
+      userId: operator.id,
+      adminRole: "operator",
+      createdByUserId: admin.id
+    }
+  });
+  await prisma.adminRoleAssignment.upsert({
+    where: { userId_adminRole: { userId: finance.id, adminRole: "finance" } },
+    update: { status: "active" },
+    create: {
+      userId: finance.id,
+      adminRole: "finance",
       createdByUserId: admin.id
     }
   });
@@ -236,7 +264,7 @@ async function main() {
     }
   });
 
-  for (const assetSeed of seededAssets) {
+  for (const [assetIndex, assetSeed] of seededAssets.entries()) {
     await prisma.asset.upsert({
       where: { id: assetSeed.id },
       update: {
@@ -363,6 +391,234 @@ async function main() {
         }
       });
     }
+
+    const certificateFileId = `40000000-0000-4000-8000-${String(assetIndex + 1).padStart(12, "0")}`;
+    await prisma.assetFile.upsert({
+      where: { id: certificateFileId },
+      update: {
+        assetId: assetSeed.id,
+        uploadedByUserId: admin.id,
+        fileType: "certificate_file",
+        accessScope: "private",
+        cosBucket: "local-private-certificates",
+        cosRegion: "local",
+        cosObjectKey: `t012/certificates/${assetSeed.id}/certificate.pdf`,
+        fileHash: hashContent(`${assetSeed.id}:certificate:t012-local-v1`),
+        fileSizeBytes: 240_000n,
+        mimeType: "application/pdf",
+        metadata: {
+          storageProvider: "local_private_fixture",
+          providerDisclosure: "本地测试只保存证书文件元数据，不保存文件正文。"
+        },
+        deletedAt: null
+      },
+      create: {
+        id: certificateFileId,
+        assetId: assetSeed.id,
+        uploadedByUserId: admin.id,
+        fileType: "certificate_file",
+        accessScope: "private",
+        cosBucket: "local-private-certificates",
+        cosRegion: "local",
+        cosObjectKey: `t012/certificates/${assetSeed.id}/certificate.pdf`,
+        fileHash: hashContent(`${assetSeed.id}:certificate:t012-local-v1`),
+        fileSizeBytes: 240_000n,
+        mimeType: "application/pdf",
+        metadata: {
+          storageProvider: "local_private_fixture",
+          providerDisclosure: "本地测试只保存证书文件元数据，不保存文件正文。"
+        }
+      }
+    });
+    await prisma.certificationRecord.upsert({
+      where: { assetId: assetSeed.id },
+      update: {
+        status: "certified",
+        governmentSiteName: "本地测试认证来源（非真实机构）",
+        certificateNo: `LOCAL-CERT-${assetIndex + 1}`,
+        credential: `LOCAL-CREDENTIAL-${assetIndex + 1}`,
+        certificateFileId,
+        certificateIssuedAt: new Date("2026-07-16T08:00:00.000Z"),
+        certificationStartedAt: new Date("2026-07-15T09:00:00.000Z"),
+        verifiedByUserId: admin.id,
+        verifiedAt: new Date("2026-07-16T08:00:00.000Z"),
+        notes: "本地非真实认证记录。"
+      },
+      create: {
+        assetId: assetSeed.id,
+        status: "certified",
+        governmentSiteName: "本地测试认证来源（非真实机构）",
+        certificateNo: `LOCAL-CERT-${assetIndex + 1}`,
+        credential: `LOCAL-CREDENTIAL-${assetIndex + 1}`,
+        certificateFileId,
+        certificateIssuedAt: new Date("2026-07-16T08:00:00.000Z"),
+        certificationStartedAt: new Date("2026-07-15T09:00:00.000Z"),
+        verifiedByUserId: admin.id,
+        verifiedAt: new Date("2026-07-16T08:00:00.000Z"),
+        notes: "本地非真实认证记录。"
+      }
+    });
+  }
+
+  const pendingReviewFixtures = [
+    {
+      id: "11000000-0000-4000-8000-000000000001",
+      type: "person" as const,
+      title: "待初审人物素材｜本地测试",
+      category: "人物参考",
+      originalId: "21000000-0000-4000-8000-000000000001",
+      previewId: "31000000-0000-4000-8000-000000000001",
+      previewObjectKey: "t010/aa000000-0000-4000-8000-000000000001.png",
+      proofId: "41000000-0000-4000-8000-000000000001",
+      chargeId: "51000000-0000-4000-8000-000000000001"
+    },
+    {
+      id: "11000000-0000-4000-8000-000000000002",
+      type: "object" as const,
+      title: "待初审物件素材｜本地测试",
+      category: "生活道具",
+      originalId: "21000000-0000-4000-8000-000000000002",
+      previewId: "31000000-0000-4000-8000-000000000002",
+      previewObjectKey: "t010/bb000000-0000-4000-8000-000000000002.png",
+      proofId: null,
+      chargeId: "51000000-0000-4000-8000-000000000002"
+    }
+  ];
+
+  for (const [index, fixture] of pendingReviewFixtures.entries()) {
+    await prisma.asset.upsert({
+      where: { id: fixture.id },
+      update: {},
+      create: {
+        id: fixture.id,
+        uploaderProfileId: uploaderProfile.id,
+        assetType: fixture.type,
+        title: fixture.title,
+        description: "T012 本地审核流程样本，不代表真实素材或真实支付。",
+        category: fixture.category,
+        reviewStatus: "pending_review",
+        listingStatus: "unlisted",
+        certificationStatus: "pending_review",
+        priceCents: fixture.type === "object" ? 1000 : 5000,
+        currency: "CNY",
+        submittedAt: new Date(`2026-07-20T0${index + 1}:00:00.000Z`)
+      }
+    });
+    await prisma.assetTag.createMany({
+      data: ["T012", fixture.type === "person" ? "人物" : "物件"].map((tag) => ({
+        assetId: fixture.id,
+        tag
+      })),
+      skipDuplicates: true
+    });
+    await prisma.assetFile.upsert({
+      where: { id: fixture.originalId },
+      update: {
+        assetId: fixture.id,
+        uploadedByUserId: assetUploader.id,
+        fileType: "original",
+        accessScope: "private",
+        cosBucket: "local-private-originals",
+        cosRegion: "local",
+        cosObjectKey: `t012/review/${fixture.id}/original.png`,
+        fileHash: hashContent(`${fixture.id}:original`),
+        fileSizeBytes: 2_000_000n,
+        mimeType: "image/png",
+        metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" },
+        deletedAt: null
+      },
+      create: {
+        id: fixture.originalId,
+        assetId: fixture.id,
+        uploadedByUserId: assetUploader.id,
+        fileType: "original",
+        accessScope: "private",
+        cosBucket: "local-private-originals",
+        cosRegion: "local",
+        cosObjectKey: `t012/review/${fixture.id}/original.png`,
+        fileHash: hashContent(`${fixture.id}:original`),
+        fileSizeBytes: 2_000_000n,
+        mimeType: "image/png",
+        metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" }
+      }
+    });
+    await prisma.assetFile.upsert({
+      where: { id: fixture.previewId },
+      update: {
+        assetId: fixture.id,
+        uploadedByUserId: assetUploader.id,
+        fileType: "preview",
+        accessScope: "public_preview",
+        cosBucket: "local-watermarked-previews",
+        cosRegion: "local",
+        cosObjectKey: fixture.previewObjectKey,
+        fileHash: hashContent(`${fixture.id}:preview`),
+        fileSizeBytes: 800_000n,
+        mimeType: "image/png",
+        metadata: { processingStatus: "ready", watermarkTemplateVersion: "t012-local-v1" },
+        deletedAt: null
+      },
+      create: {
+        id: fixture.previewId,
+        assetId: fixture.id,
+        uploadedByUserId: assetUploader.id,
+        fileType: "preview",
+        accessScope: "public_preview",
+        cosBucket: "local-watermarked-previews",
+        cosRegion: "local",
+        cosObjectKey: fixture.previewObjectKey,
+        fileHash: hashContent(`${fixture.id}:preview`),
+        fileSizeBytes: 800_000n,
+        mimeType: "image/png",
+        metadata: { processingStatus: "ready", watermarkTemplateVersion: "t012-local-v1" }
+      }
+    });
+    if (fixture.proofId) {
+      await prisma.assetFile.upsert({
+        where: { id: fixture.proofId },
+        update: {
+          assetId: fixture.id,
+          uploadedByUserId: assetUploader.id,
+          fileType: "person_proof",
+          accessScope: "private",
+          cosBucket: "local-private-proofs",
+          cosRegion: "local",
+          cosObjectKey: `t012/review/${fixture.id}/proof.pdf`,
+          fileHash: hashContent(`${fixture.id}:proof`),
+          fileSizeBytes: 300_000n,
+          mimeType: "application/pdf",
+          metadata: { storageProvider: "local_private_fixture" },
+          deletedAt: null
+        },
+        create: {
+          id: fixture.proofId,
+          assetId: fixture.id,
+          uploadedByUserId: assetUploader.id,
+          fileType: "person_proof",
+          accessScope: "private",
+          cosBucket: "local-private-proofs",
+          cosRegion: "local",
+          cosObjectKey: `t012/review/${fixture.id}/proof.pdf`,
+          fileHash: hashContent(`${fixture.id}:proof`),
+          fileSizeBytes: 300_000n,
+          mimeType: "application/pdf",
+          metadata: { storageProvider: "local_private_fixture" }
+        }
+      });
+    }
+    await prisma.certificationFeeCharge.upsert({
+      where: { assetId: fixture.id },
+      update: {},
+      create: {
+        id: fixture.chargeId,
+        assetId: fixture.id,
+        uploaderUserId: assetUploader.id,
+        amountCents: 1000,
+        currency: "CNY",
+        status: "success",
+        paidAt: new Date("2026-07-20T00:30:00.000Z")
+      }
+    });
   }
 }
 

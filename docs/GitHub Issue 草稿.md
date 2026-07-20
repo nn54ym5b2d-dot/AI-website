@@ -1,12 +1,12 @@
 # GitHub Issue 草稿
 
-版本：v3.7
+版本：v3.9
 日期：2026-07-20
-状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
+状态：已由 Robert 审核确认；T012A / #33 已创建并加入 GitHub Project #1，#8-#11、#16 已同步审计增补
 
 ## 使用说明
 
-本文件保留 T006-T017 与 T009A 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
+本文件保留 T006-T017、T009A 与 T012A 的 Issue 草稿内容和 GitHub Issue 映射，方便后续核对任务来源。
 
 GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 
@@ -21,14 +21,15 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
-| T012 | #7 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
-| T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T012 | #7 / PR #32 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
+| T012A | #33 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
+| T013 | #8 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T011 已由 Robert 验收并通过 PR #30 压缩合并，Issue #6 已关闭，GitHub Project #1 已转为 Done；T012 的 T011 前置已满足并转为 Ready。
+T011 已由 Robert 验收并通过 PR #30 压缩合并，Issue #6 已关闭，GitHub Project #1 已转为 Done。T012 已在独立分支完成本地实现和自动化检查，通过草稿 PR #32 进入 Review；修复测试共享数据库竞态后的 Actions `verify` 已通过，Issue #7 已关联 PR，Project 卡片已转 Review，等待 Robert 页面验收。全站占位审计后已创建 T012A / Issue #33，并扩充 Issues #8-#11、#16；Project #1 已加入 #33 并设为 Blocked，T013 已调整为 Blocked，重新读取确认 T012A-T016 均为 Blocked。
 
 每个任务默认规则：
 
@@ -476,6 +477,42 @@ T012
 
 ---
 
+## [T012A] 后台基础管理与现有入口补全
+
+任务目标：
+补齐全站审计发现的、已进入正式导航但没有真实功能或没有后续明确归属的基础管理和现有业务入口。
+
+相关资料：
+- `docs/全站占位功能审计.md`
+- `docs/页面清单.md`
+- `docs/API.md`
+- `docs/数据库设计.md`
+- `docs/角色权限.md`
+
+关联任务编号：
+T012A；前置 T012，后置 T013。
+
+本次范围：
+- 完成 `/admin/invitations` 真实列表、创建、一次明文、掩码回显和禁用未使用邀请码。
+- 落地 `system_settings` migration/seed、API 与 `/admin/settings`，并区分 365 天平台下载资格和短时 ZIP URL 期限。
+- 完成 `/account/uploads`、`/account/upload-status`、`/account/uploader-profile` 和个人中心已落地计数真实化。
+- 提供管理员用户列表/详情与角色摘要只读基础；高权限写操作留给 T015。
+- 补充公开安全认证摘要，把首页假“本周精选”改为“最新上架”。
+- 增加 `/terms`、`/privacy`、`/license` 版本化展示；草案/测试文本明确标识，正式文本留给 T017。
+- 等待 T013-T015 的页面移除假记录和无行为按钮，改为准确不可用状态。
+
+不做范围：
+- 不实现订单、支付、ZIP、收益或观察员汇总。
+- 不接真实外部服务，不开放角色和观察员账号高权限写操作。
+
+验收标准：
+- 上述页面使用真实 PostgreSQL/API 或准确不可用状态，不落入通用三条演示记录。
+- 邀请码、设置权限和设置快照有自动化测试。
+- 公开认证响应无敏感文件和存储字段。
+- lint、typecheck、PostgreSQL 测试、build 和桌面/390px 浏览器复核通过。
+
+---
+
 ## [T013] 开发订单、支付测试流程和授权记录
 
 任务目标：
@@ -525,6 +562,11 @@ T013
 
 备注：
 真实支付接入前，必须保持密钥不进入代码仓库。
+
+全站占位审计增补：
+- 前置改为 T012A / Issue #33。
+- 必须完成服务端待购/结算、认证费支付与退款、`/account/purchases`、`/account/licenses`、`/admin/orders`、`/admin/payments`、`/admin/refunds`、`/admin/licenses`，并移除这些入口的通用演示页。
+- 价格以系统设置为服务端权威源，订单明细保存不可变快照。
 
 ---
 
@@ -580,6 +622,11 @@ T014
 备注：
 下载入口有效期已由 Robert 确认为默认 365 天。
 
+全站占位审计增补：
+- 必须完成 `/account/downloads`、`/account/revenue`、`/admin/revenue` 专用真实页面。
+- 365 天平台下载资格与每次短时 ZIP URL 分离。
+- 热门排序使用真实订单/下载信号；若 MVP 不做则移除选项，不长期回退最新冒充热门。
+
 ---
 
 ## [T015] 开发后台权限和外部观察员只读视图
@@ -634,6 +681,11 @@ T015
 备注：
 这是权限敏感任务，完成后需要重点 review。
 
+全站占位审计增补：
+- 完成 `/admin/users` 角色/状态写操作、最后超级管理员保护和敏感字段遮罩。
+- 完成 `/admin/observer-accounts` 账号生命周期；把 `/observer` 从字段说明升级为真实汇总看板。
+- 用户/观察员正式路由不得继续使用通用假记录或无行为按钮。
+
 ---
 
 ## [T016] MVP 全流程测试和修正
@@ -685,6 +737,11 @@ T016
 备注：
 本任务完成后，项目进入上线准备和真实外部服务接入检查阶段。
 
+全站占位审计增补：
+- 前置包括 T012A-T015。
+- 逐一复核全部 P0/P1 正式导航，禁止假业务记录、演示金额和可点击无行为按钮。
+- 未知动态 section 返回 404；移除正式导航对通用演示页的依赖，确认无引用后清理废弃演示文件。
+
 ---
 
 ## [T017] 真实外部服务、腾讯云部署与上线准备
@@ -705,6 +762,9 @@ T017
 - 接入已开通的腾讯云 COS 与 TencentDB for PostgreSQL，并验证最小权限、备份和恢复流程。
 - 接入腾讯云图片处理能力与 CDN：原文件保持私有，异步预生成独立水印预览图/缩略图，CDN 只分发水印衍生图；Next.js 只处理元数据、权限和签名。
 - 按已提供的商户与平台配置接入微信支付、支付宝、短信/邮件和微信登录；验证真实回调、重试和对账。
+- 在政府认证网站、路径和许可确认后实现准确跳转/人工交接，不暗示未取得的政府合作或背书。
+- 换入经正式审阅的服务条款、隐私政策、统一商业授权和上传者声明，保留版本、接受时间和授权快照。
+- 移除生产环境可使用的 `local_test` provider、非真实 seed、测试支付入口和草案/测试标识。
 - 完成腾讯云应用部署、HTTPS、域名、备案、环境变量和监控告警检查。
 - 执行生产前安全、隐私、数据保留、密钥轮换和回滚演练。
 

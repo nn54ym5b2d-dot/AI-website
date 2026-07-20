@@ -39,4 +39,10 @@ const testFiles = (await readdir("tests"))
   .sort()
   .map((file) => `tests/${file}`);
 
-await run(process.execPath, ["--import", "tsx", "--test", ...testFiles], runtimeEnv);
+// All integration test files share the same reset PostgreSQL database. Run them
+// sequentially so one file cannot observe another file's in-progress mutations.
+await run(
+  process.execPath,
+  ["--import", "tsx", "--test", "--test-concurrency=1", ...testFiles],
+  runtimeEnv
+);

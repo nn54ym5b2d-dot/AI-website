@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v3.5
+版本：v3.7
 日期：2026-07-20
-状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012、T013 Ready
+状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012 Review；T012A-T016 Blocked
 
 ## 1. 文档定位
 
@@ -217,9 +217,10 @@ T010 实现状态：第 5 节的素材列表、详情、分类和标签接口已
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `GET /api/v1/assets` | 公开 | `q`、`type: person\|object\|scene`、`tag`、`minPriceCents`、`maxPriceCents`、`listedAfter`、`sort: newest\|popular\|price_asc\|price_desc`、`cursor`、`limit` | 素材卡片列表：`id`、`title`、`type`、`priceCents`、`currency`、`certificationStatus`、已生成水印缩略图/预览图的 CDN 地址 | `VALIDATION_ERROR` |
-| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、带水印的预览文件、认证展示状态、价格、授权摘要；不含原文件和证明材料 | `RESOURCE_NOT_FOUND` |
+| `GET /api/v1/assets/{assetId}` | 公开 | 无 | 详情：基础信息、标签、带水印的预览文件、价格、授权摘要，以及可公开的认证状态、证书编号、来源和签发日期；不含原文件、证明材料、证书/凭证文件或内部备注 | `RESOURCE_NOT_FOUND` |
 | `GET /api/v1/categories` | 公开 | 无 | 首版固定三类素材及展示名称 | 无 |
 | `GET /api/v1/tags` | 公开 | `q`、`limit` | 已上架素材使用的标签建议 | `VALIDATION_ERROR` |
+| `GET /api/v1/legal-documents/current?type=terms_of_service\|privacy_policy\|commercial_license` | 公开 | 文档类型 | 当前有效版本、标题、正文、版本号和生效时间；非正式本地文本带明确环境标记 | `RESOURCE_NOT_FOUND`、`VALIDATION_ERROR` |
 
 搜索参数必须限制长度并做数据库参数化查询。公开接口只返回已经生成成功的独立水印预览图/缩略图 CDN 地址；不得在公开请求中临时读取原图加工，也不能由预览地址推导原文件地址。T010 使用本地种子或受控适配器提供已生成衍生图，真实腾讯云图片处理和 CDN 在 T017 接入。
 
@@ -289,6 +290,7 @@ T011 已实现提交前校验：至少一个原文件、每个原文件的衍生
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `GET /api/v1/admin/assets` | 超级、运营 | 类型、审核/认证/上架状态、分页参数 | 后台素材列表；人物证明材料只返回“是否存在”，不直接返回文件地址 | `FORBIDDEN` |
+| `GET /api/v1/admin/dashboard` | 超级、运营 | 无 | 待审核、认证中、认证异常和已上架数量 | `FORBIDDEN` |
 | `GET /api/v1/admin/assets/{assetId}` | 超级、运营 | 无 | 素材、文件摘要、审核事件和认证记录 | `RESOURCE_NOT_FOUND` |
 | `PATCH /api/v1/admin/assets/{assetId}` | 超级、运营 | `title?`、`description?`、`tags?`、`category?` | 更新后的素材基础信息；写入操作日志 | `VALIDATION_ERROR`、`FORBIDDEN` |
 | `POST /api/v1/admin/assets/{assetId}/review` | 超级、运营 | `decision: approve\|reject`；驳回时必填 `reason` | 新审核状态、认证状态、`reviewedAt` | `STATE_TRANSITION_INVALID`、`VALIDATION_ERROR` |
@@ -298,11 +300,14 @@ T011 已实现提交前校验：至少一个原文件、每个原文件的衍生
 | `POST /api/v1/admin/certifications/{certificationId}/file-uploads` | 超级、运营 | 与第 6.2 节相同，`fileType: certificate_file\|certificate_snapshot` | 管理员专用短期上传信息 | `UPLOAD_FILE_REJECTED` |
 | `POST /api/v1/admin/certifications/{certificationId}/file-uploads/{uploadId}/complete` | 超级、运营 | 可选 `etag` | 经核验的证书文件 ID | `UPLOAD_INTENT_EXPIRED`、`UPLOAD_FILE_REJECTED` |
 | `POST /api/v1/admin/certifications/{certificationId}/verify` | 超级、运营 | `status: certifying\|certified\|exception`、`governmentSiteName?`、`certificateNo?`、`certificateFileId?`、`snapshotFileId?`、`issuedAt?`、`notes?` | 更新后的认证记录 | `CERTIFICATE_REQUIRED`、`STATE_TRANSITION_INVALID` |
-| `GET /api/v1/admin/files/{fileId}/view` | 超级、运营 | 无 | 校验文件用途后记录敏感文件访问，并 `302` 跳转到不超过 10 分钟的签名查看地址 | `RESOURCE_NOT_FOUND`、`FORBIDDEN` |
+| `GET /api/v1/admin/files/{fileId}/view` | 超级、运营 | 无 | 校验文件用途后记录敏感文件访问，并 `302` 跳转到不超过 5 分钟的签名查看地址 | `RESOURCE_NOT_FOUND`、`FORBIDDEN` |
+| `GET /api/v1/admin/audit-logs` | 超级、运营 | 动作、素材 ID | 最近 100 条脱敏操作日志 | `FORBIDDEN` |
 
 该查看接口只用于审核所需的人物证明、认证证书和凭证；财务管理员、外部观察员和普通用户无权访问。响应不返回 object key，短期地址不得写日志或持久化，访问人、文件、素材、时间和 `requestId` 必须进入操作日志。
 
 审核驳回时创建认证上传费退款请求；退款最终成功状态只能来自已验证的支付平台回调或主动查询结果，不能由前端或管理员任意写成成功。所有审核、上架、下架和认证操作必须写入审核事件或操作日志。
+
+T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 19/19 集成测试。证书上传和敏感文件查看在 `local_test` provider 下只验证元数据和 5 分钟 HMAC token，不读取或保存文件正文；`/local-view` 仅显示明确的本地测试说明。生产环境不得沿用该查看页，必须在 T017 替换为真实私有 COS 对象校验和短时签名地址。
 
 ## 8. 订单与支付
 
@@ -481,9 +486,12 @@ T011 已实现提交前校验：至少一个原文件、每个原文件的衍生
 | T010 素材浏览和详情页 | 第 5 节 |
 | T011 上传者素材提交流程 | 第 6 节 |
 | T012 后台审核和认证记录 | 第 7、10 节 |
+| T012A 后台基础管理与现有入口补全 | 第 4-6、10、13 节 |
 | T013 订单、支付测试流程和授权记录 | 第 8、12 节 |
 | T014 ZIP 下载和收益记录 | 第 9、12 节 |
 | T015 后台权限和外部观察员 | 第 10-11、13 节 |
+| T016 全流程和无占位收口 | 第 2-13 节全部正式路由 |
+| T017 生产 provider 和正式法律文本 | 第 2、4-13 节外部服务边界 |
 
 ## 15. 仍待确认但不阻塞接口结构
 
