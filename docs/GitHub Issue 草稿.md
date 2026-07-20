@@ -1,6 +1,6 @@
 # GitHub Issue 草稿
 
-版本：v3.6
+版本：v3.7
 日期：2026-07-20
 状态：已由 Robert 审核确认，已创建到 GitHub Issues，并已加入 GitHub Project #1
 
@@ -20,15 +20,15 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T009 | #4（PR #19） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/4> |
 | T009A | #21（PR #24；状态同步 PR #25） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/21> |
 | T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
-| T011 | #6 / 草稿 PR #30 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
-| T012 | #7 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
+| T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
+| T012 | #7 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-以上状态中的 T011 已按本地实现转为 Review；草稿 PR #30 已创建，Issue #6 已补充结果评论，GitHub Project #1 已重新读取确认为 Review。
+T011 已由 Robert 验收并通过 PR #30 压缩合并，Issue #6 已关闭，GitHub Project #1 已转为 Done；T012 的 T011 前置已满足并转为 Ready。
 
 每个任务默认规则：
 
