@@ -280,10 +280,10 @@ export const adminRoutes: RouteDefinition[] = [
   {
     title: "操作日志",
     href: "/admin/audit-logs",
-    description: "查看后台关键操作记录。",
+    description: "查看素材审核、认证、上架和敏感文件访问记录。",
     priority: "P1",
-    roleEntry: "超级管理员、运营管理员、财务管理员",
-    audiences: ["super_admin", "operator", "finance"],
+    roleEntry: "超级管理员、运营管理员",
+    audiences: ["super_admin", "operator"],
     slug: "audit-logs"
   },
   {

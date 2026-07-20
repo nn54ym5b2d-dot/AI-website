@@ -1,8 +1,8 @@
 # 核心 API 细化版
 
-版本：v3.5
+版本：v3.6
 日期：2026-07-20
-状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012、T013 Ready
+状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程已完成；T012 Review；T013 Ready
 
 ## 1. 文档定位
 
@@ -289,6 +289,7 @@ T011 已实现提交前校验：至少一个原文件、每个原文件的衍生
 | 方法与路径 | 允许角色 | 请求 | 成功返回 | 主要错误 |
 |---|---|---|---|---|
 | `GET /api/v1/admin/assets` | 超级、运营 | 类型、审核/认证/上架状态、分页参数 | 后台素材列表；人物证明材料只返回“是否存在”，不直接返回文件地址 | `FORBIDDEN` |
+| `GET /api/v1/admin/dashboard` | 超级、运营 | 无 | 待审核、认证中、认证异常和已上架数量 | `FORBIDDEN` |
 | `GET /api/v1/admin/assets/{assetId}` | 超级、运营 | 无 | 素材、文件摘要、审核事件和认证记录 | `RESOURCE_NOT_FOUND` |
 | `PATCH /api/v1/admin/assets/{assetId}` | 超级、运营 | `title?`、`description?`、`tags?`、`category?` | 更新后的素材基础信息；写入操作日志 | `VALIDATION_ERROR`、`FORBIDDEN` |
 | `POST /api/v1/admin/assets/{assetId}/review` | 超级、运营 | `decision: approve\|reject`；驳回时必填 `reason` | 新审核状态、认证状态、`reviewedAt` | `STATE_TRANSITION_INVALID`、`VALIDATION_ERROR` |
@@ -298,11 +299,14 @@ T011 已实现提交前校验：至少一个原文件、每个原文件的衍生
 | `POST /api/v1/admin/certifications/{certificationId}/file-uploads` | 超级、运营 | 与第 6.2 节相同，`fileType: certificate_file\|certificate_snapshot` | 管理员专用短期上传信息 | `UPLOAD_FILE_REJECTED` |
 | `POST /api/v1/admin/certifications/{certificationId}/file-uploads/{uploadId}/complete` | 超级、运营 | 可选 `etag` | 经核验的证书文件 ID | `UPLOAD_INTENT_EXPIRED`、`UPLOAD_FILE_REJECTED` |
 | `POST /api/v1/admin/certifications/{certificationId}/verify` | 超级、运营 | `status: certifying\|certified\|exception`、`governmentSiteName?`、`certificateNo?`、`certificateFileId?`、`snapshotFileId?`、`issuedAt?`、`notes?` | 更新后的认证记录 | `CERTIFICATE_REQUIRED`、`STATE_TRANSITION_INVALID` |
-| `GET /api/v1/admin/files/{fileId}/view` | 超级、运营 | 无 | 校验文件用途后记录敏感文件访问，并 `302` 跳转到不超过 10 分钟的签名查看地址 | `RESOURCE_NOT_FOUND`、`FORBIDDEN` |
+| `GET /api/v1/admin/files/{fileId}/view` | 超级、运营 | 无 | 校验文件用途后记录敏感文件访问，并 `302` 跳转到不超过 5 分钟的签名查看地址 | `RESOURCE_NOT_FOUND`、`FORBIDDEN` |
+| `GET /api/v1/admin/audit-logs` | 超级、运营 | 动作、素材 ID | 最近 100 条脱敏操作日志 | `FORBIDDEN` |
 
 该查看接口只用于审核所需的人物证明、认证证书和凭证；财务管理员、外部观察员和普通用户无权访问。响应不返回 object key，短期地址不得写日志或持久化，访问人、文件、素材、时间和 `requestId` 必须进入操作日志。
 
 审核驳回时创建认证上传费退款请求；退款最终成功状态只能来自已验证的支付平台回调或主动查询结果，不能由前端或管理员任意写成成功。所有审核、上架、下架和认证操作必须写入审核事件或操作日志。
+
+T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 19/19 集成测试。证书上传和敏感文件查看在 `local_test` provider 下只验证元数据和 5 分钟 HMAC token，不读取或保存文件正文；`/local-view` 仅显示明确的本地测试说明。生产环境不得沿用该查看页，必须在 T017 替换为真实私有 COS 对象校验和短时签名地址。
 
 ## 8. 订单与支付
 
