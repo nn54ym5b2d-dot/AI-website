@@ -54,3 +54,11 @@ export async function requireAdminPage(nextPath: string) {
   }
   return access;
 }
+
+export async function requireUploaderPage(nextPath: string) {
+  const access = await requireAudience(nextPath, ["uploader"]);
+  if (!access.uploaderProfile || access.uploaderProfile.status !== "active") {
+    redirect("/forbidden");
+  }
+  return access as typeof access & { uploaderProfile: NonNullable<typeof access.uploaderProfile> };
+}

@@ -68,8 +68,8 @@ export function MaterialDetail({ assetId }: { assetId: string }) {
           </dl>
           <div className="mt-5 flex flex-wrap gap-2">{asset.tags.map((tag) => <Link className="rounded-full bg-paper px-3 py-1.5 text-xs text-muted hover:text-brand" href={`/search?tag=${encodeURIComponent(tag)}`} key={tag}>{tag}</Link>)}</div>
           <div className="my-6 grid gap-3 rounded-lg bg-paper p-4 text-sm">
-            <div className="flex gap-3"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-success" size={20} weight="duotone" /><div><strong className="text-ink">认证状态可查</strong><p className="mt-1 text-xs leading-5 text-muted">公开页面只展示已审核、已认证并正式上架的素材。</p></div></div>
-            <div className="flex gap-3"><FileText aria-hidden="true" className="mt-0.5 shrink-0 text-success" size={20} weight="duotone" /><div><strong className="text-ink">统一商业授权</strong><p className="mt-1 text-xs leading-5 text-muted">支付后生成永久授权记录；下载资格默认 365 天。正式授权文本仍待后续起草。</p></div></div>
+            <div className="flex gap-3"><ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-success" size={20} weight="duotone" /><div><strong className="text-ink">认证状态可查</strong><p className="mt-1 text-xs leading-5 text-muted">证书编号：{asset.certificationSummary.certificateNo}</p><p className="text-xs leading-5 text-muted">来源：{asset.certificationSummary.source ?? "未公开来源名称"} · 签发：{asset.certificationSummary.issuedAt ? new Date(asset.certificationSummary.issuedAt).toLocaleDateString("zh-CN") : "未记录"}</p></div></div>
+            <div className="flex gap-3"><FileText aria-hidden="true" className="mt-0.5 shrink-0 text-success" size={20} weight="duotone" /><div><strong className="text-ink">统一商业授权</strong><p className="mt-1 text-xs leading-5 text-muted">支付后生成永久授权记录；平台下载资格默认 {asset.licenseSummary.downloadEligibilityDays} 天。</p><Link className="mt-1 inline-block text-xs font-semibold text-brand" href="/license">查看当前授权说明</Link></div></div>
           </div>
           <PurchasePanel assetId={asset.id} priceCents={asset.priceCents} />
         </aside>

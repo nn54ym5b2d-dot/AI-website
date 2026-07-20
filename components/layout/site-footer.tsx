@@ -10,6 +10,9 @@ export function SiteFooter() {
           <p className="mt-3 text-xs">当前公开素材来自本地 PostgreSQL 非真实种子数据；真实 COS、CDN 与支付服务尚未接入。</p>
         </div>
         <nav aria-label="辅助入口" className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
+          <Link className="hover:text-ink" href="/terms">服务条款</Link>
+          <Link className="hover:text-ink" href="/privacy">隐私政策</Link>
+          <Link className="hover:text-ink" href="/license">商业授权</Link>
           <Link className="hover:text-ink" href="/admin">管理后台</Link>
           <Link className="hover:text-ink" href="/observer">观察员入口</Link>
         </nav>

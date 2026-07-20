@@ -18,6 +18,35 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
 const TEST_TERMS_VERSION = "test-2026-07-15";
 const TEST_TERMS_CONTENT =
   "本条款只用于源素库本地开发和自动化测试，不是正式平台条款，也不适用于真实交易。";
+const TEST_LEGAL_DOCUMENTS = [
+  {
+    documentType: "terms_of_service" as const,
+    version: TEST_TERMS_VERSION,
+    title: "服务条款草案（本地测试，非正式）",
+    content: TEST_TERMS_CONTENT
+  },
+  {
+    documentType: "privacy_policy" as const,
+    version: "draft-2026-07-20",
+    title: "隐私政策草案（本地测试，非正式）",
+    content: "本页面仅用于验证版本化隐私政策展示，不构成正式隐私政策或法律意见。正式文本将在 T017 经法律审阅后替换。"
+  },
+  {
+    documentType: "commercial_license" as const,
+    version: "draft-2026-07-20",
+    title: "商业授权说明草案（本地测试，非正式）",
+    content: "本页面仅用于验证商业授权版本展示。当前说明不得用于真实交易；正式授权范围、限制和争议条款将在 T017 经法律审阅后替换。"
+  }
+];
+const SYSTEM_SETTINGS = [
+  ["certification_fee_cents", 1000, "每份素材的认证上传费，单位分。"],
+  ["asset_price_rules", { person: 5000, object: 1000, scene: 5000 }, "三类素材当前统一售价，单位分。"],
+  ["uploader_share_rate", "0.8000", "上传者收益比例。"],
+  ["platform_share_rate", "0.2000", "平台收益比例。"],
+  ["observer_share_rate", "0.0000", "外部观察员收益比例。"],
+  ["download_eligibility_days", 365, "购买后的平台下载资格天数。"],
+  ["signed_download_url_ttl_minutes", 10, "每次校验授权后签发的私有 ZIP 地址有效分钟数。"]
+] as const;
 const ASSET_UPLOADER_INVITE_HASH = hashInviteCode("YSK-T010-ASSET-SEED-INTERNAL");
 
 const seededAssets = [
@@ -131,28 +160,27 @@ async function ensureIdentityUser(input: {
 }
 
 async function main() {
-  await prisma.legalDocumentVersion.upsert({
-    where: {
-      documentType_version: {
-        documentType: "terms_of_service",
-        version: TEST_TERMS_VERSION
+  for (const document of TEST_LEGAL_DOCUMENTS) {
+    await prisma.legalDocumentVersion.upsert({
+      where: {
+        documentType_version: {
+          documentType: document.documentType,
+          version: document.version
+        }
+      },
+      update: {
+        title: document.title,
+        content: document.content,
+        contentHash: hashContent(document.content),
+        retiredAt: null
+      },
+      create: {
+        ...document,
+        contentHash: hashContent(document.content),
+        effectiveAt: new Date("2026-01-01T00:00:00.000Z")
       }
-    },
-    update: {
-      title: "本地测试条款（非正式）",
-      content: TEST_TERMS_CONTENT,
-      contentHash: hashContent(TEST_TERMS_CONTENT),
-      retiredAt: null
-    },
-    create: {
-      documentType: "terms_of_service",
-      version: TEST_TERMS_VERSION,
-      title: "本地测试条款（非正式）",
-      content: TEST_TERMS_CONTENT,
-      contentHash: hashContent(TEST_TERMS_CONTENT),
-      effectiveAt: new Date("2026-01-01T00:00:00.000Z")
-    }
-  });
+    });
+  }
 
   await ensureIdentityUser({
     email: "buyer@example.test",
@@ -164,6 +192,13 @@ async function main() {
     displayName: "本地超级管理员",
     role: "admin"
   });
+  for (const [key, value, description] of SYSTEM_SETTINGS) {
+    await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value, description },
+      create: { key, value, description, updatedByUserId: admin.id }
+    });
+  }
   const operator = await ensureIdentityUser({
     email: "operator@example.test",
     displayName: "本地运营管理员",

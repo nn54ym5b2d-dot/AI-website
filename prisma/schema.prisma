@@ -190,6 +190,7 @@ model User {
   uploadIntents               UploadIntent[]
   certificationFeeCharges     CertificationFeeCharge[]
   idempotencyRecords          IdempotencyRecord[]
+  systemSettingsUpdated       SystemSetting[]              @relation("SystemSettingUpdatedBy")
 
   @@index([status, createdAt])
   @@map("users")
@@ -279,6 +280,7 @@ model InviteCode {
   id              String           @id @default(uuid()) @db.Uuid
   codeHash        String           @unique @map("code_hash")
   displayPrefix   String           @map("display_prefix")
+  note            String?
   status          InviteCodeStatus @default(unused)
   createdByUserId String           @map("created_by_user_id") @db.Uuid
   usedByUserId    String?          @map("used_by_user_id") @db.Uuid
@@ -502,6 +504,7 @@ model CertificationFeeCharge {
   amountCents    Int                         @default(1000) @map("amount_cents")
   currency       String                      @default("CNY")
   status         PaymentStatus               @default(pending)
+  settingsSnapshot Json                       @default("{}") @map("settings_snapshot")
   paidAt         DateTime?                   @map("paid_at") @db.Timestamptz(3)
   createdAt      DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -592,6 +595,19 @@ model AuditLog {
   @@index([assetId, createdAt])
   @@index([action, createdAt])
   @@map("audit_logs")
+}
+
+model SystemSetting {
+  id              String   @id @default(uuid()) @db.Uuid
+  key             String   @unique
+  value           Json
+  description     String?
+  updatedByUserId String?  @map("updated_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updatedBy       User?    @relation("SystemSettingUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  @@map("system_settings")
 }
 
 model IdempotencyRecord {

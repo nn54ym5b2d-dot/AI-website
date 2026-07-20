@@ -11,12 +11,7 @@ import {
   verifyAndFinalizeUpload
 } from "@/lib/storage/asset-provider";
 import type { UploaderAccess } from "@/lib/uploader/access";
-
-const PRICE_BY_TYPE: Record<AssetType, number> = {
-  person: 5000,
-  object: 1000,
-  scene: 5000
-};
+import { getSystemSettings, settingsSnapshot } from "@/lib/settings/service";
 
 const UPLOAD_INTENT_TTL_MS = 10 * 60 * 1000;
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
@@ -159,13 +154,14 @@ function assertDraftEditable(asset: { reviewStatus: string; certificationStatus:
 
 export async function createUploaderAsset(access: UploaderAccess, input: AssetDraftInput) {
   const tags = normalizeTags(input.tags);
+  const settings = await getSystemSettings();
   const asset = await getPrisma().asset.create({
     data: {
       uploaderProfileId: access.uploaderProfile.id,
       assetType: input.type,
       title: input.title.trim(),
       description: input.description?.trim() || null,
-      priceCents: PRICE_BY_TYPE[input.type],
+      priceCents: settings.assetPriceRules[input.type],
       tags: tags.length ? { create: tags.map((tag) => ({ tag })) } : undefined
     },
     include: { tags: true }
@@ -550,13 +546,15 @@ export async function submitUploaderAsset(
       throw new ApiError(422, "PERSON_PROOF_REQUIRED", "人物素材必须上传必要证明材料。 ");
     }
 
+    const settings = await getSystemSettings(transaction);
     const charge = await transaction.certificationFeeCharge.create({
       data: {
         assetId,
         uploaderUserId: access.user.id,
-        amountCents: 1000,
+        amountCents: settings.certificationFeeCents,
         currency: "CNY",
-        status: "pending"
+        status: "pending",
+        settingsSnapshot: settingsSnapshot(settings)
       }
     });
     const updatedAsset = await transaction.asset.update({
