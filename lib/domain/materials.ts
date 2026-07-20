@@ -11,6 +11,7 @@ import {
   type PublicAssetType,
   type PublicPreview
 } from "@/types/materials";
+import { getSystemSettings } from "@/lib/settings/service";
 
 const readyPublicPreviewWhere = {
   deletedAt: null,
@@ -52,6 +53,14 @@ const publicAssetSelect = {
       createdAt: true
     },
     orderBy: { createdAt: "asc" }
+  },
+  certificationRecord: {
+    select: {
+      status: true,
+      certificateNo: true,
+      governmentSiteName: true,
+      certificateIssuedAt: true
+    }
   }
 } satisfies Prisma.AssetSelect;
 
@@ -165,15 +174,18 @@ export async function listPublicAssets(filters: PublicAssetFilters) {
 }
 
 export async function getPublicAsset(assetId: string): Promise<PublicAssetDetail> {
-  const asset = await getPrisma().asset.findFirst({
+  const [asset, settings] = await Promise.all([getPrisma().asset.findFirst({
     where: { id: assetId, ...publicAssetEligibilityWhere },
     select: publicAssetSelect
-  });
+  }), getSystemSettings()]);
 
   if (!asset) {
     throw new ApiError(404, "RESOURCE_NOT_FOUND", "素材不存在或尚未上架。 ");
   }
 
+  if (!asset.certificationRecord?.certificateNo || asset.certificationRecord.status !== "certified") {
+    throw new ApiError(404, "RESOURCE_NOT_FOUND", "素材认证公开摘要尚未就绪。");
+  }
   return {
     ...mapAssetCard(asset),
     description: asset.description,
@@ -182,7 +194,13 @@ export async function getPublicAsset(assetId: string): Promise<PublicAssetDetail
     licenseSummary: {
       scope: "统一商业内容制作授权；禁止转售原文件、冒充权利人或用于违法侵权用途。",
       authorizationDuration: "permanent",
-      downloadEligibilityDays: 365
+      downloadEligibilityDays: settings.downloadEligibilityDays
+    },
+    certificationSummary: {
+      status: "certified",
+      certificateNo: asset.certificationRecord.certificateNo,
+      source: asset.certificationRecord.governmentSiteName,
+      issuedAt: asset.certificationRecord.certificateIssuedAt?.toISOString() ?? null
     }
   };
 }

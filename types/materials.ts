@@ -36,7 +36,13 @@ export type PublicAssetDetail = PublicAssetCard & {
   licenseSummary: {
     scope: string;
     authorizationDuration: "permanent";
-    downloadEligibilityDays: 365;
+    downloadEligibilityDays: number;
+  };
+  certificationSummary: {
+    status: "certified";
+    certificateNo: string;
+    source: string | null;
+    issuedAt: string | null;
   };
 };
 

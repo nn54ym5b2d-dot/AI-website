@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
-import { hashInviteCode } from "@/lib/auth/crypto";
+import { getAuthConfig } from "@/lib/auth/config";
+import { encryptInviteCode, hashInviteCode } from "@/lib/auth/crypto";
 
 type InviteSeedClient = Pick<PrismaClient, "inviteCode">;
 
@@ -23,6 +24,7 @@ export async function ensureLocalUploaderInvite(
   }: LocalInviteInput
 ) {
   const codeHash = hashInviteCode(code);
+  const codeCiphertext = encryptInviteCode(code, getAuthConfig().authSecret);
   const existing = await client.inviteCode.findUnique({
     where: { codeHash },
     include: { uploaderProfile: true }
@@ -32,6 +34,7 @@ export async function ensureLocalUploaderInvite(
     return client.inviteCode.create({
       data: {
         codeHash,
+        codeCiphertext,
         displayPrefix,
         status: "unused",
         createdByUserId,
@@ -44,10 +47,18 @@ export async function ensureLocalUploaderInvite(
     return client.inviteCode.update({
       where: { id: existing.id },
       data: {
+        codeCiphertext,
         status: "used",
         usedByUserId: existing.uploaderProfile.userId,
         usedAt: existing.usedAt ?? existing.uploaderProfile.createdAt
       }
+    });
+  }
+
+  if (!existing.codeCiphertext) {
+    return client.inviteCode.update({
+      where: { id: existing.id },
+      data: { codeCiphertext }
     });
   }
 

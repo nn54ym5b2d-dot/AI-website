@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.0
+版本：v4.2
 日期：2026-07-20
-状态：已由 Robert 审核确认；T012 / #7 已完成，T012A / #33 已解除阻塞并转为 Ready
+状态：已由 Robert 审核确认；T012 / #7 已完成，T012A / #33 通过草稿 PR #35 进入 Review，远程检查通过
 
 ## 使用说明
 
@@ -22,14 +22,14 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T010 | #5（PR #28；状态同步 PR #29） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/5> |
 | T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
-| T012A | #33 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
+| T012A | #33 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012 已由 Robert 验收并通过 PR #32 压缩合并到 `main`（`8e5b42b`），Issue #7 已关闭并转为 Done。全站占位审计后创建的 T012A / Issue #33 已满足前置并转为 Ready；Issues #8-#11、#16 的扩充范围和 T013-T017 后续依赖保持不变。
+T012 已由 Robert 验收并通过 PR #32 压缩合并到 `main`（`8e5b42b`），Issue #7 已关闭并转为 Done。全站占位审计后创建的 T012A / Issue #33 已通过草稿 PR #35 进入 Review，远程 `verify` 已通过；Issues #8-#11、#16 的扩充范围和 T013-T017 后续依赖保持不变。
 
 每个任务默认规则：
 
@@ -493,7 +493,7 @@ T012
 T012A；前置 T012，后置 T013。
 
 本次范围：
-- 完成 `/admin/invitations` 真实列表、创建、一次明文、掩码回显和禁用未使用邀请码。
+- 完成 `/admin/invitations` 真实列表、创建、掩码回显、逐条眼睛按需查看完整邀请码和禁用未使用邀请码；新码加密保存并记录查看审计，旧哈希历史码明确不可恢复。
 - 落地 `system_settings` migration/seed、API 与 `/admin/settings`，并区分 365 天平台下载资格和短时 ZIP URL 期限。
 - 完成 `/account/uploads`、`/account/upload-status`、`/account/uploader-profile` 和个人中心已落地计数真实化。
 - 提供管理员用户列表/详情与角色摘要只读基础；高权限写操作留给 T015。

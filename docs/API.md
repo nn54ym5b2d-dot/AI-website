@@ -1,12 +1,14 @@
 # 核心 API 细化版
 
-版本：v3.8
+版本：v3.9
 日期：2026-07-20
-状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程、T012 后台审核认证已完成；T012A Ready；T013-T016 Blocked
+状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程、T012 后台审核认证已完成；T012A 本地实现完成并进入 Review；T013-T016 Blocked
 
 ## 1. 文档定位
 
 本文件定义源素库 MVP 的第一版核心 API 合同，供 T009-T015 开发使用。接口覆盖用户登录、邀请码激活、素材浏览、素材上传、审核认证、订单支付、授权下载、收益记录、管理后台和外部观察员只读看板。
+
+T012A 实现状态：管理员邀请码列表/创建/按需查看/禁用、系统设置读取/修改、管理员用户只读列表/详情、上传者资料读写和个人中心摘要均已形成真实本地 API；公开素材响应增加安全认证摘要。邀请码列表默认掩码，完整码经认证加密保存并仅通过单条 reveal API 按权限、CSRF 和审计后返回；迁移前只保存哈希的历史码不可恢复。设置写入仅允许超级管理员并记录审计，私有认证文件和用户完整联系方式不进入非授权响应。
 
 本次只确定接口边界，不实现完整 API，不接入真实微信支付、支付宝、腾讯云 COS、短信、邮件、微信登录或政府认证网站，也不生成正式 OpenAPI 文件。
 
@@ -172,6 +174,8 @@ T010 实现状态：第 5 节的素材列表、详情、分类和标签接口已
 | `INVITE_CODE_USED` | 409 | 邀请码已使用 |
 | `INVITE_CODE_DISABLED` | 409 | 邀请码已禁用 |
 | `INVITE_CODE_EXPIRED` | 409 | 邀请码已过期 |
+| `INVITE_CODE_NOT_RECOVERABLE` | 409 | 历史邀请码仅保存单向哈希，无法恢复完整内容 |
+| `INVITE_CODE_DECRYPTION_FAILED` | 409 | 当前环境密钥无法解密邀请码密文 |
 | `UPLOADER_ALREADY_ACTIVE` | 409 | 用户已经是有效上传者 |
 | `ASSET_FILES_INCOMPLETE` | 422 | 原文件、预览图或缩略图不完整 |
 | `PERSON_PROOF_REQUIRED` | 422 | 人物素材缺少必要证明材料 |
@@ -383,7 +387,8 @@ T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 1
 |---|:---:|:---:|:---:|---|
 | `GET /api/v1/admin/dashboard` | 可 | 可 | 可 | 按角色返回待审核、订单、退款、收益等概览 |
 | `GET /api/v1/admin/invite-codes` | 可 | 可 | 否 | 邀请码列表，code 默认掩码 |
-| `POST /api/v1/admin/invite-codes` | 可 | 可 | 否 | 请求 `expiresAt?`、`note?`；返回一次完整 code，之后默认掩码 |
+| `POST /api/v1/admin/invite-codes` | 可 | 可 | 否 | 请求 `expiresAt?`、`note?`；返回完整 code，同时保存哈希与认证加密密文 |
+| `POST /api/v1/admin/invite-codes/{inviteId}/reveal` | 可 | 可 | 否 | CSRF 校验后按需返回单条完整 code，并记录查看审计；旧哈希记录不可恢复 |
 | `POST /api/v1/admin/invite-codes/{inviteId}/disable` | 可 | 可 | 否 | 只能禁用未使用的有效邀请码 |
 | `GET /api/v1/admin/users` | 可 | 可 | 否 | 运营默认只看掩码联系方式 |
 | `GET /api/v1/admin/users/{userId}` | 可 | 可 | 否 | 按角色裁剪敏感字段 |

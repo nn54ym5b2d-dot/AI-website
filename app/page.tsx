@@ -56,8 +56,8 @@ export default function HomePage() {
         <section className="border-t border-line"><div className="site-container py-10 sm:py-14">
           <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="ui-eyebrow">Featured assets</p>
-              <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-ink sm:text-3xl">本周精选素材</h2>
+              <p className="ui-eyebrow">Latest assets</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-ink sm:text-3xl">最新上架素材</h2>
               <div className="mt-3"><DemoNotice>本地种子素材 · 真实 API 查询</DemoNotice></div>
             </div>
             <Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:text-brand-dark" href="/materials">查看全部素材<ArrowRight aria-hidden="true" size={16} weight="bold" /></Link>
