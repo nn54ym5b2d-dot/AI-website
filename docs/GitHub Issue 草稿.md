@@ -29,7 +29,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012 与 T012A 均已完成。T013 / Issue #8 已完成本地实现、自动化与桌面/390px 浏览器验收，草稿 PR #37 已创建并进入 Review；Issue 保持打开，等待远程 `verify`、Robert 页面验收和合并。T014-T016 继续 Blocked，T017 保持 Backlog。
+T012 与 T012A 均已完成。T013 / Issue #8 已完成本地实现、自动化与桌面/390px 浏览器验收，草稿 PR #37 远程 `verify` 已通过并保持 Review；Issue 保持打开，等待 Robert 页面验收和合并。T014-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
