@@ -1,14 +1,16 @@
 # 核心 API 细化版
 
-版本：v3.9
+版本：v3.10
 日期：2026-07-20
-状态：T008 接口合同已批准；T009 身份基础、T010 公开素材接口、T011 上传者素材提交流程、T012 后台审核认证、T012A 基础管理与现有入口均已完成；T013 Ready，T014-T016 Blocked
+状态：T008 接口合同已批准；T009-T012A 已完成；T013 本地交易接口完成并处于 Review，T014-T016 Blocked
 
 ## 1. 文档定位
 
 本文件定义源素库 MVP 的第一版核心 API 合同，供 T009-T015 开发使用。接口覆盖用户登录、邀请码激活、素材浏览、素材上传、审核认证、订单支付、授权下载、收益记录、管理后台和外部观察员只读看板。
 
 T012A 实现状态：管理员邀请码列表/创建/按需查看/禁用、系统设置读取/修改、管理员用户只读列表/详情、上传者资料读写和个人中心摘要均已形成真实本地 API；公开素材响应增加安全认证摘要。邀请码列表默认掩码，完整码经认证加密保存并仅通过单条 reveal API 按权限、CSRF 和审计后返回；迁移前只保存哈希的历史码不可恢复。设置写入仅允许超级管理员并记录审计，私有认证文件和用户完整联系方式不进入非授权响应。
+
+T013 实现状态：订单创建/读取、订单支付、认证费支付、支付查询、购买者授权列表、管理员订单/支付/退款/授权及本地测试回调已经形成真实 PostgreSQL API。测试 provider 明确只用于本机，不接真实微信/支付宝；只有经过签名、商户、时间戳、金额和幂等校验的回调能写入成功状态。
 
 本次只确定接口边界，不实现完整 API，不接入真实微信支付、支付宝、腾讯云 COS、短信、邮件、微信登录或政府认证网站，也不生成正式 OpenAPI 文件。
 
@@ -326,6 +328,8 @@ T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 1
 | `POST /api/v1/orders/{orderId}/payments` | 订单购买方 | `provider: wechat_pay\|alipay`；要求 `Idempotency-Key` | `paymentId`、`paymentNo`、`status=pending`、非敏感 `paymentAction` | `PAYMENT_ALREADY_SUCCESS`、`STATE_TRANSITION_INVALID`、`UPSTREAM_UNAVAILABLE` |
 | `GET /api/v1/payments/{paymentId}` | 付款用户 | 无 | 支付用途、金额、平台、状态和时间；第三方流水号只返回掩码 | `RESOURCE_NOT_FOUND` |
 
+T013 本地验收还提供 `POST /api/v1/payments/{paymentId}/test-confirm`，由当前付款用户请求服务端构造本地签名事件并进入同一 webhook 校验入口；该接口在生产环境默认禁用。认证费使用 `POST /api/v1/certification-fee-charges/{chargeId}/payments` 创建支付，成功回调后才将素材推进到 `pending_review`。
+
 创建订单时必须由服务端重新读取素材状态和价格，客户端不得提交或覆盖金额、认证状态、分成比例。订单明细保存成交快照；购物车页面显示的旧价格不能作为最终计费依据。
 
 ### 8.2 支付回调
@@ -336,6 +340,8 @@ T012 实现状态：上述接口已由本地 PostgreSQL/Prisma 实现并通过 1
 | `POST /api/v1/webhooks/payments/alipay` | 支付宝 | 保留原始表单/请求体和平台签名字段 | 支付宝要求的确认响应 | `PAYMENT_SIGNATURE_INVALID`、`PAYMENT_AMOUNT_MISMATCH` |
 | `POST /api/v1/webhooks/refunds/wechat` | 微信支付 | 退款通知原文和签名头 | 平台要求的确认响应 | `PAYMENT_SIGNATURE_INVALID` |
 | `POST /api/v1/webhooks/refunds/alipay` | 支付宝 | 退款通知原文和签名字段 | 平台要求的确认响应 | `PAYMENT_SIGNATURE_INVALID` |
+
+T013 本地 provider 使用 `POST /api/v1/webhooks/payments/local-test` 同时接收签名支付/退款测试事件；管理员通过 `/api/v1/admin/refunds` 创建完整订单明细或认证费退款，并通过 `/api/v1/admin/refunds/{refundId}/test-confirm` 发送签名回调。生产环境默认禁用这些测试入口。
 
 回调边界：
 

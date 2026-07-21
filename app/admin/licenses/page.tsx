@@ -1,0 +1,5 @@
+import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { requireAdminPage } from "@/lib/auth/page-guard";
+import { listAdminAuthorizations } from "@/lib/transactions/service";
+export const dynamic = "force-dynamic";
+export default async function AdminLicensesPage() { await requireAdminPage("/admin/licenses"); const records = await listAdminAuthorizations(); return <PageShell actions={<SecondaryLink href="/admin">返回管理后台</SecondaryLink>} description="每个订单明细最多生成一条授权，退款按明细撤销。" eyebrow="Operations" title="授权记录"><div className="ui-panel overflow-hidden"><div className="divide-y divide-line">{records.map((record) => <article className="grid gap-2 p-5 sm:grid-cols-[1fr_auto]" key={record.id}><div><strong className="text-sm text-ink">{record.assetTitle}</strong><p className="mt-1 text-xs text-muted">{record.buyerDisplayName} · {record.orderNo} · {record.licenseVersion}</p></div><span className="rounded-full bg-paper px-3 py-1 text-xs text-muted">{record.status}</span></article>)}{!records.length ? <p className="p-6 text-sm text-muted">暂无授权记录。</p> : null}</div></div></PageShell>; }

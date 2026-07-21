@@ -260,6 +260,15 @@ export const adminRoutes: RouteDefinition[] = [
     slug: "licenses"
   },
   {
+    title: "退款管理",
+    href: "/admin/refunds",
+    description: "按完整订单明细处理购买退款和认证费退款待办。",
+    priority: "P0",
+    roleEntry: "超级管理员、财务管理员",
+    audiences: ["super_admin", "finance"],
+    slug: "refunds"
+  },
+  {
     title: "收益记录",
     href: "/admin/revenue",
     description: "查看上传者 80%、平台 20% 的首版收益记录和后续结算字段。",

@@ -1,0 +1,37 @@
+"use client";
+
+import { CheckSquare, Flask, SpinnerGap, Square } from "@phosphor-icons/react";
+import { useState } from "react";
+
+type Order = { id: string; orderNo: string; status: string; items: Array<{ id: string; title: string; priceCents: number }>; payments: Array<{ id: string; status: string }> };
+type Refund = { id: string; refundNo: string; purpose: string; amountCents: number; status: string; provider: string; providerMode: string; reason: string; items: Array<{ title: string; amountCents: number }> };
+type CertificationRequest = { id: string; assetTitle: string; amountCents: number; reason: string; status: string };
+
+async function csrf() {
+  const response = await fetch("/api/v1/auth/csrf", { cache: "no-store" }); const payload = await response.json() as { data?: { csrfToken: string }; error?: { message: string } };
+  if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? "安全校验初始化失败。"); return payload.data.csrfToken;
+}
+
+export function RefundManager({ orders, refunds, certificationRequests }: { orders: Order[]; refunds: Refund[]; certificationRequests: CertificationRequest[] }) {
+  const [selected, setSelected] = useState<Record<string, string[]>>({}); const [busy, setBusy] = useState(""); const [message, setMessage] = useState("");
+  function toggle(orderId: string, itemId: string) { setSelected((current) => ({ ...current, [orderId]: current[orderId]?.includes(itemId) ? current[orderId].filter((id) => id !== itemId) : [...(current[orderId] ?? []), itemId] })); }
+  async function createPurchaseRefund(order: Order) {
+    const ids = selected[order.id] ?? []; const payment = order.payments.find((item) => item.status === "success"); if (!payment || !ids.length) return;
+    setBusy(order.id); setMessage("");
+    try { const token = await csrf(); const items = order.items.filter((item) => ids.includes(item.id)).map((item) => ({ orderItemId: item.id, amountCents: item.priceCents })); const response = await fetch("/api/v1/admin/refunds", { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": token }, body: JSON.stringify({ paymentId: payment.id, items, reason: "管理员按完整订单明细发起退款" }) }); const payload = await response.json() as { error?: { message: string } }; if (!response.ok) throw new Error(payload.error?.message ?? "退款待办创建失败。"); window.location.reload(); } catch (error) { setMessage(error instanceof Error ? error.message : "退款待办创建失败。"); } finally { setBusy(""); }
+  }
+  async function createCertificationRefund(request: CertificationRequest) {
+    setBusy(request.id); setMessage(""); try { const token = await csrf(); const response = await fetch("/api/v1/admin/refunds", { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": token }, body: JSON.stringify({ certificationRefundRequestId: request.id, reason: request.reason }) }); const payload = await response.json() as { error?: { message: string } }; if (!response.ok) throw new Error(payload.error?.message ?? "认证费退款待办创建失败。"); window.location.reload(); } catch (error) { setMessage(error instanceof Error ? error.message : "认证费退款待办创建失败。"); } finally { setBusy(""); }
+  }
+  async function confirmRefund(refundId: string) {
+    setBusy(refundId); setMessage(""); try { const token = await csrf(); const response = await fetch(`/api/v1/admin/refunds/${refundId}/test-confirm`, { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": token }, body: "{}" }); const payload = await response.json() as { error?: { message: string } }; if (!response.ok) throw new Error(payload.error?.message ?? "退款测试回调失败。"); window.location.reload(); } catch (error) { setMessage(error instanceof Error ? error.message : "退款测试回调失败。"); } finally { setBusy(""); }
+  }
+  const refundableOrders = orders.filter((order) => order.status === "paid" || order.status === "partial_refunded");
+  return <div className="grid gap-6">
+    <div className="rounded-lg border border-warning/30 bg-amber-50 p-4 text-sm"><div className="flex gap-3"><Flask className="shrink-0 text-warning" size={22} /><div><strong className="text-ink">本地测试退款 provider</strong><p className="mt-1 text-xs leading-5 text-muted">管理员只能创建/提交待办；只有带签名并通过金额校验的测试回调才能写成退款成功。</p></div></div></div>
+    <section className="ui-panel overflow-hidden"><div className="border-b border-line px-5 py-4"><h2 className="font-bold text-ink">购买订单退款</h2><p className="mt-1 text-xs text-muted">可选一个或多个完整明细，不允许拆分单项金额。</p></div><div className="divide-y divide-line">{refundableOrders.map((order) => <article className="p-5" key={order.id}><div className="flex justify-between gap-3"><strong className="text-sm text-ink">{order.orderNo}</strong><span className="text-xs text-muted">{order.status}</span></div><div className="mt-3 grid gap-2">{order.items.map((item) => { const active = selected[order.id]?.includes(item.id) ?? false; return <button className="flex items-center justify-between rounded-lg border border-line p-3 text-left text-sm" key={item.id} onClick={() => toggle(order.id, item.id)} type="button"><span className="flex items-center gap-2">{active ? <CheckSquare className="text-brand" size={18} weight="fill" /> : <Square size={18} />} {item.title}</span><span>¥{(item.priceCents / 100).toFixed(2)}</span></button>; })}</div><button className="ui-button-primary mt-4" disabled={busy === order.id || !(selected[order.id]?.length)} onClick={() => createPurchaseRefund(order)} type="button">{busy === order.id ? <SpinnerGap className="animate-spin" size={18} /> : null}创建所选明细退款待办</button></article>)}{!refundableOrders.length ? <p className="p-6 text-sm text-muted">暂无可退款的已支付订单。</p> : null}</div></section>
+    <section className="ui-panel overflow-hidden"><div className="border-b border-line px-5 py-4"><h2 className="font-bold text-ink">认证费退款待办</h2></div><div className="divide-y divide-line">{certificationRequests.map((request) => <article className="flex flex-wrap items-center justify-between gap-4 p-5" key={request.id}><div><strong className="text-sm text-ink">{request.assetTitle}</strong><p className="mt-1 text-xs text-muted">{request.reason} · ¥{(request.amountCents / 100).toFixed(2)}</p></div><button className="ui-button-secondary" disabled={busy === request.id} onClick={() => createCertificationRefund(request)} type="button">进入退款流程</button></article>)}{!certificationRequests.length ? <p className="p-6 text-sm text-muted">暂无未处理的认证费退款待办。</p> : null}</div></section>
+    <section className="ui-panel overflow-hidden"><div className="border-b border-line px-5 py-4"><h2 className="font-bold text-ink">退款记录</h2></div><div className="divide-y divide-line">{refunds.map((refund) => <article className="grid gap-3 p-5 sm:grid-cols-[1fr_auto_auto] sm:items-center" key={refund.id}><div><strong className="text-sm text-ink">{refund.refundNo}</strong><p className="mt-1 text-xs text-muted">{refund.purpose} · {refund.provider}/{refund.providerMode} · {refund.reason}</p></div><span className="font-semibold text-brand">¥{(refund.amountCents / 100).toFixed(2)}</span>{refund.status === "pending" ? <button className="ui-button-primary" disabled={busy === refund.id} onClick={() => confirmRefund(refund.id)} type="button">发送签名退款回调</button> : <span className="rounded-full bg-paper px-3 py-1 text-xs text-muted">{refund.status}</span>}</article>)}{!refunds.length ? <p className="p-6 text-sm text-muted">暂无退款记录。</p> : null}</div></section>
+    {message ? <p className="text-sm text-danger">{message}</p> : null}
+  </div>;
+}

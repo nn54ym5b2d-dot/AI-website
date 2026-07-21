@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.2
+版本：v4.3
 日期：2026-07-20
-状态：已由 Robert 审核确认；T012 / #7、T012A / #33 均已完成，T013 / #8 已转为 Ready
+状态：已由 Robert 审核确认；T013 / #8 本地实现完成并转为 Review
 
 ## 使用说明
 
@@ -23,13 +23,13 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
-| T013 | #8 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T013 | #8 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012 已由 Robert 验收并通过 PR #32 压缩合并到 `main`（`8e5b42b`），Issue #7 已关闭并转为 Done。全站占位审计后创建的 T012A / Issue #33 已由 Robert 完成页面验收并通过 PR #35 压缩合并到 `main`（`9238226`），Issue #33 已关闭，T013 / Issue #8 已转为 Ready；Issues #9-#11、#16 的后续依赖保持不变。
+T012 与 T012A 均已完成。T013 / Issue #8 已完成本地实现、自动化与桌面/390px 浏览器验收，草稿 PR #37 远程 `verify` 已通过并保持 Review；Issue 保持打开，等待 Robert 页面验收和合并。T014-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
@@ -567,6 +567,12 @@ T013
 - 前置改为 T012A / Issue #33。
 - 必须完成服务端待购/结算、认证费支付与退款、`/account/purchases`、`/account/licenses`、`/admin/orders`、`/admin/payments`、`/admin/refunds`、`/admin/licenses`，并移除这些入口的通用演示页。
 - 价格以系统设置为服务端权威源，订单明细保存不可变快照。
+
+本地执行结果（2026-07-20）：
+- 已完成多素材订单、认证费/素材购买测试支付、签名/金额/幂等 webhook、授权/下载资格/初始收益、完整订单明细退款及认证费退款。
+- 已完成购买/授权个人页和订单/支付/退款/授权后台，原通用演示入口已由专用页面接管。
+- 开发库 migration、22/22 自动化测试、lint、typecheck、build、桌面与 390×844 浏览器闭环均通过。
+- 真实微信支付、支付宝、ZIP 文件生成、COS 短时签名和生产外部服务未接入，分别保留给 T014/T017。
 
 ---
 

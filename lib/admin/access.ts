@@ -4,6 +4,7 @@ import {
   canManageCertification,
   canManageInvitations,
   canManageSystemSettings,
+  canConfirmRefund,
   canReviewAsset
 } from "@/lib/auth/roles";
 import {
@@ -26,6 +27,14 @@ export async function requireContentAdminAccess(request: Request, write = false)
     throw new ApiError(403, "FORBIDDEN", "只有超级管理员或运营管理员可以处理素材审核与认证。 ");
   }
 
+  return access;
+}
+
+export async function requireFinanceAdminAccess(request: Request, write = false) {
+  const access = await requireAdminReadAccess(request, write);
+  if (!canConfirmRefund(toRoleContext(access))) {
+    throw new ApiError(403, "FORBIDDEN", "只有超级管理员或财务管理员可以处理退款。");
+  }
   return access;
 }
 

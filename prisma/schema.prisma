@@ -158,6 +158,77 @@ enum RefundStatus {
   @@map("refund_status")
 }
 
+enum OrderStatus {
+  pending_payment
+  paid
+  cancelled
+  payment_failed
+  refunded
+  partial_refunded
+
+  @@map("order_status")
+}
+
+enum PaymentPurpose {
+  asset_purchase
+  certification_fee
+
+  @@map("payment_purpose")
+}
+
+enum PaymentProvider {
+  wechat_pay
+  alipay
+
+  @@map("payment_provider")
+}
+
+enum RefundPurpose {
+  asset_purchase
+  certification_fee
+
+  @@map("refund_purpose")
+}
+
+enum AuthorizationStatus {
+  active
+  revoked
+
+  @@map("authorization_status")
+}
+
+enum DownloadBundleStatus {
+  pending
+  ready
+  failed
+
+  @@map("download_bundle_status")
+}
+
+enum DownloadStatus {
+  active
+  expired
+  revoked
+
+  @@map("download_status")
+}
+
+enum RevenueRecordType {
+  initial
+  reversal
+
+  @@map("revenue_record_type")
+}
+
+enum RevenueStatus {
+  recorded
+  reversed
+  settled_pending
+  settled
+
+  @@map("revenue_status")
+}
+
 model User {
   id                 String       @id @default(uuid()) @db.Uuid
   displayName        String       @map("display_name")
@@ -191,6 +262,13 @@ model User {
   certificationFeeCharges     CertificationFeeCharge[]
   idempotencyRecords          IdempotencyRecord[]
   systemSettingsUpdated       SystemSetting[]              @relation("SystemSettingUpdatedBy")
+  orders                      Order[]                      @relation("OrderBuyer")
+  payments                    Payment[]                    @relation("PaymentPayer")
+  refundsRequested            Refund[]                     @relation("RefundRequestedBy")
+  refundsProcessed            Refund[]                     @relation("RefundProcessedBy")
+  authorizationRecords        AuthorizationRecord[]        @relation("AuthorizationBuyer")
+  authorizationsRevoked       AuthorizationRecord[]        @relation("AuthorizationRevokedBy")
+  downloadLinksRequested      DownloadLink[]               @relation("DownloadLinkRequestedBy")
 
   @@index([status, createdAt])
   @@map("users")
@@ -261,17 +339,19 @@ model UserRoleMembership {
 }
 
 model UploaderProfile {
-  id           String     @id @default(uuid()) @db.Uuid
-  userId       String     @unique @map("user_id") @db.Uuid
-  inviteCodeId String     @unique @map("invite_code_id") @db.Uuid
-  displayName  String     @map("display_name")
+  id           String          @id @default(uuid()) @db.Uuid
+  userId       String          @unique @map("user_id") @db.Uuid
+  inviteCodeId String          @unique @map("invite_code_id") @db.Uuid
+  displayName  String          @map("display_name")
   bio          String?
-  status       UserStatus @default(active)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id])
+  status       UserStatus      @default(active)
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inviteCode   InviteCode      @relation(fields: [inviteCodeId], references: [id])
   assets       Asset[]
+  orderItems   OrderItem[]
+  revenues     RevenueRecord[]
 
   @@map("uploader_profiles")
 }
@@ -392,6 +472,9 @@ model Asset {
   certificationRecord        CertificationRecord?
   certificationRefundRequest CertificationRefundRequest?
   auditLogs                  AuditLog[]
+  orderItems                 OrderItem[]
+  authorizationRecords       AuthorizationRecord[]
+  revenueRecords             RevenueRecord[]
 
   @@index([assetType, listingStatus, certificationStatus])
   @@index([uploaderProfileId, createdAt])
@@ -499,19 +582,21 @@ model AssetDerivativeJob {
 }
 
 model CertificationFeeCharge {
-  id             String                      @id @default(uuid()) @db.Uuid
-  assetId        String                      @unique @map("asset_id") @db.Uuid
-  uploaderUserId String                      @map("uploader_user_id") @db.Uuid
-  amountCents    Int                         @default(1000) @map("amount_cents")
-  currency       String                      @default("CNY")
-  status         PaymentStatus               @default(pending)
-  settingsSnapshot Json                       @default("{}") @map("settings_snapshot")
-  paidAt         DateTime?                   @map("paid_at") @db.Timestamptz(3)
-  createdAt      DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
-  asset          Asset                       @relation(fields: [assetId], references: [id])
-  uploaderUser   User                        @relation(fields: [uploaderUserId], references: [id])
-  refundRequest  CertificationRefundRequest?
+  id               String                      @id @default(uuid()) @db.Uuid
+  assetId          String                      @unique @map("asset_id") @db.Uuid
+  uploaderUserId   String                      @map("uploader_user_id") @db.Uuid
+  amountCents      Int                         @default(1000) @map("amount_cents")
+  currency         String                      @default("CNY")
+  status           PaymentStatus               @default(pending)
+  settingsSnapshot Json                        @default("{}") @map("settings_snapshot")
+  paidAt           DateTime?                   @map("paid_at") @db.Timestamptz(3)
+  createdAt        DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  asset            Asset                       @relation(fields: [assetId], references: [id])
+  uploaderUser     User                        @relation(fields: [uploaderUserId], references: [id])
+  refundRequest    CertificationRefundRequest?
+  payments         Payment[]
+  refunds          Refund[]
 
   @@index([uploaderUserId, createdAt])
   @@index([status, createdAt])
@@ -574,9 +659,233 @@ model CertificationRefundRequest {
   asset                    Asset                  @relation(fields: [assetId], references: [id])
   certificationFeeCharge   CertificationFeeCharge @relation(fields: [certificationFeeChargeId], references: [id])
   requestedBy              User                   @relation("CertificationRefundRequestedBy", fields: [requestedByUserId], references: [id])
+  refund                   Refund?
 
   @@index([status, requestedAt])
   @@map("certification_refund_requests")
+}
+
+model Order {
+  id               String                @id @default(uuid()) @db.Uuid
+  orderNo          String                @unique @map("order_no")
+  buyerUserId      String                @map("buyer_user_id") @db.Uuid
+  status           OrderStatus           @default(pending_payment)
+  totalAmountCents Int                   @map("total_amount_cents")
+  currency         String                @default("CNY")
+  settingsSnapshot Json                  @default("{}") @map("settings_snapshot")
+  paidAt           DateTime?             @map("paid_at") @db.Timestamptz(3)
+  cancelledAt      DateTime?             @map("cancelled_at") @db.Timestamptz(3)
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  buyer            User                  @relation("OrderBuyer", fields: [buyerUserId], references: [id])
+  items            OrderItem[]
+  payments         Payment[]
+  refunds          Refund[]
+  authorizations   AuthorizationRecord[]
+
+  @@index([buyerUserId, createdAt])
+  @@index([status, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                          String               @id @default(uuid()) @db.Uuid
+  orderId                     String               @map("order_id") @db.Uuid
+  assetId                     String               @map("asset_id") @db.Uuid
+  uploaderProfileId           String               @map("uploader_profile_id") @db.Uuid
+  assetTitleSnapshot          String               @map("asset_title_snapshot")
+  assetTypeSnapshot           AssetType            @map("asset_type_snapshot")
+  certificationStatusSnapshot CertificationStatus  @map("certification_status_snapshot")
+  priceCents                  Int                  @map("price_cents")
+  currency                    String               @default("CNY")
+  createdAt                   DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  order                       Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  asset                       Asset                @relation(fields: [assetId], references: [id])
+  uploaderProfile             UploaderProfile      @relation(fields: [uploaderProfileId], references: [id])
+  authorization               AuthorizationRecord?
+  refundItems                 RefundItem[]
+  revenueRecords              RevenueRecord[]
+
+  @@unique([orderId, assetId])
+  @@index([assetId])
+  @@index([uploaderProfileId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  paymentNo                String                  @unique @map("payment_no")
+  purpose                  PaymentPurpose
+  orderId                  String?                 @map("order_id") @db.Uuid
+  certificationFeeChargeId String?                 @map("certification_fee_charge_id") @db.Uuid
+  payerUserId              String                  @map("payer_user_id") @db.Uuid
+  provider                 PaymentProvider
+  providerMode             String                  @default("local_test") @map("provider_mode")
+  merchantId               String                  @map("merchant_id")
+  amountCents              Int                     @map("amount_cents")
+  currency                 String                  @default("CNY")
+  status                   PaymentStatus           @default(pending)
+  providerTradeNo          String?                 @unique @map("provider_trade_no")
+  providerPayloadSummary   Json                    @default("{}") @map("provider_payload_summary")
+  paidAt                   DateTime?               @map("paid_at") @db.Timestamptz(3)
+  failedReason             String?                 @map("failed_reason")
+  createdAt                DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
+  order                    Order?                  @relation(fields: [orderId], references: [id])
+  certificationFeeCharge   CertificationFeeCharge? @relation(fields: [certificationFeeChargeId], references: [id])
+  payer                    User                    @relation("PaymentPayer", fields: [payerUserId], references: [id])
+  refunds                  Refund[]
+  webhookEvents            WebhookEvent[]
+
+  @@index([orderId])
+  @@index([certificationFeeChargeId])
+  @@index([payerUserId, createdAt])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model Refund {
+  id                           String                      @id @default(uuid()) @db.Uuid
+  refundNo                     String                      @unique @map("refund_no")
+  purpose                      RefundPurpose
+  paymentId                    String                      @map("payment_id") @db.Uuid
+  orderId                      String?                     @map("order_id") @db.Uuid
+  certificationFeeChargeId     String?                     @map("certification_fee_charge_id") @db.Uuid
+  certificationRefundRequestId String?                     @unique @map("certification_refund_request_id") @db.Uuid
+  amountCents                  Int                         @map("amount_cents")
+  currency                     String                      @default("CNY")
+  reason                       String
+  status                       RefundStatus                @default(pending)
+  providerRefundNo             String?                     @unique @map("provider_refund_no")
+  requestedByUserId            String                      @map("requested_by_user_id") @db.Uuid
+  requestedAt                  DateTime                    @default(now()) @map("requested_at") @db.Timestamptz(3)
+  processedByUserId            String?                     @map("processed_by_user_id") @db.Uuid
+  processedAt                  DateTime?                   @map("processed_at") @db.Timestamptz(3)
+  createdAt                    DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                    DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  payment                      Payment                     @relation(fields: [paymentId], references: [id])
+  order                        Order?                      @relation(fields: [orderId], references: [id])
+  certificationFeeCharge       CertificationFeeCharge?     @relation(fields: [certificationFeeChargeId], references: [id])
+  certificationRefundRequest   CertificationRefundRequest? @relation(fields: [certificationRefundRequestId], references: [id])
+  requestedBy                  User                        @relation("RefundRequestedBy", fields: [requestedByUserId], references: [id])
+  processedBy                  User?                       @relation("RefundProcessedBy", fields: [processedByUserId], references: [id])
+  items                        RefundItem[]
+  webhookEvents                WebhookEvent[]
+
+  @@index([paymentId, createdAt])
+  @@index([orderId])
+  @@index([certificationFeeChargeId])
+  @@index([status, createdAt])
+  @@map("refunds")
+}
+
+model RefundItem {
+  id          String    @id @default(uuid()) @db.Uuid
+  refundId    String    @map("refund_id") @db.Uuid
+  orderItemId String    @map("order_item_id") @db.Uuid
+  amountCents Int       @map("amount_cents")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  refund      Refund    @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+
+  @@unique([refundId, orderItemId])
+  @@index([orderItemId])
+  @@map("refund_items")
+}
+
+model AuthorizationRecord {
+  id                          String              @id @default(uuid()) @db.Uuid
+  buyerUserId                 String              @map("buyer_user_id") @db.Uuid
+  orderId                     String              @map("order_id") @db.Uuid
+  orderItemId                 String              @unique @map("order_item_id") @db.Uuid
+  assetId                     String              @map("asset_id") @db.Uuid
+  licenseVersion              String              @map("license_version")
+  licenseTextSnapshot         String              @map("license_text_snapshot")
+  certificationStatusSnapshot CertificationStatus @map("certification_status_snapshot")
+  assetFileManifestSnapshot   Json                @map("asset_file_manifest_snapshot")
+  status                      AuthorizationStatus @default(active)
+  grantedAt                   DateTime            @default(now()) @map("granted_at") @db.Timestamptz(3)
+  revokedAt                   DateTime?           @map("revoked_at") @db.Timestamptz(3)
+  revokedByUserId             String?             @map("revoked_by_user_id") @db.Uuid
+  revokeReason                String?             @map("revoke_reason")
+  createdAt                   DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  buyer                       User                @relation("AuthorizationBuyer", fields: [buyerUserId], references: [id])
+  order                       Order               @relation(fields: [orderId], references: [id])
+  orderItem                   OrderItem           @relation(fields: [orderItemId], references: [id])
+  asset                       Asset               @relation(fields: [assetId], references: [id])
+  revokedBy                   User?               @relation("AuthorizationRevokedBy", fields: [revokedByUserId], references: [id])
+  downloadLinks               DownloadLink[]
+
+  @@index([buyerUserId, grantedAt])
+  @@index([assetId])
+  @@index([status, createdAt])
+  @@map("authorization_records")
+}
+
+model DownloadLink {
+  id                      String               @id @default(uuid()) @db.Uuid
+  authorizationRecordId   String               @map("authorization_record_id") @db.Uuid
+  bundleStatus            DownloadBundleStatus @default(pending) @map("bundle_status")
+  requestedByUserId       String               @map("requested_by_user_id") @db.Uuid
+  eligibilityDaysSnapshot Int                  @map("eligibility_days_snapshot")
+  expiresAt               DateTime             @map("expires_at") @db.Timestamptz(3)
+  status                  DownloadStatus       @default(active)
+  createdAt               DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  authorizationRecord     AuthorizationRecord  @relation(fields: [authorizationRecordId], references: [id])
+  requestedBy             User                 @relation("DownloadLinkRequestedBy", fields: [requestedByUserId], references: [id])
+
+  @@unique([authorizationRecordId])
+  @@index([requestedByUserId, createdAt])
+  @@index([status, expiresAt])
+  @@map("download_links")
+}
+
+model RevenueRecord {
+  id                     String            @id @default(uuid()) @db.Uuid
+  orderItemId            String            @map("order_item_id") @db.Uuid
+  recordType             RevenueRecordType @map("record_type")
+  assetId                String            @map("asset_id") @db.Uuid
+  uploaderProfileId      String            @map("uploader_profile_id") @db.Uuid
+  grossAmountCents       Int               @map("gross_amount_cents")
+  uploaderAmountCents    Int               @map("uploader_amount_cents")
+  platformAmountCents    Int               @map("platform_amount_cents")
+  uploaderShareRate      Decimal           @map("uploader_share_rate") @db.Decimal(6, 4)
+  platformShareRate      Decimal           @map("platform_share_rate") @db.Decimal(6, 4)
+  currency               String            @default("CNY")
+  status                 RevenueStatus     @default(recorded)
+  relatedRevenueRecordId String?           @unique @map("related_revenue_record_id") @db.Uuid
+  createdAt              DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  orderItem              OrderItem         @relation(fields: [orderItemId], references: [id])
+  asset                  Asset             @relation(fields: [assetId], references: [id])
+  uploaderProfile        UploaderProfile   @relation(fields: [uploaderProfileId], references: [id])
+  relatedRevenueRecord   RevenueRecord?    @relation("RevenueReversal", fields: [relatedRevenueRecordId], references: [id])
+  reversalRecord         RevenueRecord?    @relation("RevenueReversal")
+
+  @@index([orderItemId])
+  @@index([uploaderProfileId, createdAt])
+  @@index([assetId])
+  @@index([status, createdAt])
+  @@map("revenue_records")
+}
+
+model WebhookEvent {
+  id              String          @id @default(uuid()) @db.Uuid
+  provider        PaymentProvider
+  providerMode    String          @default("local_test") @map("provider_mode")
+  providerEventId String          @map("provider_event_id")
+  eventType       String          @map("event_type")
+  paymentId       String?         @map("payment_id") @db.Uuid
+  refundId        String?         @map("refund_id") @db.Uuid
+  payloadHash     String          @map("payload_hash")
+  processedAt     DateTime        @default(now()) @map("processed_at") @db.Timestamptz(3)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  payment         Payment?        @relation(fields: [paymentId], references: [id])
+  refund          Refund?         @relation(fields: [refundId], references: [id])
+
+  @@unique([provider, providerEventId])
+  @@index([paymentId])
+  @@index([refundId])
+  @@map("webhook_events")
 }
 
 model AuditLog {
