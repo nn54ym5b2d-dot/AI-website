@@ -12,7 +12,7 @@ async function readPayload(response: Response) {
   return (await response.json().catch(() => ({}))) as ApiPayload;
 }
 
-export function LogoutButton() {
+export function LogoutButton({ label = "退出登录" }: { label?: string }) {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -64,7 +64,7 @@ export function LogoutButton() {
         type="button"
       >
         <SignOut aria-hidden="true" size={17} weight="bold" />
-        {submitting ? "正在退出…" : "退出登录"}
+        {submitting ? "正在退出…" : label}
       </button>
       {message ? (
         <p aria-live="polite" className="max-w-52 text-xs leading-5 text-brand" role="status">

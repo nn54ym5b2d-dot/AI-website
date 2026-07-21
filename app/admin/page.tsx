@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle, FileMagnifyingGlass, Images, WarningCircle, UsersThree } from "@phosphor-icons/react/ssr";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { canAccessAudience, requireAdminPage } from "@/lib/auth/page-guard";
 import { adminRoutes } from "@/lib/domain/navigation";
@@ -24,7 +25,7 @@ export default async function AdminPage() {
     <PageShell
       actions={
         <>
-          <SecondaryLink href="/">退出管理后台</SecondaryLink>
+          <LogoutButton label="退出账号" />
           <SecondaryLink href="/observer">观察员只读入口</SecondaryLink>
         </>
       }
