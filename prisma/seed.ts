@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { hashContent, hashInviteCode } from "../lib/auth/crypto";
@@ -61,11 +63,13 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000001",
-        objectKey: "private-originals/9e441f23-3df0-45d2-a03f-cbfa3a885001"
+        objectKey: "private-originals/9e441f23-3df0-45d2-a03f-cbfa3a885001",
+        fixtureName: "person-front.svg"
       },
       {
         id: "20000000-0000-4000-8000-000000000002",
-        objectKey: "private-originals/3d2f168d-cb67-4db8-885f-c2b865dc5002"
+        objectKey: "private-originals/3d2f168d-cb67-4db8-885f-c2b865dc5002",
+        fixtureName: "person-side.svg"
       }
     ],
     previews: [
@@ -92,7 +96,8 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000003",
-        objectKey: "private-originals/f38ccf68-83d1-4af5-bf27-266baea45003"
+        objectKey: "private-originals/f38ccf68-83d1-4af5-bf27-266baea45003",
+        fixtureName: "object-lamp.svg"
       }
     ],
     previews: [
@@ -114,7 +119,8 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000004",
-        objectKey: "private-originals/99aad196-0680-4a4c-b614-5c7ba74c5004"
+        objectKey: "private-originals/99aad196-0680-4a4c-b614-5c7ba74c5004",
+        fixtureName: "scene-factory.svg"
       }
     ],
     previews: [
@@ -341,7 +347,10 @@ async function main() {
       data: assetSeed.tags.map((tag) => ({ assetId: assetSeed.id, tag }))
     });
 
-    for (const [index, original] of assetSeed.originals.entries()) {
+    for (const original of assetSeed.originals) {
+      const fixtureRelativePath = `fixtures/local-private-storage/originals/${original.fixtureName}`;
+      const fixtureBody = await readFile(new URL(`../${fixtureRelativePath}`, import.meta.url));
+      const fixtureHash = createHash("sha256").update(fixtureBody).digest("hex");
       await prisma.assetFile.upsert({
         where: { id: original.id },
         update: {
@@ -352,12 +361,12 @@ async function main() {
           cosBucket: "local-private-originals",
           cosRegion: "local",
           cosObjectKey: original.objectKey,
-          fileHash: hashContent(`${assetSeed.id}:original:${index}`),
-          fileSizeBytes: 4_000_000n,
-          mimeType: "image/png",
-          width: 1456,
-          height: 1092,
-          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" },
+          fileHash: fixtureHash,
+          fileSizeBytes: BigInt(fixtureBody.byteLength),
+          mimeType: "image/svg+xml",
+          width: 1200,
+          height: 900,
+          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified", originalFileName: original.fixtureName, localFixtureRelativePath: fixtureRelativePath },
           deletedAt: null
         },
         create: {
@@ -369,12 +378,12 @@ async function main() {
           cosBucket: "local-private-originals",
           cosRegion: "local",
           cosObjectKey: original.objectKey,
-          fileHash: hashContent(`${assetSeed.id}:original:${index}`),
-          fileSizeBytes: 4_000_000n,
-          mimeType: "image/png",
-          width: 1456,
-          height: 1092,
-          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" }
+          fileHash: fixtureHash,
+          fileSizeBytes: BigInt(fixtureBody.byteLength),
+          mimeType: "image/svg+xml",
+          width: 1200,
+          height: 900,
+          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified", originalFileName: original.fixtureName, localFixtureRelativePath: fixtureRelativePath }
         }
       });
     }

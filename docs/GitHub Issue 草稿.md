@@ -2,7 +2,7 @@
 
 版本：v4.4
 日期：2026-07-21
-状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已为 Ready
+状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 本地实现完成并进入 In Progress
 
 ## 使用说明
 
@@ -24,12 +24,12 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
-| T014 | #9 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
+| T014 | #9 | In Progress | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收，PR #37 最终 `verify` 通过并压缩合并到 `main`（`e524f9e`），Issue 已关闭；T014 / Issue #9 已转为 Ready，T015-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，下一步为草稿 PR、远程检查与 Robert 验收；T015-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 

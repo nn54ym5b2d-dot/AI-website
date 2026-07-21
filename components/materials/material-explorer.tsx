@@ -188,7 +188,7 @@ export function MaterialExplorer({ initialFilters = {} }: { initialFilters?: Mat
               <input className="ui-input pl-10 pr-10" maxLength={100} onChange={(event) => setQuery(event.target.value)} placeholder="搜索标题、说明或标签" value={query} />
               {query ? <button aria-label="清空搜索" className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-ink" onClick={() => setQuery("")} type="button"><X aria-hidden="true" size={16} /></button> : null}
             </label>
-            <label><span className="sr-only">排序</span><select className="ui-input" onChange={(event) => setSort(event.target.value as PublicAssetSort)} value={sort}><option value="newest">最新上架</option><option value="popular">热门（暂无热度，按最新）</option><option value="price_asc">价格从低到高</option><option value="price_desc">价格从高到低</option></select></label>
+            <label><span className="sr-only">排序</span><select className="ui-input" onChange={(event) => setSort(event.target.value as PublicAssetSort)} value={sort}><option value="newest">最新上架</option><option value="popular">热门（按真实下载次数）</option><option value="price_asc">价格从低到高</option><option value="price_desc">价格从高到低</option></select></label>
           </div>
         </div>
         <div className="my-5 flex items-center justify-between gap-4 text-sm"><p className="text-muted">当前显示 <strong className="text-ink">{assets.length}</strong> 个结果</p><span className="demo-label">本地测试数据 · API 查询</span></div>

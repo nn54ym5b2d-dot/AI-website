@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <rect width="1200" height="900" fill="#d8d0be"/>
+  <path d="M450 190h300l120 260H330z" fill="#6b5b4b"/>
+  <rect x="570" y="450" width="60" height="250" rx="20" fill="#4b5563"/>
+  <ellipse cx="600" cy="720" rx="220" ry="55" fill="#374151"/>
+  <text x="44" y="70" font-family="sans-serif" font-size="28" fill="#51493f">源素库本地测试原文件 · 台灯 · 非真实素材</text>
+</svg>
