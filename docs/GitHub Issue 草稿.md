@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.3
-日期：2026-07-20
-状态：已由 Robert 审核确认；T013 / #8 本地实现完成并转为 Review
+版本：v4.4
+日期：2026-07-21
+状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已为 Ready
 
 ## 使用说明
 
@@ -23,13 +23,13 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T011 | #6 / PR #30 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/6> |
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
-| T013 | #8 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
-| T014 | #9 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
+| T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
+| T014 | #9 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012 与 T012A 均已完成。T013 / Issue #8 已完成本地实现、自动化与桌面/390px 浏览器验收，草稿 PR #37 远程 `verify` 已通过并保持 Review；Issue 保持打开，等待 Robert 页面验收和合并。T014-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收，PR #37 最终 `verify` 通过并压缩合并到 `main`（`e524f9e`），Issue 已关闭；T014 / Issue #9 已转为 Ready，T015-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
