@@ -29,7 +29,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色与购买者/上传者双中心均已完成，24/24、本地构建和响应式检查通过，草稿 PR #39 保持 Review；T015-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色与购买者/上传者双中心均已完成，24/24、本地构建、响应式检查和提交 `7fc12ae` 的远程 `verify` 通过，草稿 PR #39 保持 Review；T015-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
