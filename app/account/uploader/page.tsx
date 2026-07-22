@@ -1,46 +1,44 @@
 import Link from "next/link";
-import { ArrowRight, DownloadSimple, FileText } from "@phosphor-icons/react/ssr";
+import { ArrowRight, UploadSimple, Wallet } from "@phosphor-icons/react/ssr";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
-import { requireAudience } from "@/lib/auth/page-guard";
-import { buyerAccountRoutes } from "@/lib/domain/navigation";
+import { requireUploaderPage } from "@/lib/auth/page-guard";
+import { uploaderAccountRoutes } from "@/lib/domain/navigation";
 import { getAccountSummary } from "@/lib/account/summary";
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountPage() {
-  const access = await requireAudience("/account", ["buyer"]);
+export default async function UploaderAccountPage() {
+  const access = await requireUploaderPage("/account/uploader");
   const summary = await getAccountSummary(access);
   const quickItems = [
     {
-      href: "/account/purchases",
-      label: `我的购买 · ${summary.purchases.availability}`,
-      value: String(summary.purchases.count),
-      icon: FileText
+      href: "/account/uploads",
+      label: "我的上传 · 真实数据",
+      value: String(summary.uploads.count),
+      icon: UploadSimple
     },
     {
-      href: "/account/downloads",
-      label: `可下载 · ${summary.downloads.availability}`,
-      value: String(summary.downloads.count),
-      icon: DownloadSimple
+      href: "/account/revenue",
+      label: "购买收益 · 真实数据",
+      value: `¥${(summary.revenue.amountCents / 100).toFixed(2)}`,
+      icon: Wallet
     }
   ];
-  const buyerRoutes = buyerAccountRoutes.filter((route) => route.href !== "/account");
-  const uploaderActive = access.roles.includes("uploader") && access.uploaderProfile?.status === "active";
+  const uploaderRoutes = uploaderAccountRoutes.filter((route) => route.href !== "/account/uploader");
 
   return (
     <PageShell
       actions={
         <>
-          <SecondaryLink href={uploaderActive ? "/account/uploader" : "/upload"}>
-            {uploaderActive ? "进入上传者中心" : "开通上传资格"}
-          </SecondaryLink>
+          <SecondaryLink href="/account">返回购买者中心</SecondaryLink>
+          <SecondaryLink href="/upload">上传素材</SecondaryLink>
           <LogoutButton />
         </>
       }
-      description={`你好，${access.user.displayName}。这里仅展示你的购买、授权和下载；上传业务在独立上传者中心管理。`}
-      eyebrow="Buyer workspace"
-      title="购买者中心"
+      description={`你好，${access.user.displayName}。这里仅展示你的上传、审核状态、收益和上传者资料；购买业务请返回购买者中心。`}
+      eyebrow="Uploader workspace"
+      title="上传者中心"
     >
       <div className="grid gap-8">
         <section className="grid gap-4 sm:grid-cols-2">
@@ -64,10 +62,10 @@ export default async function AccountPage() {
 
         <section className="ui-panel overflow-hidden">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="font-bold text-ink">购买者功能</h2>
+            <h2 className="font-bold text-ink">上传者功能</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3">
-            {buyerRoutes.map((route) => (
+            {uploaderRoutes.map((route) => (
               <Link
                 className="group border-b border-line p-5 transition hover:bg-paper sm:border-r"
                 href={route.href}

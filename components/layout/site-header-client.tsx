@@ -42,7 +42,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
   const accountAction = user ? (
     <Link
-      aria-label={`进入 ${user.displayName} 的个人中心`}
+      aria-label={`进入 ${user.displayName} 的购买者中心`}
       className="inline-flex min-h-10 max-w-44 items-center gap-2 rounded-md px-3 text-sm font-semibold text-ink transition hover:bg-paper"
       href="/account"
     >
@@ -58,7 +58,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
   const mobileAccountAction = user ? (
     <Link
-      aria-label={`进入 ${user.displayName} 的个人中心`}
+      aria-label={`进入 ${user.displayName} 的购买者中心`}
       className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-ink transition hover:bg-paper"
       href="/account"
     >

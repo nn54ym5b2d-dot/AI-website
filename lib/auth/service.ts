@@ -541,13 +541,15 @@ export async function activateUploaderInvite(
         displayName
       }
     });
-    await transaction.userRoleMembership.upsert({
-      where: { userId_role: { userId: access.user.id, role: "uploader" } },
-      create: { userId: access.user.id, role: "uploader" },
-      update: { status: "active" }
-    });
+    for (const role of ["buyer", "uploader"] as const) {
+      await transaction.userRoleMembership.upsert({
+        where: { userId_role: { userId: access.user.id, role } },
+        create: { userId: access.user.id, role },
+        update: { status: "active" }
+      });
+    }
 
-    return { uploaderProfile, roles: [...access.roles, "uploader"] };
+    return { uploaderProfile, roles: [...new Set([...access.roles, "buyer", "uploader"])] };
   });
 }
 

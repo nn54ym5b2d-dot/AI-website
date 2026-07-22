@@ -136,7 +136,7 @@ const seededAssets = [
 async function ensureIdentityUser(input: {
   email: string;
   displayName: string;
-  role: "buyer" | "uploader" | "admin" | "observer";
+  roles: Array<"buyer" | "uploader" | "admin" | "observer">;
 }) {
   const user = await prisma.user.upsert({
     where: { email: input.email },
@@ -156,11 +156,13 @@ async function ensureIdentityUser(input: {
     }
   });
 
-  await prisma.userRoleMembership.upsert({
-    where: { userId_role: { userId: user.id, role: input.role } },
-    update: { status: "active" },
-    create: { userId: user.id, role: input.role }
-  });
+  for (const role of input.roles) {
+    await prisma.userRoleMembership.upsert({
+      where: { userId_role: { userId: user.id, role } },
+      update: { status: "active" },
+      create: { userId: user.id, role }
+    });
+  }
 
   return user;
 }
@@ -191,12 +193,12 @@ async function main() {
   await ensureIdentityUser({
     email: "buyer@example.test",
     displayName: "本地购买用户",
-    role: "buyer"
+    roles: ["buyer"]
   });
   const admin = await ensureIdentityUser({
     email: "admin@example.test",
     displayName: "本地超级管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   for (const [key, value, description] of SYSTEM_SETTINGS) {
     await prisma.systemSetting.upsert({
@@ -208,17 +210,17 @@ async function main() {
   const operator = await ensureIdentityUser({
     email: "operator@example.test",
     displayName: "本地运营管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   const finance = await ensureIdentityUser({
     email: "finance@example.test",
     displayName: "本地财务管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   const observer = await ensureIdentityUser({
     email: "observer@example.test",
     displayName: "本地外部观察员",
-    role: "observer"
+    roles: ["observer"]
   });
 
   await prisma.adminRoleAssignment.upsert({
@@ -269,8 +271,8 @@ async function main() {
 
   const assetUploader = await ensureIdentityUser({
     email: "asset-uploader@example.test",
-    displayName: "本地素材上传者",
-    role: "uploader"
+    displayName: "本地素材用户",
+    roles: ["buyer", "uploader"]
   });
   const assetInvite = await prisma.inviteCode.upsert({
     where: { codeHash: ASSET_UPLOADER_INVITE_HASH },
