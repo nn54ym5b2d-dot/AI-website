@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.6
+版本：v4.7
 日期：2026-07-22
-状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已通过草稿 PR #39 进入 Review
+状态：已由 Robert 审核确认；T013 / #8、T014 / #9 已完成，T015 / #10 Ready
 
 ## 使用说明
 
@@ -24,12 +24,12 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
-| T014 | #9 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9>；草稿 PR #39 |
-| T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
+| T014 | #9 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9>；PR #39 已压缩合并（`aa42ad5`） |
+| T015 | #10 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10>；T013-T014 前置已完成 |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色与购买者/上传者双中心均已完成，24/24、本地构建、响应式检查和提交 `7fc12ae` 的远程 `verify` 通过，草稿 PR #39 保持 Review；T015-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A、T013 与 T014 均已完成。T014 / Issue #9 的 ZIP、短时下载、下载记录、收益、热门排序、窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色、购买者/上传者双中心和品牌红主操作均已通过验收；PR #39 最终 `verify` 成功并压缩合并到 `main`（`aa42ad5`），Issue 已关闭。T015 / Issue #10 已转为 Ready，T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
