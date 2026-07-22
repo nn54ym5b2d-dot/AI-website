@@ -4,9 +4,19 @@ set -u
 
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 preview_url="http://127.0.0.1:3000"
+preview_path="${YUANSU_PREVIEW_PATH:-/}"
 docker_app="/Applications/Docker.app"
 docker_app_bin="$docker_app/Contents/Resources/bin"
 docker_compose_plugin="/Applications/Docker.app/Contents/Resources/cli-plugins/docker-compose"
+
+case "$preview_path" in
+  /|/local-auth-outbox) ;;
+  *) preview_path="/" ;;
+esac
+preview_target_url="$preview_url"
+if [[ "$preview_path" != "/" ]]; then
+  preview_target_url="${preview_url}${preview_path}"
+fi
 
 # Finder 启动的 .command 不一定继承 Docker Desktop 的命令路径。
 # 显式加入应用内目录，避免凭据程序 docker-credential-desktop 因失效的系统软链接而找不到。
@@ -40,7 +50,7 @@ node_major="$(node -p 'process.versions.node.split(".")[0]')"
 
 if project_is_running; then
   print_step "完成" "源素库本机预览已经在运行，正在打开浏览器。"
-  open "$preview_url"
+  open "$preview_target_url"
   exit 0
 fi
 
@@ -126,19 +136,19 @@ export ASSET_STORAGE_PROVIDER="local_test"
 export ASSET_LOCAL_TEST_ENABLED="true"
 
 print_step "6/6" "正在启动源素库，本窗口需要保持打开。"
-printf '网页地址：%s\n' "$preview_url"
+printf '网页地址：%s\n' "$preview_target_url"
 printf '页面启动后会自动打开浏览器；代码更新会自动刷新。\n'
 printf '需要结束时，可在本窗口按 Control+C，或双击“停止本机预览.command”。\n\n'
 
 (
   for _ in {1..60}; do
     if project_is_running; then
-      open "$preview_url"
+      open "$preview_target_url"
       exit 0
     fi
     sleep 1
   done
-  printf '\n提示：浏览器未自动打开，请手动访问 %s\n' "$preview_url" >&2
+  printf '\n提示：浏览器未自动打开，请手动访问 %s\n' "$preview_target_url" >&2
 ) &
 browser_wait_pid=$!
 
