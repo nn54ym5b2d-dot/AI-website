@@ -29,7 +29,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A、T013 与 T014 均已完成。T014 / Issue #9 的 ZIP、短时下载、下载记录、收益、热门排序、窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色、购买者/上传者双中心和品牌红主操作均已通过验收；PR #39 最终 `verify` 成功并压缩合并到 `main`（`aa42ad5`），Issue 已关闭。T015 / Issue #10 已转为 Ready，T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A、T013 与 T014 均已完成。T015 / Issue #10 已完成管理员分级、受约束角色/状态管理、观察员账号生命周期和只读聚合看板的本地实现与检查，当前为 Review；T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 

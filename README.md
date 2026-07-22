@@ -8,7 +8,8 @@ AI 数字素材交易平台 MVP。
 - T013 / Issue #8 已由 Robert 验收并通过 PR #37 压缩合并到 `main`（`e524f9e`），状态为 `Done`：多素材订单、本地测试支付/退款、授权、下载资格和初始收益均已接入 PostgreSQL。
 - T014 / Issue #9 已由 Robert 验收并通过 PR #39 压缩合并到 `main`（`aa42ad5`），状态为 `Done`：真实本机 ZIP、逐次短时地址、下载记录、收益冲正、真实热门排序、`buyer + uploader` 双角色及购买者/上传者双中心均已落地。
 - T014 最终验收记录为 24/24 自动化测试、lint、typecheck、build、桌面与 390×844 浏览器复核和远程 `verify` 通过。
-- 当前下一优先任务为 T015 / Issue #10，状态为 `Ready`；T016 为 `Blocked`，T017 为 `Backlog`。
+- T015 / Issue #10 已完成本地实现与检查，状态为 `Review`，等待 Robert 验收；T016 为 `Blocked`，T017 为 `Backlog`。
+- T015 已落地管理员分级、最后一名超级管理员保护、观察员账号生命周期、六个只读聚合接口和真实观察员看板；27/27、lint、typecheck、build、桌面与 390×844 浏览器复核通过。
 - 真实短信、邮件、微信 OAuth/二维码、微信支付/支付宝、COS、图片处理、CDN 和腾讯云生产部署仍未接入，统一属于 T017。
 - 本地任务清单和 GitHub Project #1 统一使用 `Backlog / Ready / In Progress / Review / Blocked / Done` 六种状态。
 

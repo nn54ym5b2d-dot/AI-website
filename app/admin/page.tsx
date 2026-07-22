@@ -6,6 +6,8 @@ import { canAccessAudience, requireAdminPage } from "@/lib/auth/page-guard";
 import { adminRoutes } from "@/lib/domain/navigation";
 import { getAdminDashboard } from "@/lib/admin/assets";
 import { getTransactionMetrics } from "@/lib/transactions/service";
+import { getAdminUserSummary } from "@/lib/admin/users";
+import { getObserverAccountSummary } from "@/lib/admin/observers";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,13 @@ export default async function AdminPage() {
   const access = await requireAdminPage("/admin");
   const visibleRoutes = adminRoutes.filter((route) => canAccessAudience(access, route.audiences));
   const contentAdmin = access.adminRoles.some((role) => role === "super_admin" || role === "operator");
-  const [dashboard, transactionMetrics] = await Promise.all([contentAdmin ? getAdminDashboard() : null, getTransactionMetrics()]);
+  const superAdmin = access.adminRoles.includes("super_admin");
+  const [dashboard, transactionMetrics, userSummary, observerSummary] = await Promise.all([
+    contentAdmin ? getAdminDashboard() : null,
+    getTransactionMetrics(),
+    contentAdmin ? getAdminUserSummary() : null,
+    superAdmin ? getObserverAccountSummary() : null
+  ]);
   const metrics = dashboard ? [
     { label: "已上架素材", value: dashboard.metrics.listed, icon: Images },
     { label: "待初审", value: dashboard.metrics.pendingReview, icon: FileMagnifyingGlass },
@@ -26,7 +34,7 @@ export default async function AdminPage() {
       actions={
         <>
           <LogoutButton label="退出账号" />
-          <SecondaryLink href="/observer">观察员只读入口</SecondaryLink>
+          {access.roles.includes("observer") ? <SecondaryLink href="/observer">观察员只读入口</SecondaryLink> : null}
         </>
       }
       description={`当前以 ${access.user.displayName} 登录。所有后台权限继续由服务端按有效子角色检查。`}
@@ -45,6 +53,7 @@ export default async function AdminPage() {
             ["平台净收益", `¥${(transactionMetrics.netPlatformRevenueCents / 100).toFixed(2)}`]
           ].map(([label, value]) => <article className="ui-panel p-5" key={String(label)}><span className="text-xs text-muted">{label}</span><strong className="mt-4 block text-3xl text-ink">{value}</strong><span className="mt-2 block text-xs text-muted">真实交易数据库计数</span></article>)}
         </section>
+        {userSummary ? <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[["有效用户", userSummary.active], ["购买者", userSummary.buyers], ["上传者", userSummary.uploaders], ["后台账号", userSummary.admins], ...(observerSummary ? [["有效观察员", observerSummary.active], ["已禁用观察员", observerSummary.disabled], ["已撤销观察员", observerSummary.revoked]] : [])].map(([label, value]) => <article className="ui-panel p-5" key={String(label)}><span className="text-xs text-muted">{label}</span><strong className="mt-4 block text-3xl text-ink">{value}</strong><span className="mt-2 block text-xs text-muted">角色允许的真实账号汇总</span></article>)}</section> : null}
         {dashboard ? (
           <>
             <div className="rounded-lg border border-warning/25 bg-amber-50 px-4 py-3 text-xs leading-5 text-warning">审核与交易均已接入本地 PostgreSQL；支付为本地测试 provider，真实商户网关、COS 与政府认证服务仍未接入。</div>

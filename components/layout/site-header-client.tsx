@@ -7,7 +7,10 @@ import { useState } from "react";
 import { authEntryHref } from "@/lib/auth/redirect";
 
 type HeaderUser = {
+  accountHref: string;
+  accountLabel: string;
   avatarUrl: string | null;
+  canUpload: boolean;
   displayName: string;
 };
 
@@ -42,9 +45,9 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
   const accountAction = user ? (
     <Link
-      aria-label={`进入 ${user.displayName} 的购买者中心`}
+      aria-label={`进入 ${user.displayName} 的${user.accountLabel}`}
       className="inline-flex min-h-10 max-w-44 items-center gap-2 rounded-md px-3 text-sm font-semibold text-ink transition hover:bg-paper"
-      href="/account"
+      href={user.accountHref}
     >
       <AccountIcon user={user} />
       <span className="truncate">{user.displayName}</span>
@@ -58,9 +61,9 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
   const mobileAccountAction = user ? (
     <Link
-      aria-label={`进入 ${user.displayName} 的购买者中心`}
+      aria-label={`进入 ${user.displayName} 的${user.accountLabel}`}
       className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-ink transition hover:bg-paper"
-      href="/account"
+      href={user.accountHref}
     >
       <AccountIcon user={user} />
     </Link>
@@ -94,10 +97,12 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
         <div className="hidden items-center gap-2 md:flex">
           {accountAction}
-          <Link className="ui-button-primary min-h-10 px-4" href={uploadHref}>
-            <UploadSimple aria-hidden="true" size={17} weight="bold" />
-            上传素材
-          </Link>
+          {!user || user.canUpload ? (
+            <Link className="ui-button-primary min-h-10 px-4" href={uploadHref}>
+              <UploadSimple aria-hidden="true" size={17} weight="bold" />
+              上传素材
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -125,9 +130,11 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
             <Link className="rounded-md px-3 py-3 text-sm font-medium text-ink hover:bg-paper" href="/search" onClick={() => setOpen(false)}>
               搜索素材
             </Link>
-            <div className="mt-2 border-t border-line pt-4">
-              <Link className="ui-button-primary" href={uploadHref} onClick={() => setOpen(false)}>上传素材</Link>
-            </div>
+            {!user || user.canUpload ? (
+              <div className="mt-2 border-t border-line pt-4">
+                <Link className="ui-button-primary" href={uploadHref} onClick={() => setOpen(false)}>上传素材</Link>
+              </div>
+            ) : null}
           </nav>
         </div>
       ) : null}
