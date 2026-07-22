@@ -69,9 +69,14 @@ async function buildSnapshot(transaction: Prisma.TransactionClient, period: Obse
   const successfulRefundAggregate = await transaction.refund.aggregate({ where: { purpose: "asset_purchase", status: "success", processedAt: dateRange }, _sum: { amountCents: true } });
   const refundedOrders = await transaction.refund.findMany({ where: { purpose: "asset_purchase", status: "success", processedAt: dateRange, orderId: { not: null } }, distinct: ["orderId"], select: { orderId: true } });
   const authorizationRecordCount = await transaction.authorizationRecord.count({ where: { grantedAt: dateRange } });
+  const purchaseCount = await transaction.revenueRecord.count({ where: { recordType: "initial", status: { not: "reversed" }, createdAt: dateRange } });
   const revenueAggregate = await transaction.revenueRecord.aggregate({ where: { createdAt: dateRange }, _sum: { grossAmountCents: true, uploaderAmountCents: true, platformAmountCents: true } });
+  const transactionRevenuePaidAggregate = await transaction.revenueRecord.aggregate({ where: { recordType: "initial", createdAt: dateRange }, _sum: { grossAmountCents: true } });
+  const transactionRevenueRefundAggregate = await transaction.revenueRecord.aggregate({ where: { recordType: "reversal", createdAt: dateRange }, _sum: { grossAmountCents: true } });
+  const uploadFeePaidAggregate = await transaction.payment.aggregate({ where: { purpose: "certification_fee", status: { in: ["success", "refunded"] }, paidAt: dateRange }, _sum: { amountCents: true } });
+  const uploadFeeRefundAggregate = await transaction.refund.aggregate({ where: { purpose: "certification_fee", status: "success", processedAt: dateRange }, _sum: { amountCents: true } });
 
-  const typeMetrics: Array<{ assetType: AssetType; uploadedAssets: number; listedAssets: number; certifiedAssets: number; downloads: number }> = [];
+  const typeMetrics: Array<{ assetType: AssetType; uploadedAssets: number; listedAssets: number; certifiedAssets: number; purchaseCount: number; transactionRevenueCents: number; downloads: number }> = [];
   const typeCounts: Array<{ assetType: AssetType; count: number }> = [];
   for (const assetType of assetTypes) {
     typeMetrics.push({
@@ -79,6 +84,8 @@ async function buildSnapshot(transaction: Prisma.TransactionClient, period: Obse
       uploadedAssets: await transaction.asset.count({ where: { assetType, createdAt: dateRange, deletedAt: null } }),
       listedAssets: await transaction.asset.count({ where: { assetType, listedAt: dateRange, deletedAt: null } }),
       certifiedAssets: await transaction.certificationRecord.count({ where: { status: "certified", verifiedAt: dateRange, asset: { assetType } } }),
+      purchaseCount: await transaction.revenueRecord.count({ where: { recordType: "initial", status: { not: "reversed" }, createdAt: dateRange, orderItem: { assetTypeSnapshot: assetType } } }),
+      transactionRevenueCents: (await transaction.revenueRecord.aggregate({ where: { createdAt: dateRange, orderItem: { assetTypeSnapshot: assetType } }, _sum: { grossAmountCents: true } }))._sum.grossAmountCents ?? 0,
       downloads: await transaction.download.count({ where: { downloadedAt: dateRange, asset: { assetType } } })
     });
     typeCounts.push({ assetType, count: await transaction.asset.count({ where: { assetType, createdAt: { lt: period.end }, deletedAt: null } }) });
@@ -86,6 +93,10 @@ async function buildSnapshot(transaction: Prisma.TransactionClient, period: Obse
 
   const paidAmount = paidOrderAggregate._sum.totalAmountCents ?? 0;
   const refundAmount = successfulRefundAggregate._sum.amountCents ?? 0;
+  const transactionRevenuePaidCents = transactionRevenuePaidAggregate._sum.grossAmountCents ?? 0;
+  const transactionRevenueRefundCents = Math.max(0, -(transactionRevenueRefundAggregate._sum.grossAmountCents ?? 0));
+  const uploadFeePaidCents = uploadFeePaidAggregate._sum.amountCents ?? 0;
+  const uploadFeeRefundCents = uploadFeeRefundAggregate._sum.amountCents ?? 0;
   const data = {
     totalUploadedAssets,
     newUploadedAssets,
@@ -102,12 +113,18 @@ async function buildSnapshot(transaction: Prisma.TransactionClient, period: Obse
     paidOrderCount: paidOrderAggregate._count.id,
     refundedOrderCount: refundedOrders.length,
     authorizationRecordCount,
+    purchaseCount,
     grossOrderAmountCents: paidAmount,
     paidOrderAmountCents: paidAmount,
     refundAmountCents: refundAmount,
     netRevenueCents: revenueAggregate._sum.grossAmountCents ?? paidAmount - refundAmount,
     platformShareAmountCents: revenueAggregate._sum.platformAmountCents ?? 0,
-    uploaderShareAmountCents: revenueAggregate._sum.uploaderAmountCents ?? 0
+    uploaderShareAmountCents: revenueAggregate._sum.uploaderAmountCents ?? 0,
+    transactionRevenuePaidCents,
+    transactionRevenueRefundCents,
+    uploadFeePaidCents,
+    uploadFeeRefundCents,
+    uploadRevenueCents: uploadFeePaidCents - uploadFeeRefundCents
   };
   const snapshot = await transaction.platformMetricSnapshot.upsert({
     where: { periodType_periodStart_periodEnd: { periodType: period.periodType, periodStart: period.start, periodEnd: period.end } },
@@ -154,6 +171,12 @@ function moneyView(snapshot: Awaited<ReturnType<typeof snapshotFor>>) {
     netRevenueCents: snapshot.netRevenueCents,
     platformShareAmountCents: snapshot.platformShareAmountCents,
     uploaderShareAmountCents: snapshot.uploaderShareAmountCents,
+    transactionRevenuePaidCents: snapshot.transactionRevenuePaidCents,
+    transactionRevenueRefundCents: snapshot.transactionRevenueRefundCents,
+    transactionRevenueCents: snapshot.netRevenueCents,
+    uploadFeePaidCents: snapshot.uploadFeePaidCents,
+    uploadFeeRefundCents: snapshot.uploadFeeRefundCents,
+    uploadRevenueCents: snapshot.uploadRevenueCents,
     currency: "CNY" as const
   };
 }
@@ -177,11 +200,10 @@ export async function getObserverDashboard(access: Parameters<typeof snapshotFor
     partner: { name: access.observerProfile.partnerName },
     metrics: {
       uploadedAssets: snapshot.newUploadedAssets,
-      listedAssets: snapshot.listedAssets,
-      certifiedAssets: snapshot.certifiedAssets,
+      certifiedListedAssets: snapshot.listedAssets,
+      purchases: snapshot.purchaseCount,
       downloads: snapshot.totalDownloads,
-      paidOrders: snapshot.paidOrderCount,
-      authorizations: snapshot.authorizationRecordCount
+      paidOrders: snapshot.paidOrderCount
     },
     revenue: moneyView(snapshot),
     share: shareView(snapshot)
@@ -204,7 +226,8 @@ export async function getObserverPlatformMetrics(access: Parameters<typeof snaps
       paidDownloads: snapshot.paidDownloads,
       paidOrderCount: snapshot.paidOrderCount,
       refundedOrderCount: snapshot.refundedOrderCount,
-      authorizationRecordCount: snapshot.authorizationRecordCount
+      authorizationRecordCount: snapshot.authorizationRecordCount,
+      purchaseCount: snapshot.purchaseCount
     },
     revenue: moneyView(snapshot)
   };
@@ -217,8 +240,9 @@ export async function getObserverAssetsSummary(access: Parameters<typeof snapsho
     assetTypes: snapshot.assetTypeSnapshots.map((item) => ({
       assetType: item.assetType,
       uploadedAssets: item.uploadedAssets,
-      listedAssets: item.listedAssets,
-      certifiedAssets: item.certifiedAssets,
+      certifiedListedAssets: item.listedAssets,
+      purchases: item.purchaseCount,
+      transactionRevenueCents: item.transactionRevenueCents,
       downloads: item.downloads
     }))
   };

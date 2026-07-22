@@ -121,14 +121,46 @@ test("T015 观察员账号生命周期、只读汇总和敏感边界使用真实
 
   const dashboardResponse = await getObserverDashboard(request("/api/v1/observer/dashboard?periodType=month", { cookie: observer.cookie }));
   assert.equal(dashboardResponse.status, 200);
-  const dashboardText = JSON.stringify(await dashboardResponse.json());
+  const dashboardPayload = await body<{
+    period: { startAt: string; endAt: string };
+    metrics: { purchases: number; certifiedListedAssets: number };
+    revenue: { transactionRevenuePaidCents: number; transactionRevenueRefundCents: number; transactionRevenueCents: number; uploadFeePaidCents: number; uploadFeeRefundCents: number; uploadRevenueCents: number };
+  }>(dashboardResponse);
+  const dashboardText = JSON.stringify(dashboardPayload);
   for (const forbiddenField of ["email", "phone", "orderNo", "providerTradeNo", "cosObjectKey", "assetId", "downloadId", "auditLog"]) {
     assert.equal(dashboardText.includes(forbiddenField), false, `${forbiddenField} must not be exposed`);
   }
+  const periodRange = { gte: new Date(dashboardPayload.data.period.startAt), lt: new Date(dashboardPayload.data.period.endAt) };
+  const [expectedPurchases, expectedListed, transactionPaid, transactionRefund, uploadPaid, uploadRefund] = await Promise.all([
+    getPrisma().revenueRecord.count({ where: { recordType: "initial", status: { not: "reversed" }, createdAt: periodRange } }),
+    getPrisma().asset.count({ where: { listedAt: periodRange, deletedAt: null } }),
+    getPrisma().revenueRecord.aggregate({ where: { recordType: "initial", createdAt: periodRange }, _sum: { grossAmountCents: true } }),
+    getPrisma().revenueRecord.aggregate({ where: { recordType: "reversal", createdAt: periodRange }, _sum: { grossAmountCents: true } }),
+    getPrisma().payment.aggregate({ where: { purpose: "certification_fee", status: { in: ["success", "refunded"] }, paidAt: periodRange }, _sum: { amountCents: true } }),
+    getPrisma().refund.aggregate({ where: { purpose: "certification_fee", status: "success", processedAt: periodRange }, _sum: { amountCents: true } })
+  ]);
+  assert.equal(dashboardPayload.data.metrics.purchases, expectedPurchases);
+  assert.equal(dashboardPayload.data.metrics.certifiedListedAssets, expectedListed);
+  assert.equal(dashboardPayload.data.revenue.transactionRevenuePaidCents, transactionPaid._sum.grossAmountCents ?? 0);
+  assert.equal(dashboardPayload.data.revenue.transactionRevenueRefundCents, Math.max(0, -(transactionRefund._sum.grossAmountCents ?? 0)));
+  assert.equal(dashboardPayload.data.revenue.transactionRevenueCents, (transactionPaid._sum.grossAmountCents ?? 0) + (transactionRefund._sum.grossAmountCents ?? 0));
+  assert.equal(dashboardPayload.data.revenue.uploadFeePaidCents, uploadPaid._sum.amountCents ?? 0);
+  assert.equal(dashboardPayload.data.revenue.uploadFeeRefundCents, uploadRefund._sum.amountCents ?? 0);
+  assert.equal(dashboardPayload.data.revenue.uploadRevenueCents, (uploadPaid._sum.amountCents ?? 0) - (uploadRefund._sum.amountCents ?? 0));
   const assetsResponse = await getObserverAssetsSummary(request("/api/v1/observer/assets-summary?periodType=month", { cookie: observer.cookie }));
   assert.equal(assetsResponse.status, 200);
-  const assetPayload = await body<{ assetTypes: Array<{ assetType: string }> }>(assetsResponse);
+  const assetPayload = await body<{ assetTypes: Array<{ assetType: "person" | "object" | "scene"; purchases: number; certifiedListedAssets: number; transactionRevenueCents: number }> }>(assetsResponse);
   assert.deepEqual(new Set(assetPayload.data.assetTypes.map((item) => item.assetType)), new Set(["person", "object", "scene"]));
+  for (const item of assetPayload.data.assetTypes) {
+    const [purchases, listed, revenue] = await Promise.all([
+      getPrisma().revenueRecord.count({ where: { recordType: "initial", status: { not: "reversed" }, createdAt: periodRange, orderItem: { assetTypeSnapshot: item.assetType } } }),
+      getPrisma().asset.count({ where: { assetType: item.assetType, listedAt: periodRange, deletedAt: null } }),
+      getPrisma().revenueRecord.aggregate({ where: { createdAt: periodRange, orderItem: { assetTypeSnapshot: item.assetType } }, _sum: { grossAmountCents: true } })
+    ]);
+    assert.equal(item.purchases, purchases);
+    assert.equal(item.certifiedListedAssets, listed);
+    assert.equal(item.transactionRevenueCents, revenue._sum.grossAmountCents ?? 0);
+  }
   const shareResponse = await getObserverShareRecords(request("/api/v1/observer/share-records?periodType=month", { cookie: observer.cookie }));
   const sharePayload = await body<{ records: Array<{ shareRate: number; expectedShareAmountCents: number; settledShareAmountCents: number; pendingShareAmountCents: number }> }>(shareResponse);
   assert.equal(sharePayload.data.records[0]?.shareRate, 0);

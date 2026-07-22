@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.7
+版本：v4.8
 日期：2026-07-22
-状态：已由 Robert 审核确认；T013 / #8、T014 / #9 已完成，T015 / #10 Ready
+状态：已由 Robert 审核确认；T013 / #8、T014 / #9 已完成，T015 / #10 Review
 
 ## 使用说明
 
@@ -25,7 +25,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9>；PR #39 已压缩合并（`aa42ad5`） |
-| T015 | #10 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10>；T013-T014 前置已完成 |
+| T015 | #10 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10>；草稿 PR #42，等待 Robert 验收 |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
@@ -657,7 +657,7 @@ T015
 - 开发外部观察员只读数据看板。
 - 看板统计周期可选择日、周、月，并支持最大跨度一年的自定义起止区间。
 - 实现 `/api/v1/observer/*` 只读汇总 API，并从平台周期快照及分类型快照读取。
-- 展示平台上传量、下载量、订单金额、净收益、合作方分成基数、比例和金额；首版观察员分成比例和金额为 0。
+- 展示新增上传、新认证上架、有效购买、下载、已支付订单、交易收益、上传收益、分类型交易收益，以及合作方分成基数、比例和金额；交易收益按全部素材成交金额 100% 的支付减退回计算，上传收益按认证上传费支付减退回计算；首版观察员分成比例和金额为 0。
 - 隐藏用户手机号、邮箱、证件信息、支付账户、完整支付流水号、原文件地址、下载原始链接和内部操作日志。
 - 禁止外部观察员导出数据。
 
@@ -679,6 +679,7 @@ T015
 - 外部观察员没有导出入口。
 - 外部观察员可以切换日、周、月统计周期和最大跨度一年的自定义区间；超过一年时服务端拒绝。
 - 观察员 API 可返回人物、物件/道具、场景分类型汇总，但不能下钻到单个素材、订单、用户或下载记录。
+- 交易收益和上传收益卡片可在卡内展开支付/退回金额，问号独立解释计算方式；分类型汇总含有效购买和 100% 交易收益。
 - 管理员、运营、财务权限边界符合 `docs/角色权限.md`。
 
 测试要求：

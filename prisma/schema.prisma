@@ -922,35 +922,41 @@ model RevenueRecord {
 }
 
 model PlatformMetricSnapshot {
-  id                           String             @id @default(uuid()) @db.Uuid
-  periodType                   SnapshotPeriodType @map("period_type")
-  periodStart                  DateTime           @map("period_start") @db.Timestamptz(3)
-  periodEnd                    DateTime           @map("period_end") @db.Timestamptz(3)
-  totalUploadedAssets          Int                @map("total_uploaded_assets")
-  newUploadedAssets            Int                @map("new_uploaded_assets")
-  listedAssets                 Int                @map("listed_assets")
-  delistedAssets               Int                @map("delisted_assets")
-  pendingReviewAssets          Int                @map("pending_review_assets")
-  certifiedAssets              Int                @map("certified_assets")
-  certificationExceptionAssets Int                @map("certification_exception_assets")
-  personAssetCount             Int                @map("person_asset_count")
-  objectAssetCount             Int                @map("object_asset_count")
-  sceneAssetCount              Int                @map("scene_asset_count")
-  totalDownloads               Int                @map("total_downloads")
-  paidDownloads                Int                @map("paid_downloads")
-  paidOrderCount               Int                @map("paid_order_count")
-  refundedOrderCount           Int                @map("refunded_order_count")
-  authorizationRecordCount     Int                @map("authorization_record_count")
-  grossOrderAmountCents        Int                @map("gross_order_amount_cents")
-  paidOrderAmountCents         Int                @map("paid_order_amount_cents")
-  refundAmountCents            Int                @map("refund_amount_cents")
-  netRevenueCents              Int                @map("net_revenue_cents")
-  platformShareAmountCents     Int                @map("platform_share_amount_cents")
-  uploaderShareAmountCents     Int                @map("uploader_share_amount_cents")
-  createdAt                    DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt                    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
-  assetTypeSnapshots           PlatformAssetTypeMetricSnapshot[]
-  observerShareRecords         ObserverShareRecord[]
+  id                            String                            @id @default(uuid()) @db.Uuid
+  periodType                    SnapshotPeriodType                @map("period_type")
+  periodStart                   DateTime                          @map("period_start") @db.Timestamptz(3)
+  periodEnd                     DateTime                          @map("period_end") @db.Timestamptz(3)
+  totalUploadedAssets           Int                               @map("total_uploaded_assets")
+  newUploadedAssets             Int                               @map("new_uploaded_assets")
+  listedAssets                  Int                               @map("listed_assets")
+  delistedAssets                Int                               @map("delisted_assets")
+  pendingReviewAssets           Int                               @map("pending_review_assets")
+  certifiedAssets               Int                               @map("certified_assets")
+  certificationExceptionAssets  Int                               @map("certification_exception_assets")
+  personAssetCount              Int                               @map("person_asset_count")
+  objectAssetCount              Int                               @map("object_asset_count")
+  sceneAssetCount               Int                               @map("scene_asset_count")
+  totalDownloads                Int                               @map("total_downloads")
+  paidDownloads                 Int                               @map("paid_downloads")
+  paidOrderCount                Int                               @map("paid_order_count")
+  refundedOrderCount            Int                               @map("refunded_order_count")
+  authorizationRecordCount      Int                               @map("authorization_record_count")
+  purchaseCount                 Int                               @default(0) @map("purchase_count")
+  grossOrderAmountCents         Int                               @map("gross_order_amount_cents")
+  paidOrderAmountCents          Int                               @map("paid_order_amount_cents")
+  refundAmountCents             Int                               @map("refund_amount_cents")
+  netRevenueCents               Int                               @map("net_revenue_cents")
+  platformShareAmountCents      Int                               @map("platform_share_amount_cents")
+  uploaderShareAmountCents      Int                               @map("uploader_share_amount_cents")
+  transactionRevenuePaidCents   Int                               @default(0) @map("transaction_revenue_paid_cents")
+  transactionRevenueRefundCents Int                               @default(0) @map("transaction_revenue_refund_cents")
+  uploadFeePaidCents            Int                               @default(0) @map("upload_fee_paid_cents")
+  uploadFeeRefundCents          Int                               @default(0) @map("upload_fee_refund_cents")
+  uploadRevenueCents            Int                               @default(0) @map("upload_revenue_cents")
+  createdAt                     DateTime                          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                     DateTime                          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  assetTypeSnapshots            PlatformAssetTypeMetricSnapshot[]
+  observerShareRecords          ObserverShareRecord[]
 
   @@unique([periodType, periodStart, periodEnd])
   @@index([periodStart, periodEnd])
@@ -958,16 +964,18 @@ model PlatformMetricSnapshot {
 }
 
 model PlatformAssetTypeMetricSnapshot {
-  id               String                 @id @default(uuid()) @db.Uuid
-  metricSnapshotId String                 @map("metric_snapshot_id") @db.Uuid
-  assetType        AssetType              @map("asset_type")
-  uploadedAssets   Int                    @map("uploaded_assets")
-  listedAssets     Int                    @map("listed_assets")
-  certifiedAssets  Int                    @map("certified_assets")
-  downloads        Int
-  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
-  metricSnapshot   PlatformMetricSnapshot @relation(fields: [metricSnapshotId], references: [id], onDelete: Cascade)
+  id                      String                 @id @default(uuid()) @db.Uuid
+  metricSnapshotId        String                 @map("metric_snapshot_id") @db.Uuid
+  assetType               AssetType              @map("asset_type")
+  uploadedAssets          Int                    @map("uploaded_assets")
+  listedAssets            Int                    @map("listed_assets")
+  certifiedAssets         Int                    @map("certified_assets")
+  purchaseCount           Int                    @default(0) @map("purchase_count")
+  transactionRevenueCents Int                    @default(0) @map("transaction_revenue_cents")
+  downloads               Int
+  createdAt               DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  metricSnapshot          PlatformMetricSnapshot @relation(fields: [metricSnapshotId], references: [id], onDelete: Cascade)
 
   @@unique([metricSnapshotId, assetType])
   @@index([assetType, createdAt])
