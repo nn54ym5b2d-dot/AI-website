@@ -4,6 +4,7 @@ import {
   canManageCertification,
   canManageInvitations,
   canManageSystemSettings,
+  canManageAdminRoles,
   canConfirmRefund,
   canReviewAsset
 } from "@/lib/auth/roles";
@@ -58,6 +59,14 @@ export async function requireInvitationAdminAccess(request: Request, write = fal
 
 export async function requireUserReadAccess(request: Request) {
   return requireInvitationAdminAccess(request);
+}
+
+export async function requireSuperAdminAccess(request: Request, write = false) {
+  const access = await requireAdminReadAccess(request, write);
+  if (!canManageAdminRoles(toRoleContext(access))) {
+    throw new ApiError(403, "FORBIDDEN", "只有超级管理员可以管理用户角色和观察员账号。");
+  }
+  return access;
 }
 
 export async function requireSettingsAccess(request: Request, write = false) {

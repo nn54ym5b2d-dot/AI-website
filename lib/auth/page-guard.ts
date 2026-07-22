@@ -62,3 +62,11 @@ export async function requireUploaderPage(nextPath: string) {
   }
   return access as typeof access & { uploaderProfile: NonNullable<typeof access.uploaderProfile> };
 }
+
+export async function requireObserverPage(nextPath: string) {
+  const access = await requireAudience(nextPath, ["observer"]);
+  if (!access.observerProfile || access.observerProfile.status !== "active") {
+    redirect("/forbidden");
+  }
+  return access as typeof access & { observerProfile: NonNullable<typeof access.observerProfile> };
+}

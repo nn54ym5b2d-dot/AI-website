@@ -8,11 +8,15 @@ import {
   ShieldCheck,
   WechatLogo
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { safeAuthRedirectPath } from "@/lib/auth/redirect";
 
 type AuthFlowFormProps = {
   nextPath?: string;
+  initialEmail?: string;
+  initialMethod?: AuthMethod;
+  showLocalOutbox?: boolean;
 };
 
 type AuthMethod = "phone" | "wechat" | "email";
@@ -57,9 +61,14 @@ const callingCodes = [
   { code: "+27", region: "南非" }
 ] as const;
 
-export function AuthFlowForm({ nextPath = "/" }: AuthFlowFormProps) {
-  const [method, setMethod] = useState<AuthMethod>("phone");
-  const [email, setEmail] = useState("");
+export function AuthFlowForm({
+  nextPath = "/",
+  initialEmail = "",
+  initialMethod = "phone",
+  showLocalOutbox = false
+}: AuthFlowFormProps) {
+  const [method, setMethod] = useState<AuthMethod>(initialMethod);
+  const [email, setEmail] = useState(initialEmail);
   const [countryCallingCode, setCountryCallingCode] = useState("+86");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emailChallengeId, setEmailChallengeId] = useState("");
@@ -143,7 +152,9 @@ export function AuthFlowForm({ nextPath = "/" }: AuthFlowFormProps) {
         setEmailChallengeId(payload.data.challengeId);
         setEmailVerificationCode("");
       }
-      setMessage("验证码已交给本地测试 provider。开发环境可运行 npm run auth:outbox 查看。");
+      setMessage(showLocalOutbox
+        ? "验证码已生成，可在本地验证码箱查看。"
+        : "验证码已交给本地测试 provider。开发环境可运行 npm run auth:outbox 查看。");
     } finally {
       setSubmitting(false);
     }
@@ -373,6 +384,16 @@ export function AuthFlowForm({ nextPath = "/" }: AuthFlowFormProps) {
             >
               获取邮箱验证码
             </button>
+            {showLocalOutbox ? (
+              <Link
+                className="text-center text-sm font-semibold text-brand hover:text-brand-dark"
+                href="/local-auth-outbox"
+                rel="noreferrer"
+                target="_blank"
+              >
+                打开本地验证码箱
+              </Link>
+            ) : null}
             {emailChallengeId ? (
               <label className="grid gap-2 text-sm font-medium text-ink">
                 邮箱验证码

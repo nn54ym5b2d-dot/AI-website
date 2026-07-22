@@ -25,6 +25,28 @@ export type RouteGroup = {
   routes: RouteDefinition[];
 };
 
+export function signedInHeaderAccess(roles: readonly string[]) {
+  const roleSet = new Set(roles);
+
+  if (roleSet.has("buyer")) {
+    return { accountHref: "/account", accountLabel: "购买者中心", canUpload: true } as const;
+  }
+
+  if (roleSet.has("uploader")) {
+    return { accountHref: "/account/uploader", accountLabel: "上传者中心", canUpload: true } as const;
+  }
+
+  if (roleSet.has("admin")) {
+    return { accountHref: "/admin", accountLabel: "管理后台", canUpload: false } as const;
+  }
+
+  if (roleSet.has("observer")) {
+    return { accountHref: "/observer", accountLabel: "观察员看板", canUpload: false } as const;
+  }
+
+  return { accountHref: "/", accountLabel: "首页", canUpload: false } as const;
+}
+
 export const primaryNavItems = [
   { href: "/", label: "首页" },
   { href: "/materials", label: "素材" },

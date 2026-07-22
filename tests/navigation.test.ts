@@ -5,6 +5,7 @@ import {
   adminRoutes,
   buyerAccountRoutes,
   routesForAudience,
+  signedInHeaderAccess,
   uploaderAccountRoutes
 } from "../lib/domain/navigation.ts";
 
@@ -45,4 +46,22 @@ test("财务管理员不显示内容审核入口", () => {
   assert.ok(slugs.includes("payments"));
   assert.equal(slugs.includes("review"), false);
   assert.equal(slugs.includes("assets"), false);
+});
+
+test("公共页头按登录角色提供正确工作入口", () => {
+  assert.deepEqual(signedInHeaderAccess(["buyer"]), {
+    accountHref: "/account",
+    accountLabel: "购买者中心",
+    canUpload: true
+  });
+  assert.deepEqual(signedInHeaderAccess(["admin"]), {
+    accountHref: "/admin",
+    accountLabel: "管理后台",
+    canUpload: false
+  });
+  assert.deepEqual(signedInHeaderAccess(["observer"]), {
+    accountHref: "/observer",
+    accountLabel: "观察员看板",
+    canUpload: false
+  });
 });
