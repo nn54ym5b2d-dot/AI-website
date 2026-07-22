@@ -155,13 +155,6 @@ export function ObserverDashboard() {
 
       {dashboard ? <>
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            ["新增上传", dashboard.metrics.uploadedAssets],
-            ["新认证上架", dashboard.metrics.certifiedListedAssets],
-            ["购买次数", dashboard.metrics.purchases],
-            ["下载次数", dashboard.metrics.downloads],
-            ["已支付订单", dashboard.metrics.paidOrders]
-          ].map(([label, value]) => <article className="ui-panel min-h-[196px] p-5" key={String(label)}><span className="text-xs text-muted">{label}</span><strong className="mt-4 block text-3xl text-ink">{value}</strong><span className="mt-2 block text-xs text-muted">只读周期汇总</span></article>)}
           <RevenueMetricCard
             explanation="交易收益 = 本周期全部素材交易支付 − 本周期交易退回，按素材成交金额的 100% 统计；其中包含上传者分成和平台分成，不代表平台最终利润。"
             incomeCents={dashboard.revenue.transactionRevenuePaidCents}
@@ -180,6 +173,13 @@ export function ObserverDashboard() {
             refundLabel="上传费退回"
             valueCents={dashboard.revenue.uploadRevenueCents}
           />
+          {[
+            ["新增上传", dashboard.metrics.uploadedAssets],
+            ["新认证上架", dashboard.metrics.certifiedListedAssets],
+            ["购买次数", dashboard.metrics.purchases],
+            ["下载次数", dashboard.metrics.downloads],
+            ["已支付订单", dashboard.metrics.paidOrders]
+          ].map(([label, value]) => <article className="ui-panel min-h-[196px] p-5" key={String(label)}><span className="text-xs text-muted">{label}</span><strong className="mt-4 block text-3xl text-ink">{value}</strong><span className="mt-2 block text-xs text-muted">只读周期汇总</span></article>)}
         </section>
 
         <section className="ui-panel overflow-hidden">
