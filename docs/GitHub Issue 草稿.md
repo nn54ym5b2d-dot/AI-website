@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.8
+版本：v4.9
 日期：2026-07-22
-状态：已由 Robert 审核确认；T013 / #8、T014 / #9 已完成，T015 / #10 Review
+状态：已由 Robert 审核确认；T013 / #8、T014 / #9、T015 / #10 已完成，T016 / #11 Ready
 
 ## 使用说明
 
@@ -25,11 +25,11 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
 | T014 | #9 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9>；PR #39 已压缩合并（`aa42ad5`） |
-| T015 | #10 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10>；草稿 PR #42，等待 Robert 验收 |
-| T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
+| T015 | #10 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10>；PR #42 已压缩合并（`78d8b45`） |
+| T016 | #11 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A、T013 与 T014 均已完成。T015 / Issue #10 已完成管理员分级、受约束角色/状态管理、观察员账号生命周期和只读聚合看板的本地实现与检查，当前为 Review；T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A、T013、T014 与 T015 均已完成。T015 / Issue #10 已通过 Robert 验收、最终 CI、PR 合并和 Issue 关闭四项收口条件；T016 已解锁为 Ready，T017 保持 Backlog。
 
 每个任务默认规则：
 
