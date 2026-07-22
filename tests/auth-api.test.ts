@@ -10,6 +10,7 @@ import { POST as login } from "../app/api/v1/auth/login/route.ts";
 import { POST as loginWithWechat } from "../app/api/v1/auth/wechat/route.ts";
 import { GET as getCsrf } from "../app/api/v1/auth/csrf/route.ts";
 import { POST as logout } from "../app/api/v1/auth/logout/route.ts";
+import { GET as getLocalOutbox } from "../app/api/v1/auth/local-outbox/route.ts";
 import { GET as getMe } from "../app/api/v1/me/route.ts";
 import { POST as activateInvite } from "../app/api/v1/invites/activate/route.ts";
 import { disconnectPrisma, getPrisma } from "../lib/db/prisma.ts";
@@ -86,6 +87,43 @@ async function loginSeededUser(identifier: string) {
   assert.equal(response.status, 200);
   return { response, cookie: sessionCookie(response) };
 }
+
+test("本地验证码箱只允许回环地址读取且响应不缓存", { skip: !shouldRun }, async () => {
+  const identifier = "local-outbox@example.test";
+  const credentials = await challenge("email", identifier, "login");
+  const localResponse = await getLocalOutbox(
+    new Request("http://127.0.0.1/api/v1/auth/local-outbox")
+  );
+  assert.equal(localResponse.status, 200);
+  assert.match(localResponse.headers.get("cache-control") ?? "", /no-store/);
+
+  const localPayload = await body<{
+    data: {
+      deliveries: Array<{
+        identifier: string;
+        verificationCode: string;
+        expired: boolean;
+        challengeId?: string;
+      }>;
+    };
+  }>(localResponse);
+  const delivery = localPayload.data.deliveries.find(
+    (item) => item.identifier === identifier &&
+      item.verificationCode === credentials.verificationCode
+  );
+  assert.ok(delivery);
+  assert.equal(delivery.expired, false);
+  assert.equal(delivery.challengeId, undefined);
+
+  const remoteResponse = await getLocalOutbox(
+    new Request("https://example.test/api/v1/auth/local-outbox")
+  );
+  assert.equal(remoteResponse.status, 404);
+  assert.equal(
+    (await body<{ error: { code: string } }>(remoteResponse)).error.code,
+    "RESOURCE_NOT_FOUND"
+  );
+});
 
 test("身份 API 使用真实 PostgreSQL 完成注册、条款审计、会话、邀请码和退出", { skip: !shouldRun }, async () => {
   const termsResponse = await getCurrentTerms(

@@ -9,6 +9,7 @@ import {
   LEGACY_LOCAL_UPLOADER_INVITE_CODE,
   LOCAL_UPLOADER_INVITE_CODE
 } from "../lib/auth/local-invite-seed";
+import { LOCAL_TEST_ACCOUNTS } from "../lib/auth/local-test-accounts";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -195,11 +196,8 @@ async function main() {
     displayName: "本地购买用户",
     roles: ["buyer"]
   });
-  const admin = await ensureIdentityUser({
-    email: "admin@example.test",
-    displayName: "本地超级管理员",
-    roles: ["admin"]
-  });
+  const adminAccount = LOCAL_TEST_ACCOUNTS.find((account) => account.email === "admin@example.test")!;
+  const admin = await ensureIdentityUser({ ...adminAccount, roles: [...adminAccount.roles] });
   for (const [key, value, description] of SYSTEM_SETTINGS) {
     await prisma.systemSetting.upsert({
       where: { key },
@@ -207,21 +205,12 @@ async function main() {
       create: { key, value, description, updatedByUserId: admin.id }
     });
   }
-  const operator = await ensureIdentityUser({
-    email: "operator@example.test",
-    displayName: "本地运营管理员",
-    roles: ["admin"]
-  });
-  const finance = await ensureIdentityUser({
-    email: "finance@example.test",
-    displayName: "本地财务管理员",
-    roles: ["admin"]
-  });
-  const observer = await ensureIdentityUser({
-    email: "observer@example.test",
-    displayName: "本地外部观察员",
-    roles: ["observer"]
-  });
+  const operatorAccount = LOCAL_TEST_ACCOUNTS.find((account) => account.email === "operator@example.test")!;
+  const financeAccount = LOCAL_TEST_ACCOUNTS.find((account) => account.email === "finance@example.test")!;
+  const observerAccount = LOCAL_TEST_ACCOUNTS.find((account) => account.email === "observer@example.test")!;
+  const operator = await ensureIdentityUser({ ...operatorAccount, roles: [...operatorAccount.roles] });
+  const finance = await ensureIdentityUser({ ...financeAccount, roles: [...financeAccount.roles] });
+  const observer = await ensureIdentityUser({ ...observerAccount, roles: [...observerAccount.roles] });
 
   await prisma.adminRoleAssignment.upsert({
     where: { userId_adminRole: { userId: admin.id, adminRole: "super_admin" } },
