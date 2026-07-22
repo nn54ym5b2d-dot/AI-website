@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, UploadSimple, Wallet } from "@phosphor-icons/react/ssr";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { requireUploaderPage } from "@/lib/auth/page-guard";
 import { uploaderAccountRoutes } from "@/lib/domain/navigation";
 import { getAccountSummary } from "@/lib/account/summary";
@@ -31,8 +31,8 @@ export default async function UploaderAccountPage() {
     <PageShell
       actions={
         <>
-          <SecondaryLink href="/account">返回购买者中心</SecondaryLink>
-          <SecondaryLink href="/upload">上传素材</SecondaryLink>
+          <Link className="ui-button-primary" href="/account">返回购买者中心</Link>
+          <Link className="ui-button-primary" href="/upload">上传素材</Link>
           <LogoutButton />
         </>
       }

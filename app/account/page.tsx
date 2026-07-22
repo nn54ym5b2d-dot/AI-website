@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, DownloadSimple, FileText } from "@phosphor-icons/react/ssr";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { requireAudience } from "@/lib/auth/page-guard";
 import { buyerAccountRoutes } from "@/lib/domain/navigation";
 import { getAccountSummary } from "@/lib/account/summary";
@@ -32,9 +32,9 @@ export default async function AccountPage() {
     <PageShell
       actions={
         <>
-          <SecondaryLink href={uploaderActive ? "/account/uploader" : "/upload"}>
+          <Link className="ui-button-primary" href={uploaderActive ? "/account/uploader" : "/upload"}>
             {uploaderActive ? "进入上传者中心" : "开通上传资格"}
-          </SecondaryLink>
+          </Link>
           <LogoutButton />
         </>
       }
