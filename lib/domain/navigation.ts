@@ -149,7 +149,7 @@ export const accountRoutes: RouteDefinition[] = [
   {
     title: "收益记录",
     href: "/account/revenue",
-    description: "上传者查看素材收益记录。",
+    description: "上传者查看素材总购买次数、各素材购买次数和实际购买收益。",
     priority: "P0",
     roleEntry: "上传者",
     audiences: ["uploader"],

@@ -6,7 +6,7 @@ export async function getAccountSummary(access: SessionAccess) {
     access.uploaderProfile ? getPrisma().asset.count({ where: { uploaderProfileId: access.uploaderProfile.id, deletedAt: null } }) : 0,
     access.roles.includes("buyer") ? getPrisma().order.count({ where: { buyerUserId: access.user.id } }) : 0,
     access.roles.includes("buyer") ? getPrisma().downloadLink.count({ where: { requestedByUserId: access.user.id, status: "active", expiresAt: { gt: new Date() } } }) : 0,
-    access.uploaderProfile ? getPrisma().revenueRecord.aggregate({ where: { uploaderProfileId: access.uploaderProfile.id }, _sum: { uploaderAmountCents: true } }) : null
+    access.roles.includes("uploader") && access.uploaderProfile ? getPrisma().revenueRecord.aggregate({ where: { uploaderProfileId: access.uploaderProfile.id }, _sum: { uploaderAmountCents: true } }) : null
   ]);
   return {
     purchases: { count: purchaseCount, availability: "available" as const },

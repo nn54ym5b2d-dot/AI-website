@@ -34,7 +34,7 @@ function effectiveStatus(link: { status: string; expiresAt: Date }) {
 
 function serializeLink(link: {
   id: string; status: string; bundleStatus: string; bundleFailureCode: string | null; expiresAt: Date; eligibilityDaysSnapshot: number; bundleGeneratedAt: Date | null;
-  authorizationRecord: { id: string; status: string; assetId: string; order: { orderNo: string }; orderItem: { assetTitleSnapshot: string } };
+  authorizationRecord: { id: string; status: string; assetId: string; order: { id: string; orderNo: string }; orderItem: { assetTitleSnapshot: string } };
   _count?: { downloads: number };
   downloads?: Array<{ downloadedAt: Date }>;
 }) {
@@ -44,6 +44,7 @@ function serializeLink(link: {
     authorizationStatus: link.authorizationRecord.status,
     assetId: link.authorizationRecord.assetId,
     assetTitle: link.authorizationRecord.orderItem.assetTitleSnapshot,
+    orderId: link.authorizationRecord.order.id,
     orderNo: link.authorizationRecord.order.orderNo,
     status: effectiveStatus(link),
     bundleStatus: link.bundleStatus,
@@ -59,7 +60,7 @@ function serializeLink(link: {
 const linkInclude = {
   authorizationRecord: {
     include: {
-      order: { select: { orderNo: true } },
+      order: { select: { id: true, orderNo: true } },
       orderItem: { select: { assetTitleSnapshot: true, uploaderProfile: { select: { userId: true } } } }
     }
   },

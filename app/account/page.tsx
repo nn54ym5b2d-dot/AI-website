@@ -16,7 +16,7 @@ export default async function AccountPage() {
     { href: "/account/purchases", label: `我的购买 · ${summary.purchases.availability}`, value: String(summary.purchases.count), icon: FileText },
     { href: "/account/downloads", label: `可下载 · ${summary.downloads.availability}`, value: String(summary.downloads.count), icon: DownloadSimple },
     { href: "/account/uploads", label: "我的上传 · 真实数据", value: String(summary.uploads.count), icon: UploadSimple },
-    { href: "/account/revenue", label: `收益 · ${summary.revenue.availability}`, value: `¥${(summary.revenue.amountCents / 100).toFixed(2)}`, icon: Wallet }
+    { href: "/account/revenue", label: "购买收益 · 真实数据", value: `¥${(summary.revenue.amountCents / 100).toFixed(2)}`, icon: Wallet }
   ];
   const visibleRoutes = accountRoutes.filter((route) => canAccessAudience(access, route.audiences));
   const visibleHrefs = new Set(visibleRoutes.map((route) => route.href));

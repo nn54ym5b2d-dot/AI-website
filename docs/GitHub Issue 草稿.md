@@ -1,7 +1,7 @@
 # GitHub Issue 草稿
 
-版本：v4.4
-日期：2026-07-21
+版本：v4.5
+日期：2026-07-22
 状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已通过草稿 PR #39 进入 Review
 
 ## 使用说明
@@ -29,7 +29,7 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，草稿 PR #39 的远程 `verify` 已通过，等待 Robert 验收；T015-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，Robert 追加确认的窄屏账户入口、支付后跳转、一键 ZIP 和上传者购买收益统计已完成本地检查，草稿 PR #39 保持 Review；T015-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 

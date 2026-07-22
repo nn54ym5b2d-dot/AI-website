@@ -80,12 +80,42 @@ export async function listUploaderRevenue(access: SessionAccess) {
 }
 
 export async function getUploaderRevenueSummary(access: SessionAccess) {
-  const records = await listUploaderRevenue(access);
-  const initialUploaderAmountCents = records.filter((record) => record.recordType === "initial").reduce((sum, record) => sum + record.uploaderAmountCents, 0);
-  const reversedUploaderAmountCents = Math.abs(records.filter((record) => record.recordType === "reversal").reduce((sum, record) => sum + record.uploaderAmountCents, 0));
-  const netUploaderAmountCents = records.reduce((sum, record) => sum + record.uploaderAmountCents, 0);
-  const pendingSettlementAmountCents = records.filter((record) => record.status === "recorded" || record.status === "settled_pending").reduce((sum, record) => sum + record.uploaderAmountCents, 0);
-  return { initialUploaderAmountCents, reversedUploaderAmountCents, netUploaderAmountCents, pendingSettlementAmountCents, recordCount: records.length, currency: "CNY" as const };
+  const profile = ensureUploader(access);
+  const initialRecords = await getPrisma().revenueRecord.findMany({
+    where: { uploaderProfileId: profile.id, recordType: "initial" },
+    select: {
+      assetId: true,
+      uploaderAmountCents: true,
+      status: true,
+      createdAt: true,
+      orderItem: { select: { assetTitleSnapshot: true } }
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }]
+  });
+  const products = new Map<string, { assetId: string; assetTitle: string; purchaseCount: number; purchaseRevenueCents: number }>();
+  for (const record of initialRecords) {
+    if (record.status === "reversed") continue;
+    const existing = products.get(record.assetId) ?? {
+      assetId: record.assetId,
+      assetTitle: record.orderItem.assetTitleSnapshot,
+      purchaseCount: 0,
+      purchaseRevenueCents: 0
+    };
+    existing.purchaseCount += 1;
+    existing.purchaseRevenueCents += record.uploaderAmountCents;
+    products.set(record.assetId, existing);
+  }
+  const productSales = [...products.values()].sort((left, right) =>
+    right.purchaseCount - left.purchaseCount
+    || right.purchaseRevenueCents - left.purchaseRevenueCents
+    || left.assetTitle.localeCompare(right.assetTitle, "zh-CN")
+  );
+  return {
+    totalPurchaseCount: productSales.reduce((sum, product) => sum + product.purchaseCount, 0),
+    totalPurchaseRevenueCents: productSales.reduce((sum, product) => sum + product.purchaseRevenueCents, 0),
+    products: productSales,
+    currency: "CNY" as const
+  };
 }
 
 export async function listAdminRevenue(access: SessionAccess) {
