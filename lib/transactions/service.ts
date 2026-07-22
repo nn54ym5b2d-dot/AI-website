@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api/http";
 import type { SessionAccess } from "@/lib/auth/session";
 import { getPrisma } from "@/lib/db/prisma";
 import { getSystemSettings, settingsSnapshot } from "@/lib/settings/service";
+import { reverseRevenueForOrderItem } from "@/lib/revenue/service";
 import {
   LOCAL_TEST_MERCHANT_ID,
   type LocalTestEvent,
@@ -30,6 +31,14 @@ function ensureBuyer(access: SessionAccess) {
   if (!access.roles.includes("buyer")) {
     throw new ApiError(403, "FORBIDDEN", "当前账号没有购买权限。");
   }
+}
+
+function originalFileName(metadata: Prisma.JsonValue, index: number, mimeType: string) {
+  if (metadata && typeof metadata === "object" && !Array.isArray(metadata) && typeof metadata.originalFileName === "string") {
+    return metadata.originalFileName;
+  }
+  const extension = mimeType === "image/svg+xml" ? "svg" : mimeType === "image/png" ? "png" : "bin";
+  return `original-${String(index + 1).padStart(2, "0")}.${extension}`;
 }
 
 type PaymentView = {
@@ -355,7 +364,7 @@ async function processPaymentSucceeded(event: LocalTestEvent, rawBody: string) {
             licenseVersion: license.version,
             licenseTextSnapshot: license.content,
             certificationStatusSnapshot: item.certificationStatusSnapshot,
-            assetFileManifestSnapshot: item.asset.files.map((file) => ({ id: file.id, sha256: file.fileHash, sizeBytes: file.fileSizeBytes.toString(), mimeType: file.mimeType }))
+            assetFileManifestSnapshot: item.asset.files.map((file, index) => ({ id: file.id, sha256: file.fileHash, sizeBytes: file.fileSizeBytes.toString(), mimeType: file.mimeType, originalFileName: originalFileName(file.metadata, index, file.mimeType) }))
           }
         });
         await transaction.downloadLink.create({ data: { authorizationRecordId: authorization.id, requestedByUserId: payment.payerUserId, eligibilityDaysSnapshot: eligibilityDays, expiresAt: new Date(now.getTime() + eligibilityDays * 86400000), bundleStatus: "pending", status: "active" } });
@@ -399,11 +408,7 @@ async function processRefundSucceeded(event: LocalTestEvent, rawBody: string) {
           await transaction.authorizationRecord.update({ where: { id: authorization.id }, data: { status: "revoked", revokedAt: now, revokeReason: `订单明细退款：${refund.refundNo}` } });
           await transaction.downloadLink.updateMany({ where: { authorizationRecordId: authorization.id }, data: { status: "revoked" } });
         }
-        const initial = refundItem.orderItem.revenueRecords.find((record) => record.recordType === "initial");
-        if (initial && !refundItem.orderItem.revenueRecords.some((record) => record.recordType === "reversal")) {
-          await transaction.revenueRecord.update({ where: { id: initial.id }, data: { status: "reversed" } });
-          await transaction.revenueRecord.create({ data: { orderItemId: initial.orderItemId, recordType: "reversal", assetId: initial.assetId, uploaderProfileId: initial.uploaderProfileId, grossAmountCents: -initial.grossAmountCents, uploaderAmountCents: -initial.uploaderAmountCents, platformAmountCents: -initial.platformAmountCents, uploaderShareRate: initial.uploaderShareRate, platformShareRate: initial.platformShareRate, currency: initial.currency, status: "recorded", relatedRevenueRecordId: initial.id } });
-        }
+        await reverseRevenueForOrderItem(transaction, refundItem.orderItemId);
       }
       const orderItemCount = await transaction.orderItem.count({ where: { orderId: refund.orderId } });
       const refundedItemCount = await transaction.refundItem.count({ where: { orderItem: { orderId: refund.orderId }, refund: { status: "success" } } });
@@ -515,12 +520,14 @@ export async function getPaymentForTestConfirmation(access: SessionAccess, payme
 }
 
 export async function getTransactionMetrics() {
-  const [orders, paidOrders, payments, pendingRefunds, authorizations] = await Promise.all([
+  const [orders, paidOrders, payments, pendingRefunds, authorizations, downloads, revenue] = await Promise.all([
     getPrisma().order.count(),
     getPrisma().order.count({ where: { status: { in: ["paid", "partial_refunded", "refunded"] } } }),
     getPrisma().payment.count({ where: { status: "success" } }),
     getPrisma().refund.count({ where: { status: "pending" } }),
-    getPrisma().authorizationRecord.count({ where: { status: "active" } })
+    getPrisma().authorizationRecord.count({ where: { status: "active" } }),
+    getPrisma().download.count(),
+    getPrisma().revenueRecord.aggregate({ _sum: { platformAmountCents: true } })
   ]);
-  return { orders, paidOrders, successfulPayments: payments, pendingRefunds, activeAuthorizations: authorizations };
+  return { orders, paidOrders, successfulPayments: payments, pendingRefunds, activeAuthorizations: authorizations, downloads, netPlatformRevenueCents: revenue._sum.platformAmountCents ?? 0 };
 }

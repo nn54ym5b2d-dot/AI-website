@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { hashContent, hashInviteCode } from "../lib/auth/crypto";
@@ -61,11 +63,13 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000001",
-        objectKey: "private-originals/9e441f23-3df0-45d2-a03f-cbfa3a885001"
+        objectKey: "private-originals/9e441f23-3df0-45d2-a03f-cbfa3a885001",
+        fixtureName: "person-front.svg"
       },
       {
         id: "20000000-0000-4000-8000-000000000002",
-        objectKey: "private-originals/3d2f168d-cb67-4db8-885f-c2b865dc5002"
+        objectKey: "private-originals/3d2f168d-cb67-4db8-885f-c2b865dc5002",
+        fixtureName: "person-side.svg"
       }
     ],
     previews: [
@@ -92,7 +96,8 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000003",
-        objectKey: "private-originals/f38ccf68-83d1-4af5-bf27-266baea45003"
+        objectKey: "private-originals/f38ccf68-83d1-4af5-bf27-266baea45003",
+        fixtureName: "object-lamp.svg"
       }
     ],
     previews: [
@@ -114,7 +119,8 @@ const seededAssets = [
     originals: [
       {
         id: "20000000-0000-4000-8000-000000000004",
-        objectKey: "private-originals/99aad196-0680-4a4c-b614-5c7ba74c5004"
+        objectKey: "private-originals/99aad196-0680-4a4c-b614-5c7ba74c5004",
+        fixtureName: "scene-factory.svg"
       }
     ],
     previews: [
@@ -130,7 +136,7 @@ const seededAssets = [
 async function ensureIdentityUser(input: {
   email: string;
   displayName: string;
-  role: "buyer" | "uploader" | "admin" | "observer";
+  roles: Array<"buyer" | "uploader" | "admin" | "observer">;
 }) {
   const user = await prisma.user.upsert({
     where: { email: input.email },
@@ -150,11 +156,13 @@ async function ensureIdentityUser(input: {
     }
   });
 
-  await prisma.userRoleMembership.upsert({
-    where: { userId_role: { userId: user.id, role: input.role } },
-    update: { status: "active" },
-    create: { userId: user.id, role: input.role }
-  });
+  for (const role of input.roles) {
+    await prisma.userRoleMembership.upsert({
+      where: { userId_role: { userId: user.id, role } },
+      update: { status: "active" },
+      create: { userId: user.id, role }
+    });
+  }
 
   return user;
 }
@@ -185,12 +193,12 @@ async function main() {
   await ensureIdentityUser({
     email: "buyer@example.test",
     displayName: "本地购买用户",
-    role: "buyer"
+    roles: ["buyer"]
   });
   const admin = await ensureIdentityUser({
     email: "admin@example.test",
     displayName: "本地超级管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   for (const [key, value, description] of SYSTEM_SETTINGS) {
     await prisma.systemSetting.upsert({
@@ -202,17 +210,17 @@ async function main() {
   const operator = await ensureIdentityUser({
     email: "operator@example.test",
     displayName: "本地运营管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   const finance = await ensureIdentityUser({
     email: "finance@example.test",
     displayName: "本地财务管理员",
-    role: "admin"
+    roles: ["admin"]
   });
   const observer = await ensureIdentityUser({
     email: "observer@example.test",
     displayName: "本地外部观察员",
-    role: "observer"
+    roles: ["observer"]
   });
 
   await prisma.adminRoleAssignment.upsert({
@@ -263,8 +271,8 @@ async function main() {
 
   const assetUploader = await ensureIdentityUser({
     email: "asset-uploader@example.test",
-    displayName: "本地素材上传者",
-    role: "uploader"
+    displayName: "本地素材用户",
+    roles: ["buyer", "uploader"]
   });
   const assetInvite = await prisma.inviteCode.upsert({
     where: { codeHash: ASSET_UPLOADER_INVITE_HASH },
@@ -341,7 +349,10 @@ async function main() {
       data: assetSeed.tags.map((tag) => ({ assetId: assetSeed.id, tag }))
     });
 
-    for (const [index, original] of assetSeed.originals.entries()) {
+    for (const original of assetSeed.originals) {
+      const fixtureRelativePath = `fixtures/local-private-storage/originals/${original.fixtureName}`;
+      const fixtureBody = await readFile(new URL(`../${fixtureRelativePath}`, import.meta.url));
+      const fixtureHash = createHash("sha256").update(fixtureBody).digest("hex");
       await prisma.assetFile.upsert({
         where: { id: original.id },
         update: {
@@ -352,12 +363,12 @@ async function main() {
           cosBucket: "local-private-originals",
           cosRegion: "local",
           cosObjectKey: original.objectKey,
-          fileHash: hashContent(`${assetSeed.id}:original:${index}`),
-          fileSizeBytes: 4_000_000n,
-          mimeType: "image/png",
-          width: 1456,
-          height: 1092,
-          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" },
+          fileHash: fixtureHash,
+          fileSizeBytes: BigInt(fixtureBody.byteLength),
+          mimeType: "image/svg+xml",
+          width: 1200,
+          height: 900,
+          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified", originalFileName: original.fixtureName, localFixtureRelativePath: fixtureRelativePath },
           deletedAt: null
         },
         create: {
@@ -369,12 +380,12 @@ async function main() {
           cosBucket: "local-private-originals",
           cosRegion: "local",
           cosObjectKey: original.objectKey,
-          fileHash: hashContent(`${assetSeed.id}:original:${index}`),
-          fileSizeBytes: 4_000_000n,
-          mimeType: "image/png",
-          width: 1456,
-          height: 1092,
-          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified" }
+          fileHash: fixtureHash,
+          fileSizeBytes: BigInt(fixtureBody.byteLength),
+          mimeType: "image/svg+xml",
+          width: 1200,
+          height: 900,
+          metadata: { storageProvider: "local_private_fixture", verificationStatus: "verified", originalFileName: original.fixtureName, localFixtureRelativePath: fixtureRelativePath }
         }
       });
     }

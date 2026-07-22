@@ -1,0 +1,12 @@
+import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
+import { requireAdminPage } from "@/lib/auth/page-guard";
+import { getPlatformRevenueSummary, listAdminRevenue } from "@/lib/revenue/service";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminRevenuePage() {
+  const access = await requireAdminPage("/admin/revenue");
+  const [records, summary] = await Promise.all([listAdminRevenue(access), getPlatformRevenueSummary()]);
+  const financialDetail = access.adminRoles.includes("super_admin") || access.adminRoles.includes("finance");
+  return <PageShell actions={<SecondaryLink href="/admin">返回管理后台</SecondaryLink>} description={financialDetail ? "财务明细、分成快照、初始收益和冲正记录。" : "运营角色只显示工作所需的上传者收益摘要，隐藏订单号、平台金额和比例细节。"} eyebrow="Operations" title="收益记录"><div className="grid gap-7"><section className="grid gap-4 sm:grid-cols-3"><article className="ui-panel p-5"><span className="text-xs text-muted">净成交金额</span><strong className="mt-4 block text-2xl text-ink">¥{(summary.netGrossAmountCents / 100).toFixed(2)}</strong></article><article className="ui-panel p-5"><span className="text-xs text-muted">上传者净收益</span><strong className="mt-4 block text-2xl text-ink">¥{(summary.netUploaderAmountCents / 100).toFixed(2)}</strong></article><article className="ui-panel p-5"><span className="text-xs text-muted">平台净收益</span><strong className="mt-4 block text-2xl text-ink">¥{(summary.netPlatformAmountCents / 100).toFixed(2)}</strong></article></section><section className="ui-panel overflow-hidden"><div className="divide-y divide-line">{records.map((record) => <article className="grid gap-3 p-5 lg:grid-cols-[1fr_auto_auto] lg:items-center" key={record.id}><div><strong className="text-sm text-ink">{record.assetTitle}</strong><p className="mt-1 text-xs text-muted">{record.uploaderDisplayName} · {record.recordType} · {record.status}{record.orderNo ? ` · ${record.orderNo}` : ""}</p></div><span className="text-sm text-muted">上传者 {record.uploaderAmountCents < 0 ? "−" : "+"}¥{(Math.abs(record.uploaderAmountCents) / 100).toFixed(2)}</span>{record.platformAmountCents === null ? <span className="text-xs text-muted">运营字段已裁剪</span> : <span className="text-sm text-muted">平台 {record.platformAmountCents < 0 ? "−" : "+"}¥{(Math.abs(record.platformAmountCents) / 100).toFixed(2)}</span>}</article>)}{!records.length ? <p className="p-6 text-sm text-muted">暂无收益记录。</p> : null}</div></section></div></PageShell>;
+}

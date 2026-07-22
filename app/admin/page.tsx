@@ -34,13 +34,15 @@ export default async function AdminPage() {
       title="管理后台"
     >
       <div className="grid gap-8">
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             ["订单总数", transactionMetrics.orders],
             ["已支付订单", transactionMetrics.paidOrders],
             ["成功支付", transactionMetrics.successfulPayments],
             ["待处理退款", transactionMetrics.pendingRefunds],
-            ["有效授权", transactionMetrics.activeAuthorizations]
+            ["有效授权", transactionMetrics.activeAuthorizations],
+            ["实际下载", transactionMetrics.downloads],
+            ["平台净收益", `¥${(transactionMetrics.netPlatformRevenueCents / 100).toFixed(2)}`]
           ].map(([label, value]) => <article className="ui-panel p-5" key={String(label)}><span className="text-xs text-muted">{label}</span><strong className="mt-4 block text-3xl text-ink">{value}</strong><span className="mt-2 block text-xs text-muted">真实交易数据库计数</span></article>)}
         </section>
         {dashboard ? (

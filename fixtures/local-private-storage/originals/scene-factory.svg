@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <rect width="1200" height="900" fill="#b9c0c2"/>
+  <path d="M0 520l260-160v115l250-150v145l250-155v145l220-130v570H0z" fill="#596267"/>
+  <path d="M120 620h150v180H120zm280-45h170v225H400zm310-35h180v260H710z" fill="#20282d"/>
+  <text x="44" y="70" font-family="sans-serif" font-size="28" fill="#394247">源素库本地测试原文件 · 工业场景 · 非真实素材</text>
+</svg>

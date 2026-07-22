@@ -199,6 +199,7 @@ enum AuthorizationStatus {
 
 enum DownloadBundleStatus {
   pending
+  processing
   ready
   failed
 
@@ -269,6 +270,7 @@ model User {
   authorizationRecords        AuthorizationRecord[]        @relation("AuthorizationBuyer")
   authorizationsRevoked       AuthorizationRecord[]        @relation("AuthorizationRevokedBy")
   downloadLinksRequested      DownloadLink[]               @relation("DownloadLinkRequestedBy")
+  downloads                   Download[]
 
   @@index([status, createdAt])
   @@map("users")
@@ -475,6 +477,7 @@ model Asset {
   orderItems                 OrderItem[]
   authorizationRecords       AuthorizationRecord[]
   revenueRecords             RevenueRecord[]
+  downloads                  Download[]
 
   @@index([assetType, listingStatus, certificationStatus])
   @@index([uploaderProfileId, createdAt])
@@ -518,6 +521,8 @@ model AssetFile {
   derivativeSourceJobs   AssetDerivativeJob[]  @relation("DerivativeSourceFile")
   certificateFileFor     CertificationRecord[] @relation("CertificationFile")
   certificateSnapshotFor CertificationRecord[] @relation("CertificationSnapshotFile")
+  downloadLinks          DownloadLink[]        @relation("DownloadBundleFile")
+  downloads              Download[]
 
   @@unique([cosBucket, cosRegion, cosObjectKey])
   @@index([assetId, fileType])
@@ -815,6 +820,7 @@ model AuthorizationRecord {
   asset                       Asset               @relation(fields: [assetId], references: [id])
   revokedBy                   User?               @relation("AuthorizationRevokedBy", fields: [revokedByUserId], references: [id])
   downloadLinks               DownloadLink[]
+  downloads                   Download[]
 
   @@index([buyerUserId, grantedAt])
   @@index([assetId])
@@ -825,19 +831,46 @@ model AuthorizationRecord {
 model DownloadLink {
   id                      String               @id @default(uuid()) @db.Uuid
   authorizationRecordId   String               @map("authorization_record_id") @db.Uuid
+  downloadBundleFileId    String?              @unique @map("download_bundle_file_id") @db.Uuid
   bundleStatus            DownloadBundleStatus @default(pending) @map("bundle_status")
+  bundleGeneratedAt       DateTime?            @map("bundle_generated_at") @db.Timestamptz(3)
+  bundleFailureCode       String?              @map("bundle_failure_code")
   requestedByUserId       String               @map("requested_by_user_id") @db.Uuid
   eligibilityDaysSnapshot Int                  @map("eligibility_days_snapshot")
   expiresAt               DateTime             @map("expires_at") @db.Timestamptz(3)
   status                  DownloadStatus       @default(active)
   createdAt               DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
   authorizationRecord     AuthorizationRecord  @relation(fields: [authorizationRecordId], references: [id])
+  downloadBundleFile      AssetFile?           @relation("DownloadBundleFile", fields: [downloadBundleFileId], references: [id])
   requestedBy             User                 @relation("DownloadLinkRequestedBy", fields: [requestedByUserId], references: [id])
+  downloads               Download[]
 
   @@unique([authorizationRecordId])
   @@index([requestedByUserId, createdAt])
   @@index([status, expiresAt])
   @@map("download_links")
+}
+
+model Download {
+  id                    String              @id @default(uuid()) @db.Uuid
+  downloadLinkId        String              @map("download_link_id") @db.Uuid
+  authorizationRecordId String              @map("authorization_record_id") @db.Uuid
+  buyerUserId           String              @map("buyer_user_id") @db.Uuid
+  assetId               String              @map("asset_id") @db.Uuid
+  assetFileId           String              @map("asset_file_id") @db.Uuid
+  downloadedAt          DateTime            @default(now()) @map("downloaded_at") @db.Timestamptz(3)
+  ipHash                String?             @map("ip_hash")
+  userAgentSummary      String?             @map("user_agent_summary")
+  downloadLink          DownloadLink        @relation(fields: [downloadLinkId], references: [id])
+  authorizationRecord   AuthorizationRecord @relation(fields: [authorizationRecordId], references: [id])
+  buyer                 User                @relation(fields: [buyerUserId], references: [id])
+  asset                 Asset               @relation(fields: [assetId], references: [id])
+  assetFile             AssetFile           @relation(fields: [assetFileId], references: [id])
+
+  @@index([buyerUserId, downloadedAt])
+  @@index([assetId, downloadedAt])
+  @@index([downloadLinkId, downloadedAt])
+  @@map("downloads")
 }
 
 model RevenueRecord {

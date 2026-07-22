@@ -85,6 +85,7 @@ function decodeCursor(cursor: string) {
 function orderByFor(sort: PublicAssetSort): Prisma.AssetOrderByWithRelationInput[] {
   if (sort === "price_asc") return [{ priceCents: "asc" }, { id: "asc" }];
   if (sort === "price_desc") return [{ priceCents: "desc" }, { id: "desc" }];
+  if (sort === "popular") return [{ downloads: { _count: "desc" } }, { listedAt: "desc" }, { id: "desc" }];
   return [{ listedAt: "desc" }, { id: "desc" }];
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { PageShell, SecondaryLink } from "@/components/layout/page-shell";
 import { CheckoutWorkspace } from "@/components/transactions/checkout-workspace";
 import { requireAudience } from "@/lib/auth/page-guard";
@@ -14,6 +15,9 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     : query.certificationFeeChargeId
       ? { kind: "certification_fee" as const, value: await getCertificationFeeCheckout(access, query.certificationFeeChargeId) }
       : null;
+  if (resource?.kind === "order" && resource.value.status === "paid") {
+    redirect(`/account/downloads?payment=success&orderId=${resource.value.id}`);
+  }
   const orders = !resource && access.roles.includes("buyer") ? await listBuyerOrders(access) : [];
 
   return (

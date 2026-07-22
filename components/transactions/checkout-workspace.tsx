@@ -43,6 +43,10 @@ export function CheckoutWorkspace({ resource }: { resource: { kind: "order"; val
       const response = await fetch(`/api/v1/payments/${payment.id}/test-confirm`, { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": csrf }, body: "{}" });
       const payload = await response.json() as { error?: { message: string } };
       if (!response.ok) throw new Error(payload.error?.message ?? "测试回调处理失败。");
+      if (resource.kind === "order") {
+        window.location.replace(`/account/downloads?payment=success&orderId=${resource.value.id}`);
+        return;
+      }
       setMessage("签名、商户号、金额和事件去重校验已通过，业务状态已原子更新。");
       window.setTimeout(() => window.location.reload(), 500);
     } catch (error) { setMessage(error instanceof Error ? error.message : "测试回调处理失败。"); }

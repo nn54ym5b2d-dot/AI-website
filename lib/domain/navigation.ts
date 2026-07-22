@@ -92,14 +92,14 @@ export const publicRoutes: RouteDefinition[] = [
   }
 ];
 
-export const accountRoutes: RouteDefinition[] = [
+export const buyerAccountRoutes: RouteDefinition[] = [
   {
-    title: "个人中心首页",
+    title: "购买者中心",
     href: "/account",
-    description: "购买用户和上传者的个人中心总入口。",
+    description: "查看自己的购买、下载和授权；已开通上传资格的用户可切换到上传者中心。",
     priority: "P0",
-    roleEntry: "购买用户、上传者",
-    audiences: ["buyer", "uploader"]
+    roleEntry: "购买用户",
+    audiences: ["buyer"]
   },
   {
     title: "我的购买",
@@ -127,6 +127,17 @@ export const accountRoutes: RouteDefinition[] = [
     roleEntry: "购买用户",
     audiences: ["buyer"],
     slug: "licenses"
+  }
+];
+
+export const uploaderAccountRoutes: RouteDefinition[] = [
+  {
+    title: "上传者中心",
+    href: "/account/uploader",
+    description: "查看自己的上传、审核状态、收益和上传者资料，并可切换回购买者中心。",
+    priority: "P0",
+    roleEntry: "上传者",
+    audiences: ["uploader"]
   },
   {
     title: "我的上传",
@@ -149,7 +160,7 @@ export const accountRoutes: RouteDefinition[] = [
   {
     title: "收益记录",
     href: "/account/revenue",
-    description: "上传者查看素材收益记录。",
+    description: "上传者查看素材总购买次数、各素材购买次数和实际购买收益。",
     priority: "P0",
     roleEntry: "上传者",
     audiences: ["uploader"],
@@ -166,6 +177,8 @@ export const accountRoutes: RouteDefinition[] = [
   }
 ];
 
+export const accountRoutes: RouteDefinition[] = [...buyerAccountRoutes, ...uploaderAccountRoutes];
+
 export const uploaderRoutes: RouteDefinition[] = [
   {
     title: "认证上传页",
@@ -175,7 +188,7 @@ export const uploaderRoutes: RouteDefinition[] = [
     roleEntry: "上传者",
     audiences: ["uploader"]
   },
-  ...accountRoutes.filter((route) => route.audiences.includes("uploader"))
+  ...uploaderAccountRoutes
 ];
 
 export const adminRoutes: RouteDefinition[] = [
@@ -326,11 +339,11 @@ export const publicPageRouteGroups: RouteGroup[] = [
   {
     title: "购买用户个人中心",
     description: "购买用户查看订单、下载和授权记录。",
-    routes: accountRoutes.filter((route) => route.audiences.includes("buyer"))
+    routes: buyerAccountRoutes
   },
   {
     title: "上传者中心",
-    description: "上传者从上传入口提交素材，并在个人中心查看上传、审核状态和收益。",
+    description: "已开通上传资格的购买用户从独立上传者中心管理上传、审核状态、收益和资料。",
     routes: uploaderRoutes
   }
 ];
@@ -365,9 +378,9 @@ export const publicRoleEntryRoutes = [
   },
   {
     role: "上传者",
-    href: "/upload",
-    entry: "顶部“上传者”",
-    description: "通过邀请码激活后进入认证上传，再到个人中心查看审核和收益。"
+    href: "/account/uploader",
+    entry: "购买者中心的“上传者中心”或顶部“上传素材”",
+    description: "通过邀请码激活后同时保留购买者身份，在独立上传者中心查看上传、审核和收益。"
   }
 ];
 

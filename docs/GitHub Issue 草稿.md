@@ -1,8 +1,8 @@
 # GitHub Issue 草稿
 
-版本：v4.4
-日期：2026-07-21
-状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已为 Ready
+版本：v4.6
+日期：2026-07-22
+状态：已由 Robert 审核确认；T013 / #8 已完成，T014 / #9 已通过草稿 PR #39 进入 Review
 
 ## 使用说明
 
@@ -24,12 +24,12 @@ GitHub Project：<https://github.com/users/nn54ym5b2d-dot/projects/1>
 | T012 | #7 / PR #32 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/7> |
 | T012A | #33 | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/33> |
 | T013 | #8（PR #37） | Done | <https://github.com/nn54ym5b2d-dot/AI-website/issues/8> |
-| T014 | #9 | Ready | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9> |
+| T014 | #9 | Review | <https://github.com/nn54ym5b2d-dot/AI-website/issues/9>；草稿 PR #39 |
 | T015 | #10 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/10> |
 | T016 | #11 | Blocked | <https://github.com/nn54ym5b2d-dot/AI-website/issues/11> |
 | T017 | #16 | Backlog | <https://github.com/nn54ym5b2d-dot/AI-website/issues/16> |
 
-T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收，PR #37 最终 `verify` 通过并压缩合并到 `main`（`e524f9e`），Issue 已关闭；T014 / Issue #9 已转为 Ready，T015-T016 继续 Blocked，T017 保持 Backlog。
+T012、T012A 与 T013 均已完成。T013 / Issue #8 已由 Robert 验收并合并；T014 / Issue #9 已完成本地 ZIP、短时下载、下载记录、收益和热门排序实现，窄屏账户入口、支付后跳转、一键 ZIP、上传者购买收益统计、`buyer + uploader` 双角色与购买者/上传者双中心均已完成，24/24、本地构建、响应式检查和提交 `7fc12ae` 的远程 `verify` 通过，草稿 PR #39 保持 Review；T015-T016 继续 Blocked，T017 保持 Backlog。
 
 每个任务默认规则：
 
@@ -596,6 +596,8 @@ T014
 - 实现下载资格校验、ZIP 就绪状态和短时签名地址的本地测试服务。
 - 将每份素材的全部有效原文件按固定清单打包为一个 ZIP，并通过本地测试存储 provider 验证下载权限。
 - 实现上传者收益记录和收益汇总页面/API，并从本地数据库读取。
+- 开通上传资格后账号固定同时持有 `buyer + uploader`；为已有仅 `uploader` 的账号安全补齐 `buyer`。
+- `/account` 购买者中心和 `/account/uploader` 上传者中心使用独立页面展示各自业务入口，并允许双角色账号切换。
 - 明确原始文件地址不能直接公开。
 - 下载入口默认有效 365 天，并以配置项保留后续调整能力；每次实际下载再生成短时 COS 签名 URL。
 - 购买后只交付由该素材全部有效原文件生成的私有 ZIP，不能签发公开原文件地址。
@@ -618,6 +620,7 @@ T014
 - 下载动作有记录。
 - ZIP 只包含所属素材的全部有效原文件，入口可在 365 天内重复使用，退款/授权撤销后立即失效。
 - 上传者收益记录能基于订单明细产生。
+- 上传者继续拥有购买、订单、授权和下载能力；购买者中心不混入上传业务，上传者中心不混入购买业务。
 
 测试要求：
 - 运行 `npm run lint`

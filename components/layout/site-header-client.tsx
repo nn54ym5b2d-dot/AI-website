@@ -42,7 +42,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
 
   const accountAction = user ? (
     <Link
-      aria-label={`进入 ${user.displayName} 的个人中心`}
+      aria-label={`进入 ${user.displayName} 的购买者中心`}
       className="inline-flex min-h-10 max-w-44 items-center gap-2 rounded-md px-3 text-sm font-semibold text-ink transition hover:bg-paper"
       href="/account"
     >
@@ -51,6 +51,21 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
     </Link>
   ) : (
     <Link className="ui-button-secondary px-4" href={authHref}>
+      <UserCircle aria-hidden="true" size={19} />
+      登录/注册
+    </Link>
+  );
+
+  const mobileAccountAction = user ? (
+    <Link
+      aria-label={`进入 ${user.displayName} 的购买者中心`}
+      className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-ink transition hover:bg-paper"
+      href="/account"
+    >
+      <AccountIcon user={user} />
+    </Link>
+  ) : (
+    <Link className="ui-button-secondary min-h-10 shrink-0 px-3" href={authHref}>
       <UserCircle aria-hidden="true" size={19} />
       登录/注册
     </Link>
@@ -85,15 +100,18 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
           </Link>
         </div>
 
-        <button
-          aria-expanded={open}
-          aria-label={open ? "关闭导航" : "打开导航"}
-          className="rounded-md border border-line p-2 text-ink md:hidden"
-          onClick={() => setOpen((value) => !value)}
-          type="button"
-        >
-          {open ? <X aria-hidden="true" size={22} /> : <List aria-hidden="true" size={22} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          {mobileAccountAction}
+          <button
+            aria-expanded={open}
+            aria-label={open ? "关闭导航" : "打开导航"}
+            className="rounded-md border border-line p-2 text-ink"
+            onClick={() => setOpen((value) => !value)}
+            type="button"
+          >
+            {open ? <X aria-hidden="true" size={22} /> : <List aria-hidden="true" size={22} />}
+          </button>
+        </div>
       </div>
 
       {open ? (
@@ -107,15 +125,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
             <Link className="rounded-md px-3 py-3 text-sm font-medium text-ink hover:bg-paper" href="/search" onClick={() => setOpen(false)}>
               搜索素材
             </Link>
-            <div className="mt-2 grid grid-cols-2 gap-2 border-t border-line pt-4">
-              {user ? (
-                <Link className="ui-button-secondary min-w-0" href="/account" onClick={() => setOpen(false)}>
-                  <AccountIcon user={user} />
-                  <span className="truncate">{user.displayName}</span>
-                </Link>
-              ) : (
-                <Link className="ui-button-secondary" href={authHref} onClick={() => setOpen(false)}>登录/注册</Link>
-              )}
+            <div className="mt-2 border-t border-line pt-4">
               <Link className="ui-button-primary" href={uploadHref} onClick={() => setOpen(false)}>上传素材</Link>
             </div>
           </nav>
